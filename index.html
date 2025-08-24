@@ -11,11 +11,123 @@
 </head>
 <body>
     <header class="hero">
-        <video class="hero-video" autoplay muted loop playsinline preload="auto" onerror="this.style.display='none'">
-            <source src="https://rocketrychallenge.org/wp-content/uploads/ARCHeroVideo.mp4" type="video/mp4">
-        </video>
-        <div class="hero-fallback"></div>
-        <div class="hero-overlay"></div>
+        <div class="hero-carousel">
+            <div class="carousel-slide active">
+                <img src="images/hero/KQ1A1336.JPG" alt="Rocket Launch at Interlake" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Launch Day Success</h3>
+                    <p>Our team celebrates another successful rocket launch mission</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1243.jpg" alt="Rocket preparation at Interlake" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Pre-Launch Preparation</h3>
+                    <p>Careful preparation and safety checks before launch</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1255.jpg" alt="Team working on rocket" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Team Collaboration</h3>
+                    <p>Students working together on rocket assembly</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1264.jpg" alt="Rocket launch sequence" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Launch Sequence</h3>
+                    <p>Capturing the excitement of rocket ignition</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1275.jpg" alt="Rocket in flight" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Flight Achievement</h3>
+                    <p>Our rocket soaring through the sky</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1277.jpg" alt="Students observing launch" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Learning in Action</h3>
+                    <p>Students observing and learning from each launch</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1281.jpg" alt="Rocket recovery" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Mission Recovery</h3>
+                    <p>Successful recovery and data collection</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1296.jpg" alt="Team celebration" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Team Spirit</h3>
+                    <p>Celebrating achievements with the Interlake team</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1304.jpg" alt="Technical analysis" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Data Analysis</h3>
+                    <p>Reviewing flight data and performance metrics</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1309.jpg" alt="Rocket assembly" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Precision Assembly</h3>
+                    <p>Detailed rocket construction and testing</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1313.jpg" alt="Launch field setup" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Field Operations</h3>
+                    <p>Setting up for a successful launch day</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1478.jpg" alt="Competition preparation" loading="lazy">
+                <div class="slide-caption">
+                    <h3>Competition Ready</h3>
+                    <p>Preparing for regional and national competitions</p>
+                </div>
+            </div>
+            <div class="carousel-slide">
+                <img src="images/hero/KQ1A1483.jpg" alt="STEM education in action" loading="lazy">
+                <div class="slide-caption">
+                    <h3>STEM Excellence</h3>
+                    <p>Inspiring the next generation of aerospace engineers</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carousel Navigation -->
+        <div class="carousel-nav">
+            <button class="carousel-btn prev" onclick="changeSlide(-1)">❮</button>
+            <button class="carousel-btn next" onclick="changeSlide(1)">❯</button>
+        </div>
+        
+        <!-- Carousel Indicators -->
+        <div class="carousel-indicators">
+            <span class="indicator active" onclick="currentSlide(1)"></span>
+            <span class="indicator" onclick="currentSlide(2)"></span>
+            <span class="indicator" onclick="currentSlide(3)"></span>
+            <span class="indicator" onclick="currentSlide(4)"></span>
+            <span class="indicator" onclick="currentSlide(5)"></span>
+            <span class="indicator" onclick="currentSlide(6)"></span>
+            <span class="indicator" onclick="currentSlide(7)"></span>
+            <span class="indicator" onclick="currentSlide(8)"></span>
+            <span class="indicator" onclick="currentSlide(9)"></span>
+            <span class="indicator" onclick="currentSlide(10)"></span>
+            <span class="indicator" onclick="currentSlide(11)"></span>
+            <span class="indicator" onclick="currentSlide(12)"></span>
+            <span class="indicator" onclick="currentSlide(13)"></span>
+        </div>
+        
         <nav class="navbar">
             <div class="nav-brand">
                 <a href="https://interlakehigh.bsd405.org/" target="_blank" class="school-link">
@@ -288,31 +400,61 @@
     </footer>
 
     <script>
-        // Force video autoplay and handle autoplay restrictions
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.querySelector('.hero-video');
+        // Photo Carousel Functionality
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const indicators = document.querySelectorAll('.indicator');
+        
+        function showSlide(index) {
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove('active'));
+            indicators.forEach(indicator => indicator.classList.remove('active'));
             
-            if (video) {
-                // Try to play the video
-                const playPromise = video.play();
-                
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        console.log('Video autoplay successful');
-                    }).catch(error => {
-                        console.log('Autoplay failed:', error);
-                        // Show fallback background instead
-                        video.style.display = 'none';
-                    });
-                }
-                
-                // Add click event to play video if autoplay fails
-                document.addEventListener('click', function() {
-                    if (video.paused) {
-                        video.play().catch(e => console.log('Manual play failed:', e));
-                    }
-                }, { once: true });
+            // Show current slide
+            slides[index].classList.add('active');
+            indicators[index].classList.add('active');
+        }
+        
+        function changeSlide(direction) {
+            currentSlideIndex += direction;
+            
+            if (currentSlideIndex >= slides.length) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex < 0) {
+                currentSlideIndex = slides.length - 1;
             }
+            
+            showSlide(currentSlideIndex);
+        }
+        
+        function currentSlide(index) {
+            currentSlideIndex = index - 1;
+            showSlide(currentSlideIndex);
+        }
+        
+        // Auto-advance slides every 5 seconds
+        let autoAdvanceInterval;
+        
+        function startAutoAdvance() {
+            autoAdvanceInterval = setInterval(() => {
+                changeSlide(1);
+            }, 5000);
+        }
+        
+        function stopAutoAdvance() {
+            clearInterval(autoAdvanceInterval);
+        }
+        
+        // Pause auto-advance on hover
+        const heroCarousel = document.querySelector('.hero-carousel');
+        if (heroCarousel) {
+            heroCarousel.addEventListener('mouseenter', stopAutoAdvance);
+            heroCarousel.addEventListener('mouseleave', startAutoAdvance);
+        }
+        
+        // Start auto-advance on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            startAutoAdvance();
         });
     </script>
 </body>
