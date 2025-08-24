@@ -361,122 +361,30 @@ h2 {
 
 /* School Links Styling */
 .school-link {
-    color: #00d4ff;
+    color: #ffffff;
     text-decoration: none;
     transition: all 0.3s ease;
     border-bottom: 1px solid transparent;
+    font-weight: 500;
 }
 
 .school-link:hover {
-    color: #fff;
+    color: #00d4ff;
     border-bottom-color: #00d4ff;
     text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
 }
 
 .nav-brand .school-link {
-    color: #00d4ff;
+    color: #ffffff;
     text-decoration: none;
 }
 
 .nav-brand .school-link:hover {
-    color: #fff;
+    color: #00d4ff;
     text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
 }
 
-.hero-school-link {
-    margin-top: 2rem;
-}
 
-.hero-school-link a {
-    color: #00d4ff;
-    text-decoration: none;
-    font-size: 1.1rem;
-    padding: 0.5rem 1rem;
-    border: 2px solid rgba(0, 212, 255, 0.3);
-    border-radius: 25px;
-    transition: all 0.3s ease;
-}
-
-.hero-school-link a:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: #00d4ff;
-    transform: translateY(-2px);
-}
-
-.about-school-link {
-    text-align: center;
-    margin-top: 3rem;
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.about-school-link p {
-    color: #ccc;
-    font-size: 1.1rem;
-}
-
-.contact-school-links {
-    margin-top: 3rem;
-    text-align: center;
-}
-
-.contact-school-links p {
-    color: #ccc;
-    margin-bottom: 1.5rem;
-    font-size: 1.1rem;
-}
-
-.school-links-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.school-links-grid a {
-    display: inline-block;
-    padding: 1rem 1.5rem;
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 10px;
-    color: #00d4ff;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.school-links-grid a:hover {
-    background: rgba(0, 212, 255, 0.2);
-    border-color: #00d4ff;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
-}
-
-.footer-school-links {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-school-links a {
-    color: #00d4ff;
-    text-decoration: none;
-    margin: 0 0.5rem;
-    transition: color 0.3s ease;
-}
-
-.footer-school-links a:hover {
-    color: #fff;
-}
-
-.footer-school-links .separator {
-    color: #666;
-    margin: 0 0.5rem;
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
