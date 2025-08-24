@@ -221,6 +221,92 @@ h2 {
     margin-top: 3rem;
 }
 
+/* Gallery Section */
+.gallery-intro {
+    text-align: center;
+    color: #ccc;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.gallery-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.category-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    position: relative;
+}
+
+.category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.category-image {
+    position: relative;
+    overflow: hidden;
+    height: 200px;
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-image img {
+    transform: scale(1.05);
+}
+
+.category-content {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.category-content h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.category-content p {
+    color: #ccc;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.category-count {
+    display: inline-block;
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
 .project-card {
     background: rgba(255, 255, 255, 0.05);
     padding: 2rem;
@@ -386,6 +472,139 @@ h2 {
 
 
 
+/* Gallery Category Pages */
+.launches-grid,
+.competitions-grid,
+.workshops-grid,
+.team-grid,
+.testing-grid,
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.launch-item,
+.competition-item,
+.workshop-item,
+.team-item,
+.testing-item,
+.achievement-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.launch-item:hover,
+.competition-item:hover,
+.workshop-item:hover,
+.team-item:hover,
+.testing-item:hover,
+.achievement-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+.launch-image,
+.competition-image,
+.workshop-image,
+.team-image,
+.testing-image,
+.achievement-image {
+    position: relative;
+    overflow: hidden;
+    height: 250px;
+}
+
+.launch-image img,
+.competition-image img,
+.workshop-image img,
+.team-image img,
+.testing-image img,
+.achievement-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.launch-item:hover .launch-image img,
+.competition-item:hover .competition-image img,
+.workshop-item:hover .workshop-image img,
+.team-item:hover .team-image img,
+.testing-item:hover .testing-image img,
+.achievement-item:hover .achievement-image img {
+    transform: scale(1.05);
+}
+
+.launch-details,
+.competition-details,
+.workshop-details,
+.team-details,
+.testing-details,
+.achievement-details {
+    padding: 1.5rem;
+}
+
+.launch-details h3,
+.competition-details h3,
+.workshop-details h3,
+.team-details h3,
+.testing-details h3,
+.achievement-details h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: #00d4ff;
+}
+
+.launch-date,
+.competition-date,
+.workshop-date,
+.team-date,
+.testing-date,
+.achievement-date {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.launch-description,
+.competition-description,
+.workshop-description,
+.team-description,
+.testing-description,
+.achievement-description {
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.launch-stats,
+.competition-stats,
+.workshop-stats,
+.team-stats,
+.testing-stats,
+.achievement-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.stat {
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
@@ -412,7 +631,17 @@ h2 {
     
     .about-grid,
     .projects-grid,
+    .gallery-categories,
     .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .launches-grid,
+    .competitions-grid,
+    .workshops-grid,
+    .team-grid,
+    .testing-grid,
+    .achievements-grid {
         grid-template-columns: 1fr;
     }
     
