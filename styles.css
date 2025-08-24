@@ -44,7 +44,7 @@ body {
 h1, h2, h3 {
     font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-weight: 600;
-    color: var(--text-primary);
+    color: #0C2340;
 }
 
 h2 {
@@ -54,7 +54,7 @@ h2 {
     text-align: center;
     font-style: normal;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #0C2340;
 }
 
 /* Navigation */
@@ -183,7 +183,7 @@ header.hero nav.navbar {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: stretch;
 }
 
 .hero-video {
@@ -241,19 +241,24 @@ header.hero nav.navbar {
 }
 
 .hero-content {
-    position: relative;
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
     z-index: 3;
-    text-align: center;
-    max-width: 800px;
-    padding: 0 2rem;
-    margin-top: 80px; /* Space for navbar */
+    text-align: left;
+    max-width: 600px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .hero-title {
     font-family: "Merriweather", serif;
     font-size: 4rem;
     margin-bottom: 1rem;
-    color: #1a237e;
+    color: #0C2340 !important;
     text-shadow: none;
     animation: none;
     font-weight: 300 !important;
@@ -352,7 +357,7 @@ main {
 .about-card h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: var(--accent-primary);
+    color: #0C2340;
 }
 
 .about-card p {
@@ -434,7 +439,7 @@ main {
 .category-content h3 {
     font-size: 1.4rem;
     margin-bottom: 0.5rem;
-    color: var(--text-primary);
+    color: #0C2340;
     font-weight: 600;
 }
 
@@ -498,7 +503,7 @@ main {
 .project-card h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
-    color: var(--accent-primary);
+    color: #0C2340;
 }
 
 .project-card p {
@@ -539,7 +544,7 @@ main {
 .team-member h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
-    color: var(--accent-primary);
+    color: #0C2340;
 }
 
 .team-member p {
@@ -735,7 +740,7 @@ main {
 .sponsor-cta-section h3 {
     font-size: 2rem;
     margin-bottom: 1rem;
-    color: var(--text-primary);
+    color: #0C2340;
 }
 
 .sponsor-cta-section p {
@@ -1126,7 +1131,13 @@ main {
         justify-content: center;
     }
     
-
+    .hero-content {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+        padding: 1.5rem;
+    }
     
     .hero-title {
         font-size: 2.5rem;
