@@ -1,3 +1,35 @@
+/* CSS Variables for Theme Switching */
+:root {
+    /* Dark Theme (Default) */
+    --bg-primary: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    --bg-secondary: rgba(255, 255, 255, 0.05);
+    --bg-tertiary: rgba(0, 0, 0, 0.8);
+    --text-primary: #ffffff;
+    --text-secondary: #ccc;
+    --text-tertiary: #888;
+    --accent-primary: #00d4ff;
+    --accent-secondary: #ff6b6b;
+    --border-primary: rgba(255, 255, 255, 0.1);
+    --border-secondary: rgba(0, 212, 255, 0.3);
+    --shadow-primary: rgba(0, 212, 255, 0.2);
+    --shadow-secondary: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] {
+    /* Light Theme */
+    --bg-primary: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+    --bg-secondary: rgba(0, 0, 0, 0.08);
+    --bg-tertiary: rgba(255, 255, 255, 0.95);
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-tertiary: #6c757d;
+    --accent-primary: #007bff;
+    --accent-secondary: #dc3545;
+    --border-primary: rgba(0, 0, 0, 0.15);
+    --border-secondary: rgba(0, 123, 255, 0.4);
+    --shadow-primary: rgba(0, 123, 255, 0.25);
+    --shadow-secondary: rgba(0, 0, 0, 0.15);
+}
 /* Reset and base styles */
 * {
     margin: 0;
@@ -8,16 +40,17 @@
 body {
     font-family: 'Roboto', sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    color: var(--text-primary);
+    background: var(--bg-primary);
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Typography */
 h1, h2, h3 {
     font-family: 'Orbitron', monospace;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 h2 {
@@ -26,7 +59,7 @@ h2 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 2px;
-    background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -38,7 +71,7 @@ h2 {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--bg-tertiary);
     backdrop-filter: blur(10px);
     position: fixed;
     top: 0;
@@ -46,12 +79,13 @@ h2 {
     right: 0;
     z-index: 1000;
     transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border-primary);
 }
 
 .nav-brand h1 {
     font-size: 1.5rem;
-    color: #00d4ff;
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    color: var(--accent-primary);
+    text-shadow: 0 0 10px var(--shadow-primary);
 }
 
 .nav-menu {
@@ -61,7 +95,7 @@ h2 {
 }
 
 .nav-menu a {
-    color: #fff;
+    color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
@@ -69,7 +103,7 @@ h2 {
 }
 
 .nav-menu a:hover {
-    color: #00d4ff;
+    color: var(--accent-primary);
 }
 
 .nav-menu a::after {
@@ -79,12 +113,48 @@ h2 {
     left: 0;
     width: 0;
     height: 2px;
-    background: #00d4ff;
+    background: var(--accent-primary);
     transition: width 0.3s ease;
 }
 
 .nav-menu a:hover::after {
     width: 100%;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    margin-left: 1rem;
+}
+
+.theme-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.theme-btn:hover {
+    background: var(--accent-primary);
+    color: var(--text-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--shadow-primary);
+}
+
+.theme-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.theme-btn:hover .theme-icon {
+    transform: rotate(15deg);
 }
 
 /* Hero Section */
@@ -126,19 +196,19 @@ h2 {
 .hero-title {
     font-size: 4rem;
     margin-bottom: 1rem;
-    color: #fff;
-    text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+    color: var(--text-primary);
+    text-shadow: 0 0 20px var(--shadow-primary);
     animation: glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-    from { text-shadow: 0 0 20px rgba(0, 212, 255, 0.8); }
-    to { text-shadow: 0 0 30px rgba(0, 212, 255, 1), 0 0 40px rgba(0, 212, 255, 0.8); }
+    from { text-shadow: 0 0 20px var(--shadow-primary); }
+    to { text-shadow: 0 0 30px var(--accent-primary), 0 0 40px var(--shadow-primary); }
 }
 
 .hero-subtitle {
     font-size: 1.5rem;
-    color: #ccc;
+    color: var(--text-secondary);
     margin-bottom: 2rem;
     font-weight: 300;
 }
@@ -146,15 +216,15 @@ h2 {
 .cta-button {
     display: inline-block;
     padding: 1rem 2rem;
-    background: linear-gradient(45deg, #00d4ff, #ff6b6b);
-    color: #fff;
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+    color: var(--text-primary);
     text-decoration: none;
     border-radius: 50px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+    box-shadow: 0 5px 15px var(--shadow-primary);
 }
 
 .cta-button:hover {
@@ -183,18 +253,20 @@ h2 {
 }
 
 .about-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     padding: 2rem;
     border-radius: 15px;
     text-align: center;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .about-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+    box-shadow: 0 20px 40px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .card-icon {
@@ -205,11 +277,11 @@ h2 {
 .about-card h3 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #00d4ff;
+    color: var(--accent-primary);
 }
 
 .about-card p {
-    color: #ccc;
+    color: var(--text-secondary);
     line-height: 1.8;
 }
 
@@ -224,7 +296,7 @@ h2 {
 /* Gallery Section */
 .gallery-intro {
     text-align: center;
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 1.2rem;
     margin-bottom: 3rem;
     max-width: 600px;
@@ -243,21 +315,22 @@ h2 {
 }
 
 .category-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     border-radius: 15px;
     overflow: hidden;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
     transition: all 0.3s ease;
     text-decoration: none;
     display: block;
     position: relative;
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .category-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
-    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 20px 40px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .category-image {
@@ -285,12 +358,12 @@ h2 {
 .category-content h3 {
     font-size: 1.4rem;
     margin-bottom: 0.5rem;
-    color: #ffffff;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .category-content p {
-    color: #ccc;
+    color: var(--text-secondary);
     line-height: 1.6;
     font-size: 0.95rem;
     margin-bottom: 1rem;
@@ -308,14 +381,15 @@ h2 {
 }
 
 .project-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     padding: 2rem;
     border-radius: 15px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .project-card::before {
@@ -335,7 +409,8 @@ h2 {
 
 .project-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 212, 255, 0.2);
+    box-shadow: 0 15px 35px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .project-image {
@@ -364,17 +439,20 @@ h2 {
 }
 
 .team-member {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     padding: 2rem;
     border-radius: 15px;
     text-align: center;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
     transition: transform 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .team-member:hover {
     transform: translateY(-5px);
+    box-shadow: 0 15px 35px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .member-avatar {
@@ -451,13 +529,14 @@ h2 {
 }
 
 .tier {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     border-radius: 20px;
     padding: 2rem;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .tier::before {
@@ -502,9 +581,9 @@ h2 {
     gap: 0.5rem;
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--shadow-secondary);
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
 }
 
 .sponsor-benefits span {
@@ -519,8 +598,8 @@ h2 {
 }
 
 .sponsor-placeholder {
-    background: rgba(255, 255, 255, 0.03);
-    border: 2px dashed rgba(255, 255, 255, 0.2);
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-primary);
     border-radius: 15px;
     padding: 2rem;
     text-align: center;
@@ -569,11 +648,12 @@ h2 {
 
 .sponsor-cta-section {
     text-align: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     border-radius: 20px;
     padding: 3rem;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .sponsor-cta-section h3 {
@@ -783,14 +863,14 @@ h2 {
 
 /* Footer */
 .footer {
-    background: rgba(0, 0, 0, 0.9);
+    background: var(--shadow-secondary);
     padding: 2rem 0;
     text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-primary);
 }
 
 .footer p {
-    color: #888;
+    color: var(--text-tertiary);
     margin-bottom: 0.5rem;
 }
 
