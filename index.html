@@ -21,19 +21,19 @@
                 <li><a href="#team">Team</a></li>
                 <li><a href="#sponsors">Sponsors</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <li class="theme-toggle">
+                    <button id="theme-toggle-btn" class="theme-btn" aria-label="Toggle light/dark mode">
+                        <span class="theme-icon">☀️</span>
+                    </button>
+                </li>
             </ul>
         </nav>
-        <div class="hero-content">
-            <h1 class="hero-title">Reaching for the Stars</h1>
-            <p class="hero-subtitle">Join Interlake High School's rocketry club and explore the final frontier</p>
-            <a href="#about" class="cta-button">Learn More</a>
-        </div>
     </header>
 
     <main>
         <section id="about" class="section">
             <div class="container">
-                <h2>About Our Club</h2>
+                <h2>About Interlake Rocketry Club</h2>
                 <div class="about-grid">
                     <div class="about-card">
                         <div class="card-icon">🚀</div>
@@ -271,5 +271,44 @@
             <p>🚀 Built with passion for exploration by Interlake Saints 🚀</p>
         </div>
     </footer>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = themeToggleBtn.querySelector('.theme-icon');
+        
+        // Check for saved theme preference or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon based on current theme
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '🌙';
+            } else {
+                themeIcon.textContent = '☀️';
+            }
+        }
+        
+        // Check for system preference on first visit
+        if (!localStorage.getItem('theme')) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const defaultTheme = prefersDark ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', defaultTheme);
+            localStorage.setItem('theme', defaultTheme);
+            updateThemeIcon(defaultTheme);
+        }
+    </script>
 </body>
 </html>

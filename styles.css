@@ -1,6 +1,22 @@
 /* CSS Variables for Theme Switching */
 :root {
-    /* Dark Theme (Default) */
+    /* Light Theme (Default) - Clean White like Camp Liftoff */
+    --bg-primary: #ffffff;
+    --bg-secondary: rgba(0, 0, 0, 0.05);
+    --bg-tertiary: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-tertiary: #6c757d;
+    --accent-primary: #007bff;
+    --accent-secondary: #dc3545;
+    --border-primary: rgba(0, 0, 0, 0.1);
+    --border-secondary: rgba(0, 123, 255, 0.3);
+    --shadow-primary: rgba(0, 123, 255, 0.2);
+    --shadow-secondary: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    /* Dark Theme */
     --bg-primary: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
     --bg-secondary: rgba(255, 255, 255, 0.05);
     --bg-tertiary: rgba(0, 0, 0, 0.8);
@@ -13,22 +29,6 @@
     --border-secondary: rgba(0, 212, 255, 0.3);
     --shadow-primary: rgba(0, 212, 255, 0.2);
     --shadow-secondary: rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="light"] {
-    /* Light Theme */
-    --bg-primary: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
-    --bg-secondary: rgba(0, 0, 0, 0.08);
-    --bg-tertiary: rgba(255, 255, 255, 0.95);
-    --text-primary: #212529;
-    --text-secondary: #495057;
-    --text-tertiary: #6c757d;
-    --accent-primary: #007bff;
-    --accent-secondary: #dc3545;
-    --border-primary: rgba(0, 0, 0, 0.15);
-    --border-secondary: rgba(0, 123, 255, 0.4);
-    --shadow-primary: rgba(0, 123, 255, 0.25);
-    --shadow-secondary: rgba(0, 0, 0, 0.15);
 }
 /* Reset and base styles */
 * {
@@ -80,11 +80,12 @@ h2 {
     z-index: 1000;
     transition: all 0.3s ease;
     border-bottom: 1px solid var(--border-primary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav-brand h1 {
     font-size: 1.5rem;
-    color: var(--accent-primary);
+    color: var(--text-primary);
     text-shadow: 0 0 10px var(--shadow-primary);
 }
 
@@ -161,85 +162,19 @@ h2 {
     transform: rotate(15deg);
 }
 
-/* Hero Section */
-.hero {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="stars" cx="50%" cy="50%"><stop offset="0%" stop-color="%23fff"/><stop offset="100%" stop-color="%23fff" stop-opacity="0"/></radialGradient></defs><circle cx="20" cy="20" r="0.5" fill="url(%23stars)"/><circle cx="80" cy="40" r="0.3" fill="url(%23stars)"/><circle cx="40" cy="80" r="0.4" fill="url(%23stars)"/><circle cx="90" cy="10" r="0.2" fill="url(%23stars)"/><circle cx="10" cy="90" r="0.3" fill="url(%23stars)"/></svg>');
-    position: relative;
-    overflow: hidden;
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-    animation: pulse 4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.6; }
-}
-
-.hero-content {
-    z-index: 2;
-    max-width: 800px;
-    padding: 0 2rem;
-}
-
-.hero-title {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-    text-shadow: 0 0 20px var(--shadow-primary);
-    animation: glow 2s ease-in-out infinite alternate;
-}
-
-@keyframes glow {
-    from { text-shadow: 0 0 20px var(--shadow-primary); }
-    to { text-shadow: 0 0 30px var(--accent-primary), 0 0 40px var(--shadow-primary); }
-}
-
-.hero-subtitle {
-    font-size: 1.5rem;
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-    font-weight: 300;
-}
-
-.cta-button {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    color: var(--text-primary);
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px var(--shadow-primary);
-}
-
-.cta-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.6);
+/* Main Content - starts directly after navbar */
+main {
+    margin-top: 80px; /* Account for fixed navbar height */
 }
 
 /* Sections */
 .section {
     padding: 5rem 0;
     position: relative;
+}
+
+.section:nth-child(even) {
+    background: #f8f9fa;
 }
 
 .container {
@@ -257,11 +192,10 @@ h2 {
 }
 
 .about-card {
-    background: var(--bg-secondary);
+    background: #ffffff;
     padding: 2rem;
     border-radius: 15px;
     text-align: center;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 15px var(--shadow-secondary);
@@ -319,10 +253,9 @@ h2 {
 }
 
 .category-card {
-    background: var(--bg-secondary);
+    background: #ffffff;
     border-radius: 15px;
     overflow: hidden;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     transition: all 0.3s ease;
     text-decoration: none;
@@ -375,20 +308,19 @@ h2 {
 
 .category-count {
     display: inline-block;
-    background: rgba(0, 212, 255, 0.2);
-    color: #00d4ff;
+    background: rgba(0, 123, 255, 0.1);
+    color: var(--accent-primary);
     padding: 0.3rem 0.8rem;
     border-radius: 15px;
     font-size: 0.85rem;
     font-weight: 500;
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    border: 1px solid rgba(0, 123, 255, 0.2);
 }
 
 .project-card {
-    background: var(--bg-secondary);
+    background: #ffffff;
     padding: 2rem;
     border-radius: 15px;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     transition: all 0.3s ease;
     position: relative;
@@ -426,7 +358,7 @@ h2 {
 .project-card h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
-    color: #00d4ff;
+    color: var(--accent-primary);
 }
 
 .project-card p {
@@ -443,11 +375,10 @@ h2 {
 }
 
 .team-member {
-    background: var(--bg-secondary);
+    background: #ffffff;
     padding: 2rem;
     border-radius: 15px;
     text-align: center;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     transition: transform 0.3s ease;
     box-shadow: 0 4px 15px var(--shadow-secondary);
@@ -467,7 +398,7 @@ h2 {
 .team-member h3 {
     font-size: 1.3rem;
     margin-bottom: 1rem;
-    color: #00d4ff;
+    color: var(--accent-primary);
 }
 
 .team-member p {
@@ -517,7 +448,7 @@ h2 {
 /* Sponsors Section */
 .sponsors-intro {
     text-align: center;
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 1.2rem;
     margin-bottom: 3rem;
     max-width: 800px;
@@ -533,10 +464,9 @@ h2 {
 }
 
 .tier {
-    background: var(--bg-secondary);
+    background: #ffffff;
     border-radius: 20px;
     padding: 2rem;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     position: relative;
     overflow: hidden;
@@ -573,7 +503,7 @@ h2 {
 
 .tier-description {
     text-align: center;
-    color: #00d4ff;
+    color: var(--accent-primary);
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
@@ -591,7 +521,7 @@ h2 {
 }
 
 .sponsor-benefits span {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
@@ -611,8 +541,8 @@ h2 {
 }
 
 .sponsor-placeholder:hover {
-    border-color: rgba(0, 212, 255, 0.5);
-    background: rgba(0, 212, 255, 0.05);
+    border-color: var(--border-secondary);
+    background: rgba(0, 123, 255, 0.05);
 }
 
 .sponsor-logo {
@@ -621,13 +551,13 @@ h2 {
 }
 
 .sponsor-placeholder h4 {
-    color: #00d4ff;
+    color: var(--accent-primary);
     font-size: 1.3rem;
     margin-bottom: 1rem;
 }
 
 .sponsor-placeholder p {
-    color: #ccc;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
     line-height: 1.6;
 }
@@ -635,27 +565,26 @@ h2 {
 .sponsor-cta {
     display: inline-block;
     padding: 0.8rem 1.5rem;
-    background: rgba(0, 212, 255, 0.2);
-    color: #00d4ff;
+    background: rgba(0, 123, 255, 0.1);
+    color: var(--accent-primary);
     text-decoration: none;
     border-radius: 25px;
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    border: 1px solid rgba(0, 123, 255, 0.2);
     transition: all 0.3s ease;
     font-weight: 500;
 }
 
 .sponsor-cta:hover {
-    background: rgba(0, 212, 255, 0.3);
-    border-color: #00d4ff;
+    background: rgba(0, 123, 255, 0.2);
+    border-color: var(--accent-primary);
     transform: translateY(-2px);
 }
 
 .sponsor-cta-section {
     text-align: center;
-    background: var(--bg-secondary);
+    background: #ffffff;
     border-radius: 20px;
     padding: 3rem;
-    backdrop-filter: blur(10px);
     border: 1px solid var(--border-primary);
     box-shadow: 0 4px 15px var(--shadow-secondary);
 }
@@ -663,11 +592,11 @@ h2 {
 .sponsor-cta-section h3 {
     font-size: 2rem;
     margin-bottom: 1rem;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 .sponsor-cta-section p {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 1.1rem;
     margin-bottom: 2rem;
     max-width: 600px;
@@ -703,7 +632,7 @@ h2 {
 }
 
 .overview-text {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 1.2rem;
     max-width: 800px;
     margin: 0 auto 3rem auto;
@@ -730,7 +659,7 @@ h2 {
 .stat-number {
     font-size: 3rem;
     font-weight: 900;
-    color: #00d4ff;
+    color: var(--accent-primary);
     margin-bottom: 0.5rem;
     font-family: 'Orbitron', monospace;
 }
@@ -822,11 +751,11 @@ h2 {
 
 .sponsorship-cta {
     text-align: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: #ffffff;
     border-radius: 20px;
     padding: 3rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-primary);
+    box-shadow: 0 4px 15px var(--shadow-secondary);
 }
 
 .sponsorship-cta h2 {
@@ -834,7 +763,7 @@ h2 {
 }
 
 .sponsorship-cta p {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 1.1rem;
     margin-bottom: 2rem;
     max-width: 600px;
@@ -851,8 +780,8 @@ h2 {
 }
 
 .sponsorship-note {
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
     border-radius: 10px;
     padding: 1rem;
     max-width: 500px;
@@ -860,7 +789,7 @@ h2 {
 }
 
 .sponsorship-note p {
-    color: #00d4ff;
+    color: var(--accent-primary);
     margin: 0;
     font-size: 0.9rem;
 }
@@ -894,13 +823,13 @@ h2 {
 }
 
 .nav-brand .school-link {
-    color: #ffffff;
+    color: var(--text-primary);
     text-decoration: none;
 }
 
 .nav-brand .school-link:hover {
-    color: #00d4ff;
-    text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+    color: var(--accent-primary);
+    text-shadow: 0 0 15px var(--shadow-primary);
 }
 
 

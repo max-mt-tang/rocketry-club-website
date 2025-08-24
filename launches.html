@@ -19,6 +19,11 @@
                 <li><a href="index.html#gallery">Gallery</a></li>
                 <li><a href="index.html#team">Team</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
+                <li class="theme-toggle">
+                    <button id="theme-toggle-btn" class="theme-btn" aria-label="Toggle light/dark mode">
+                        <span class="theme-icon">☀️</span>
+                    </button>
+                </li>
             </ul>
         </nav>
         <div class="hero-content">
@@ -138,5 +143,44 @@
             <p>🚀 Built with passion for exploration by Interlake Saints 🚀</p>
         </div>
     </footer>
+
+    <script>
+        // Theme Toggle Functionality
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = themeToggleBtn.querySelector('.theme-icon');
+        
+        // Check for saved theme preference or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+        
+        // Theme toggle click handler
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+        
+        // Update theme icon based on current theme
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '🌙';
+            } else {
+                themeIcon.textContent = '☀️';
+            }
+        }
+        
+        // Check for system preference on first visit
+        if (!localStorage.getItem('theme')) {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const defaultTheme = prefersDark ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', defaultTheme);
+            localStorage.setItem('theme', defaultTheme);
+            updateThemeIcon(defaultTheme);
+        }
+    </script>
 </body>
 </html>
