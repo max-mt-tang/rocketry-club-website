@@ -1,6 +1,6 @@
-# 🚀 High School Rocketry Club Website
+# 🚀 Interlake High School Rocketry Club Website
 
-A modern, responsive static website showcasing our high school rocketry club's activities, projects, and mission.
+Website for our high school rocketry club's activities, projects, and mission.
 
 ## ✨ Features
 
