@@ -147,6 +147,14 @@ header.hero nav.navbar {
     filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
 }
 
+.mobile-logo {
+    display: none;
+}
+
+.desktop-logo {
+    display: inline-block;
+}
+
 .school-logo:hover {
     transform: scale(1.05);
 }
@@ -1487,6 +1495,16 @@ main {
         height: 22px;
         max-width: 100px;
         flex-shrink: 0;
+    }
+    
+    .desktop-logo {
+        display: none;
+    }
+    
+    .mobile-logo {
+        display: inline-block;
+        height: 28px;
+        width: 28px;
     }
     
     /* Force hide desktop nav styles on mobile */
