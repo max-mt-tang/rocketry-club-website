@@ -1384,7 +1384,7 @@ main {
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     .navbar {
-        padding: 0.8rem 1rem 0.8rem 0.5rem;
+        padding: 0.8rem 1rem;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
@@ -1417,7 +1417,7 @@ main {
         display: block;
         color: var(--text-primary);
         font-family: "Merriweather", serif;
-        font-size: 0.75rem;
+        font-size: 0.6rem;
         font-weight: 600;
         margin: 0;
         position: absolute;
@@ -1428,6 +1428,7 @@ main {
         max-width: 50%;
         overflow: hidden;
         text-overflow: ellipsis;
+        z-index: 1;
     }
     
     .menu-toggle {
@@ -1483,8 +1484,8 @@ main {
     }
     
     .school-logo {
-        height: 25px;
-        max-width: 120px;
+        height: 22px;
+        max-width: 100px;
         flex-shrink: 0;
     }
     
