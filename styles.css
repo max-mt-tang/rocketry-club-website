@@ -1425,7 +1425,7 @@ main {
         display: block;
         color: var(--text-primary);
         font-family: "Merriweather", serif;
-        font-size: 0.6rem;
+        font-size: 0.5rem;
         font-weight: 600;
         margin: 0;
         position: absolute;
@@ -1433,7 +1433,7 @@ main {
         transform: translateX(-50%);
         text-align: center;
         white-space: nowrap;
-        max-width: 50%;
+        max-width: 65%;
         overflow: hidden;
         text-overflow: ellipsis;
         z-index: 1;
@@ -1637,6 +1637,11 @@ main {
     .cta-button {
         padding: 0.8rem 1.5rem;
         font-size: 0.9rem;
+    }
+    
+    .mobile-title {
+        font-size: 0.45rem;
+        max-width: 70%;
     }
 }
 
