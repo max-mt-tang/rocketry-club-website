@@ -125,7 +125,13 @@
                 <a href="https://interlakehigh.bsd405.org/" target="_blank" class="school-link">
                     <img src="images/InterlakeHighDogHorizontalwText-White.svg" alt="Interlake High School Logo" class="school-logo" onerror="this.style.display='none'">
                 </a>
+                <h1 class="mobile-title">Interlake Rocketry</h1>
             </div>
+            <button class="menu-toggle" aria-label="Toggle navigation">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
             <ul class="nav-menu">
                 <li><a href="#about">About</a></li>
                 <li><a href="#projects">Projects</a></li>
@@ -134,7 +140,6 @@
                 <li><a href="#team">Team</a></li>
                 <li><a href="#sponsors">Sponsors</a></li>
                 <li><a href="#contact">Contact</a></li>
-
             </ul>
         </nav>
         <div class="hero-content">
@@ -460,9 +465,40 @@
             heroCarousel.addEventListener('mouseleave', startAutoAdvance);
         }
         
+        // Mobile Menu Toggle Functionality
+        function initMobileMenu() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            const navLinks = document.querySelectorAll('.nav-menu a');
+            
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', function() {
+                    menuToggle.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+                
+                // Close menu when a link is clicked
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        menuToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    });
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!menuToggle.contains(event.target) && !navMenu.contains(event.target)) {
+                        menuToggle.classList.remove('active');
+                        navMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+        
         // Start auto-advance on page load
         document.addEventListener('DOMContentLoaded', function() {
             startAutoAdvance();
+            initMobileMenu();
         });
     </script>
 </body>
