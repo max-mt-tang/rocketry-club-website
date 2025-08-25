@@ -1240,7 +1240,7 @@ main {
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
-        padding: 0.8rem 1rem;
+        padding: 0.8rem 0.5rem 0.8rem 1rem;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
@@ -1256,6 +1256,7 @@ main {
     .school-logo {
         height: 30px;
         max-width: 180px;
+        margin-right: 1rem;
     }
     
     .hero-content {
