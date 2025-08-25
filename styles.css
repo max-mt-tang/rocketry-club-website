@@ -78,7 +78,7 @@ h2 {
 
 /* Hero navbar overrides - Must override base navbar */
 .hero .navbar {
-    background: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08) !important;
@@ -115,13 +115,13 @@ header.hero nav.navbar {
 
 /* Scrolled navbar state - more transparent */
 .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.5) !important;
     backdrop-filter: blur(20px) !important;
     box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
 .hero .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.5) !important;
     backdrop-filter: blur(20px) !important;
     box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
 }
@@ -1393,7 +1393,7 @@ main {
         left: 0 !important;
         right: 0 !important;
         z-index: 9999 !important;
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: rgba(255, 255, 255, 0.7) !important;
         backdrop-filter: blur(10px) !important;
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08) !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
@@ -1401,7 +1401,7 @@ main {
     
     /* Mobile scrolled state */
     .navbar.scrolled {
-        background: rgba(255, 255, 255, 0.7) !important;
+        background: rgba(255, 255, 255, 0.5) !important;
         backdrop-filter: blur(20px) !important;
         box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
     }
@@ -1421,9 +1421,13 @@ main {
         font-weight: 600;
         margin: 0;
         position: absolute;
-        left: 45%;
+        left: 50%;
         transform: translateX(-50%);
         text-align: center;
+        white-space: nowrap;
+        max-width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .menu-toggle {
@@ -1437,7 +1441,7 @@ main {
         top: 100%;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.98);
+        background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(10px);
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -1480,8 +1484,8 @@ main {
     
     .school-logo {
         height: 25px;
-        max-width: 160px;
-        margin-right: 0.8rem;
+        max-width: 120px;
+        flex-shrink: 0;
     }
     
     /* Force hide desktop nav styles on mobile */
