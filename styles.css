@@ -1370,7 +1370,7 @@ main {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
     .navbar {
         padding: 0.8rem 1rem;
         flex-direction: row;
@@ -1390,17 +1390,18 @@ main {
         display: block;
         color: var(--text-primary);
         font-family: "Merriweather", serif;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: 600;
         margin: 0;
     }
     
     .menu-toggle {
-        display: flex;
+        display: flex !important;
+        order: 3;
     }
     
     .nav-menu {
-        display: none;
+        display: none !important;
         position: absolute;
         top: 100%;
         left: 0;
@@ -1413,10 +1414,12 @@ main {
         padding: 1rem 0;
         gap: 0;
         z-index: 1000;
+        list-style: none;
+        margin: 0;
     }
     
     .nav-menu.active {
-        display: flex;
+        display: flex !important;
     }
     
     .nav-menu li {
@@ -1448,6 +1451,13 @@ main {
         height: 25px;
         max-width: 160px;
         margin-right: 0.8rem;
+    }
+    
+    /* Force hide desktop nav styles on mobile */
+    .nav-menu {
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        font-size: 1rem !important;
     }
     
     .hero-content {
