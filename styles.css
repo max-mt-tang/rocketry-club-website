@@ -1431,6 +1431,11 @@ main {
         align-items: center;
     }
     
+    .announcements-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
     .impact-stats {
         grid-template-columns: repeat(2, 1fr);
     }
