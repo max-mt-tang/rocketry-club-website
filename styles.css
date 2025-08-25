@@ -606,12 +606,14 @@ main {
 
 .team-member {
     background: #ffffff;
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 15px;
     text-align: center;
     border: 1px solid var(--border-primary);
     transition: transform 0.3s ease;
     box-shadow: 0 4px 15px var(--shadow-secondary);
+    max-width: 280px;
+    margin: 0 auto;
 }
 
 .team-member:hover {
@@ -625,14 +627,28 @@ main {
     margin-bottom: 1rem;
 }
 
-.team-member h3 {
-    font-size: 1.3rem;
+.member-photo {
+    width: 160px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
     margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.member-photo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+.team-member h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
     color: #0C2340;
 }
 
 .team-member p {
-    color: #ccc;
+    color: var(--text-secondary);
     line-height: 1.6;
     font-weight: 300;
 }
