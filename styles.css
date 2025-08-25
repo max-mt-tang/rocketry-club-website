@@ -1431,7 +1431,7 @@ main {
         display: block;
         color: var(--text-primary);
         font-family: "Merriweather", serif;
-        font-size: 0.5rem;
+        font-size: 0.75rem;
         font-weight: 600;
         margin: 0;
         position: absolute;
@@ -1439,7 +1439,7 @@ main {
         transform: translateX(-50%);
         text-align: center;
         white-space: nowrap;
-        max-width: 65%;
+        max-width: 75%;
         overflow: hidden;
         text-overflow: ellipsis;
         z-index: 1;
@@ -1511,6 +1511,8 @@ main {
         display: inline-block;
         height: 28px;
         width: 28px;
+        margin-left: -0.6rem;
+        margin-top: 0.4rem;
     }
     
     /* Force hide desktop nav styles on mobile */
@@ -1646,8 +1648,8 @@ main {
     }
     
     .mobile-title {
-        font-size: 0.45rem;
-        max-width: 70%;
+        font-size: 0.65rem;
+        max-width: 80%;
     }
 }
 
