@@ -266,6 +266,7 @@ header.hero nav.navbar {
 .carousel-slide img[src*="KQ1A1309.jpg"],
 .carousel-slide img[src*="KQ1A1313.jpg"],
 .carousel-slide img[src*="KQ1A1478.jpg"],
+.carousel-slide img[src*="KQ1A1478-2.jpg"],
 .carousel-slide img[src*="KQ1A1483.jpg"] {
     object-fit: contain;
 }
