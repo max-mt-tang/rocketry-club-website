@@ -365,20 +365,22 @@ h1.hero-title {
 .cta-button {
     display: inline-block;
     padding: 1rem 2rem;
-    background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+    background: var(--accent-primary);
     color: #ffffff;
     text-decoration: none;
-    border-radius: 50px;
-    font-weight: 700;
+    border-radius: 8px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    border: none;
 }
 
 .cta-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.6);
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
 /* Glow animation removed for professional appearance */
@@ -591,17 +593,35 @@ main {
 }
 
 .project-card p {
-    color: #ccc;
+    color: var(--text-secondary);
     line-height: 1.6;
     font-weight: 300;
+    margin-bottom: 1.5rem;
+}
+
+.project-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.project-logo-img {
+    max-width: 320px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(0%) sepia(100%) saturate(7500%) hue-rotate(217deg) brightness(32%) contrast(106%);
 }
 
 /* Team Section */
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
     margin-top: 3rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .team-member {
@@ -612,8 +632,8 @@ main {
     border: 1px solid var(--border-primary);
     transition: transform 0.3s ease;
     box-shadow: 0 4px 15px var(--shadow-secondary);
-    max-width: 280px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
 }
 
 .team-member:hover {
@@ -745,8 +765,9 @@ main {
 .tier h3 {
     font-size: 1.8rem;
     margin-bottom: 0.5rem;
-    color: #ffffff;
+    color: #0C2340;
     text-align: center;
+    font-weight: 700;
 }
 
 .tier-description {
@@ -1088,7 +1109,6 @@ main {
 .launches-grid,
 .competitions-grid,
 .workshops-grid,
-.team-grid,
 .testing-grid,
 .achievements-grid {
     display: grid;
