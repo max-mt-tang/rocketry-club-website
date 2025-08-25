@@ -1501,6 +1501,18 @@ main {
         bottom: 1rem;
     }
     
+    /* Ensure carousel images fill full screen on mobile */
+    .carousel-slide img {
+        object-fit: cover !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Override portrait settings for first image on mobile */
+    .carousel-slide img[src*="KQ1A1478-2.jpg"] {
+        object-fit: cover !important;
+    }
+    
     h2 {
         font-size: 2rem;
     }
