@@ -266,7 +266,6 @@ header.hero nav.navbar {
 .carousel-slide img[src*="KQ1A1309.jpg"],
 .carousel-slide img[src*="KQ1A1313.jpg"],
 .carousel-slide img[src*="KQ1A1478.jpg"],
-.carousel-slide img[src*="KQ1A1478-2.jpg"],
 .carousel-slide img[src*="KQ1A1483.jpg"] {
     object-fit: contain;
 }
@@ -1390,7 +1389,7 @@ main {
         display: block;
         color: var(--text-primary);
         font-family: "Merriweather", serif;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         font-weight: 600;
         margin: 0;
     }
@@ -1401,7 +1400,7 @@ main {
     }
     
     .nav-menu {
-        display: none !important;
+        display: none;
         position: absolute;
         top: 100%;
         left: 0;
@@ -1411,7 +1410,7 @@ main {
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         flex-direction: column;
-        padding: 1rem 0;
+        padding: 0.5rem 0;
         gap: 0;
         z-index: 1000;
         list-style: none;
@@ -1419,7 +1418,7 @@ main {
     }
     
     .nav-menu.active {
-        display: flex !important;
+        display: flex;
     }
     
     .nav-menu li {
@@ -1428,10 +1427,10 @@ main {
     
     .nav-menu li a {
         display: block;
-        padding: 0.8rem 1.5rem;
+        padding: 0.6rem 1rem;
         color: var(--text-primary);
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 500;
         white-space: nowrap;
         transition: all 0.3s ease;
