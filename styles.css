@@ -113,6 +113,19 @@ header.hero nav.navbar {
     z-index: 9999 !important;
 }
 
+/* Scrolled navbar state - more transparent */
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.hero .navbar.scrolled {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
 
 
 .nav-brand {
@@ -1371,18 +1384,33 @@ main {
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     .navbar {
-        padding: 0.8rem 1rem;
+        padding: 0.8rem 1rem 0.8rem 0.5rem;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        position: relative;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 9999 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Mobile scrolled state */
+    .navbar.scrolled {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(20px) !important;
+        box-shadow: 0 2px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
     .nav-brand {
         display: flex;
         align-items: center;
-        flex: 1;
-        gap: 1rem;
+        flex: 0 0 auto;
+        gap: 0.5rem;
     }
     
     .mobile-title {
@@ -1392,6 +1420,10 @@ main {
         font-size: 0.75rem;
         font-weight: 600;
         margin: 0;
+        position: absolute;
+        left: 45%;
+        transform: translateX(-50%);
+        text-align: center;
     }
     
     .menu-toggle {

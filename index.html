@@ -495,10 +495,49 @@
             }
         }
         
+        // Navbar scroll transparency effect
+        function initNavbarScroll() {
+            const navbar = document.querySelector('.navbar');
+            
+            if (navbar) {
+                // Use smaller threshold for mobile devices
+                const isMobile = window.innerWidth <= 768;
+                const scrollThreshold = isMobile ? 50 : 100;
+                
+                function handleScroll() {
+                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+                    
+                    if (scrollY > scrollThreshold) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+                
+                // Add scroll listener with throttling for better performance
+                let ticking = false;
+                function requestTick() {
+                    if (!ticking) {
+                        requestAnimationFrame(handleScroll);
+                        ticking = true;
+                        setTimeout(() => { ticking = false; }, 16);
+                    }
+                }
+                
+                window.addEventListener('scroll', requestTick, { passive: true });
+                
+                // Also listen for touch events on mobile
+                if (isMobile) {
+                    window.addEventListener('touchmove', requestTick, { passive: true });
+                }
+            }
+        }
+        
         // Start auto-advance on page load
         document.addEventListener('DOMContentLoaded', function() {
             startAutoAdvance();
             initMobileMenu();
+            initNavbarScroll();
         });
     </script>
 </body>
