@@ -411,6 +411,12 @@ h1.hero-title {
     font-weight: 300 !important;
 }
 
+.hero-title-small {
+    font-size: 0.7em;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
 .hero-subtitle {
     font-family: "Merriweather", serif;
     font-size: 1.2rem;
