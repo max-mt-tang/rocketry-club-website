@@ -363,7 +363,7 @@ header.hero nav.navbar {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -389,7 +389,7 @@ header.hero nav.navbar {
     text-align: left;
     max-width: 500px;
     padding: 1.5rem;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.7);
     border-radius: 15px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -1528,7 +1528,7 @@ main {
         right: 1rem;
         max-width: none;
         padding: 1rem;
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.7);
         text-align: center;
     }
     
