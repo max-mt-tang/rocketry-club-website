@@ -831,6 +831,22 @@ main {
     font-weight: 300;
 }
 
+.member-email {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+}
+
+.member-email a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.member-email a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 /* Contact Section */
 .contact-content {
     text-align: center;
@@ -898,6 +914,13 @@ main {
     overflow: hidden;
     box-shadow: 0 4px 15px var(--shadow-secondary);
     flex: 1;
+    transition: all 0.3s ease;
+}
+
+.tier:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .tier::before {
@@ -971,6 +994,8 @@ main {
 .sponsor-placeholder:hover {
     border-color: var(--border-secondary);
     background: rgba(0, 123, 255, 0.05);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px var(--shadow-primary);
 }
 
 .sponsor-logo {
@@ -1015,6 +1040,13 @@ main {
     padding: 3rem;
     border: 1px solid var(--border-primary);
     box-shadow: 0 4px 15px var(--shadow-secondary);
+    transition: all 0.3s ease;
+}
+
+.sponsor-cta-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px var(--shadow-primary);
+    border-color: var(--border-secondary);
 }
 
 .sponsor-cta-section h3 {
