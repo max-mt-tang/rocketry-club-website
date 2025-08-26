@@ -5,24 +5,26 @@ Official website for the Interlake High School Rocketry Club - showcasing our pr
 ## ✨ Features
 
 - **Hero Photo Carousel**: Dynamic slideshow showcasing real rocket launches and club activities
-- **Mobile Hamburger Menu**: Professional mobile navigation with smooth animations
-- **Scroll Transparency**: Navbar becomes semi-transparent when scrolling for modern UX
+- **Mobile-Optimized Navigation**: Responsive navbar with custom mobile logo and hamburger menu
+- **Transparent Banner**: Semi-transparent navbar with blur effects for modern UX
 - **Smart Image Handling**: Automatic portrait/landscape detection for optimal display
-- **Team Profiles**: Meet our faculty advisor Lisa Dossett and club members
+- **Team Profiles**: Complete team structure with contact information and role descriptions
 - **Project Showcase**: American Rocketry Challenge and competition highlights
 - **Announcements System**: Easy-to-update announcements with teacher-friendly templates
-- **Sponsor Tiers**: Professional sponsorship packages to support club activities
-- **Responsive Design**: Optimized for all devices with special mobile enhancements
-- **Modern Typography**: Merriweather and Inter fonts for professional appearance
+- **Interactive Sponsor Tiers**: Professional sponsorship packages with hover animations
+- **Responsive Design**: Optimized for all devices with progressive font sizing
+- **Modern Typography**: Hierarchical hero title with Merriweather and Inter fonts
+- **Hover Animations**: Consistent interactive effects across all tiles and sections
 
 ## 🎨 Design Elements
 
 - **Color Scheme**: Clean white background with professional blue accents (#0C2340)
-- **Typography**: Merriweather serif for headings, Inter for body text with optimized font weights
+- **Typography**: Hierarchical hero title, Merriweather serif for headings, Inter for body text
 - **Photography**: Real rocket launch photos from Interlake Rocketry Club activities
-- **Branding**: Official Interlake High School logo integration
-- **Animations**: Smooth carousel transitions, navbar transparency, and hover effects
-- **Professional Aesthetic**: Minimal emoji usage for clean, educational appearance
+- **Responsive Branding**: Desktop horizontal logo, compact circular mobile logo
+- **Animations**: Smooth carousel transitions, navbar transparency, and consistent hover effects
+- **Professional Aesthetic**: Modern design with interactive elements and clean typography
+- **Mobile Optimization**: Progressive font sizing and optimized touch interactions
 
 ## 📁 Project Structure
 
@@ -34,7 +36,9 @@ rocketry-club/
 ├── images/                      # Image assets organized by category
 │   ├── hero/                   # Carousel photos of rocket launches and activities
 │   ├── team/                   # Faculty and student member photos
-│   └── project/                # Project logos and graphics
+│   ├── project/                # Project logos and graphics
+│   ├── InterlakeHighDogHorizontalwText-White.svg  # Desktop logo
+│   └── InterlakeHighDog-Mobile-White.svg          # Mobile logo
 ├── README.md                   # Project documentation
 └── CNAME                       # Custom domain configuration for GitHub Pages
 ```
@@ -97,14 +101,18 @@ rocketry-club/
 
 ## 🎯 Completed Features
 
-- [x] Photo carousel of real rocket launches
-- [x] Professional team member profiles
-- [x] Mobile-optimized hamburger navigation
-- [x] Scroll-based transparency effects
+- [x] Photo carousel of real rocket launches (13 images)
+- [x] Complete team member profiles with contact information
+- [x] Responsive mobile navigation with custom logo
+- [x] Transparent banner with blur effects
+- [x] Hierarchical hero title design
+- [x] Interactive hover animations across all sections
+- [x] Progressive mobile font sizing
 - [x] Announcement system for club updates
-- [x] Sponsor tier system for fundraising
+- [x] Sponsor tier system with hover effects
 - [x] Custom domain setup (interlakerocketry.org)
 - [x] Smart image handling for various aspect ratios
+- [x] Professional email contact integration
 
 ## 🔮 Future Enhancements
 
@@ -126,7 +134,8 @@ This is a collaborative project for our rocketry club. To contribute:
 ## 📞 Contact
 
 - **Faculty Advisor**: Lisa Dossett - dossettl@bsd405.org
-- **Website Issues**: Max Tang - maxmttang@gmail.com
+- **Treasurer & Coder**: Max Tang - s-tangm@bsd405.org (BSD) | maxmttang@gmail.com (external)
+- **Website Issues**: Max Tang - s-tangm@bsd405.org (BSD) | maxmttang@gmail.com (external)
 - **Club Activities**: Contact through website or find us at Interlake High School
 - **Website**: interlakerocketry.org
 
@@ -139,4 +148,4 @@ This project is created for educational purposes and club use. Feel free to adap
 **Built with ❤️ and 🚀 by the Interlake Rocketry Club for the next generation of aerospace engineers!**
 
 *Visit us at: [interlakerocketry.org](https://interlakerocketry.org)*  
-*Last updated: August 2025*
+*Last updated: January 2025*
