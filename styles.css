@@ -153,6 +153,7 @@ header.hero nav.navbar {
 
 .desktop-logo {
     display: inline-block;
+    margin-top: 0.7rem;
 }
 
 .school-logo:hover {
