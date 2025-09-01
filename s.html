@@ -78,6 +78,11 @@
         border-color: #ffc107 !important;
     }
 
+    /* Make the entire selected row text bold without changing colors */
+    tr.selected-row td {
+        font-weight: 700 !important;
+    }
+
     /* Make best time column text more prominent */
     td[onclick="selectRow(this)"] {
         color: #0C2340 !important;
@@ -90,6 +95,14 @@
     td[onclick="selectRow(this)"]:hover {
         background-color: #57E !important;
         color: #FFF !important;
+    }
+
+    /* Preserve font color when a row is selected (avoid changing on select) */
+    tr.selected-row td[onclick="selectRow(this)"] {
+        color: #0C2340 !important;
+    }
+    tr.selected-row td[onclick="selectRow(this)"]:hover {
+        color: #0C2340 !important;
     }
 
     th {
