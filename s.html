@@ -28,6 +28,18 @@
         border: 2px solid #495057 !important;
       }
 
+      /* Ensure header cells (especially those with rowspan) retain gradient across full height */
+      .wt th, .wt th[rowspan] {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+        color: #ffffff !important;
+        border-color: #0056b3 !important;
+      }
+      .gy th {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+        color: #ffffff !important;
+        border-color: #495057 !important;
+      }
+
     div {
         font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
     }
@@ -55,12 +67,13 @@
 
     /* Row highlighting for selected rows */
     tr.selected-row {
-        background-color: #fff3cd !important;
-        box-shadow: inset 0 0 0 3px #ffc107;
-        border: 2px solid #ffc107 !important;
+        background-color: transparent !important;
+        box-shadow: none;
+        border: none;
     }
 
-    tr.selected-row td {
+    /* Highlight only data cells, excluding merged Course and Stroke cells */
+    tr.selected-row td:not(.age):not(.bold) {
         background-color: #fff3cd !important;
         border-color: #ffc107 !important;
     }
