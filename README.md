@@ -1,6 +1,8 @@
 # 🚀 Interlake Rocketry Club Website
 
-Official website for the Interlake High School Rocketry Club - showcasing our projects, team, and mission to inspire the next generation of aerospace engineers.
+Official website for the Interlake High School Rocketry Club - showcasing our projects, team, and mission to
+ inspire the next generation of aerospace engineers.
+
 
 ## ✨ Features
 
@@ -91,6 +93,7 @@ rocketry-club/
 2. Automatic deployments and previews
 3. Free hosting with custom domain support
 
+
 ## 📱 Browser Support
 
 - ✅ Chrome 60+
@@ -122,15 +125,6 @@ rocketry-club/
 - [ ] Online sponsorship application form
 - [ ] Integration with school district systems
 
-## 🤝 Contributing
-
-This is a collaborative project for our rocketry club. To contribute:
-
-1. Discuss changes with the team
-2. Make your modifications
-3. Test on different devices and browsers
-4. Submit your changes for review
-
 ## 📞 Contact
 
 - **Faculty Advisor**: Lisa Dossett - dossettl@bsd405.org
@@ -148,4 +142,4 @@ This project is created for educational purposes and club use. Feel free to adap
 **Built with ❤️ and 🚀 by the Interlake Rocketry Club for the next generation of aerospace engineers!**
 
 *Visit us at: [interlakerocketry.org](https://interlakerocketry.org)*  
-*Last updated: January 2025*
+*Last updated: September 2025*
