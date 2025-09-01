@@ -40,6 +40,8 @@
         border-color: #495057 !important;
       }
 
+
+
     div {
         font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
     }
@@ -75,11 +77,35 @@
     /* Highlight only data cells, excluding merged Course and Stroke cells */
     tr.selected-row td:not(.age):not(.bold) {
         background-color: #ffffff !important;
-        border-color: #ffc107 !important;
     }
 
     /* Make the entire selected row text bold without changing colors */
-    tr.selected-row td {
+    tr.selected-row td,
+    tr.selected-row th {
+        font-weight: 700 !important;
+    }
+
+    /* Ensure motivational times and meet cuts cells are also bold when row is selected */
+    tr.selected-row td.mt,
+    tr.selected-row td.mc {
+        font-weight: 700 !important;
+    }
+
+    /* Make nested content in motivational times and meet cuts cells bold when row is selected */
+    tr.selected-row td.mt div,
+    tr.selected-row td.mc div,
+    tr.selected-row td.mt .dp,
+    tr.selected-row td.mt .ad,
+    tr.selected-row td.mc .dp,
+    tr.selected-row td.mc .ad {
+        font-weight: 700 !important;
+    }
+
+    /* Make rankings cells and their nested content bold when row is selected */
+    tr.selected-row td.rk,
+    tr.selected-row td.rk div,
+    tr.selected-row td.rk .dp,
+    tr.selected-row td.rk .ad {
         font-weight: 700 !important;
     }
 
@@ -131,6 +157,44 @@
     select {
         border-radius: 5px;
         padding: 5px;
+    }
+
+    /* Cuts age dropdown styling - matches search box */
+    .select-text {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        border-radius: 6px;
+        padding: 9px 12px;
+        cursor: pointer;
+        display: inline-block;
+        min-width: 120px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        color: #0C2340;
+        font-weight: 500;
+    }
+
+    .select-text:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    }
+
+    .select-text .arrow {
+        float: right;
+        margin-left: 8px;
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    /* Hover states for clickable table headers */
+    th[onclick] {
+        transition: all 0.3s ease;
+    }
+
+    th[onclick]:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #003d82 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     #input {
@@ -461,13 +525,14 @@
         float: right;
     }
 
+    /* Gray shadow for unmet motivational standards in Personal Best table */
     td>.r {
         margin: 0;
         position: absolute;
         top: 0;
         bottom: 0;
         right: 0;
-        background-color: #0004;
+        background-color: rgba(0, 0, 0, 0.1);
         z-index: -1;
     }
 
@@ -920,7 +985,7 @@
     }
 
     .dropdown {
-        box-shadow: 0px 8px 16px 0px #0007;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.15);
         overflow: auto;
         position: absolute;
         z-index: 1;
@@ -1545,7 +1610,8 @@
 
         let hash = window.location.hash.substring(1);
         if (!hash) {
-            updateContent(`Please enter the swimmer's name or the club name in the search box.`);
+            // Default to Ray Tang when no hash is present
+            go('swimmer', '500281');
             return;
         }
 
@@ -2406,6 +2472,9 @@
         html.push(addHide25Botton());
 
         updateContent(html.join(''));
+        
+        // Initialize shadow toggle after content is loaded
+        setTimeout(initializeShadowToggle, 100);
     }
 
     function getAlias(firstName, lastName) {
@@ -2577,6 +2646,9 @@
 
         html.push('<style id="show-mc-style"></style>',
             createCheckbox('show-mc', 'meet cuts', true, `toggleColumns('.mc', this.checked)`));
+
+        // Shadow toggle for motivational standards
+        html.push(createCheckbox('show-shadow', 'show shadow', false, `toggleShadow(this.checked)`));
         
         // Add cuts age dropdown in the same row
         let ageOptions = [
@@ -2776,6 +2848,35 @@
                 element.classList.add('hide');
             }
         });
+    }
+
+    function toggleShadow(show) {
+        const style = document.createElement('style');
+        style.id = 'shadow-toggle-style';
+        
+        // Remove existing style if it exists
+        const existing = document.getElementById('shadow-toggle-style');
+        if (existing) {
+            existing.remove();
+        }
+        
+        if (!show) {
+            // Hide shadows when toggle is off
+            style.textContent = `
+                /* Hide motivational standards shadow when toggle is off */
+                td>.r { background-color: transparent !important; }
+            `;
+            document.head.appendChild(style);
+        }
+        // When show is true, we don't add any style, letting the original shadow show
+    }
+
+    // Initialize shadow toggle to off by default
+    function initializeShadowToggle() {
+        const checkbox = document.getElementById('show-shadow');
+        if (checkbox && !checkbox.checked) {
+            toggleShadow(false);
+        }
     }
 
     function toggleRankingsCheckbox() {
