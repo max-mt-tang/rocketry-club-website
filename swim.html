@@ -57,15 +57,23 @@
         padding: 5px;
     }
 
-    #input, #inputText {
+    #input {
         border-radius: 5px;
         padding: 9px;
         width: 100%;
         max-width: 300px;
     }
     
-    #inputText {
-        border: 1px solid #ccc;
+    .ray-btn {
+        background-color: #FF6B6B;
+        color: white;
+        width: 80px;
+    }
+    
+    .max-btn {
+        background-color: #4ECDC4;
+        color: white;
+        width: 80px;
     }
 
     .search {
@@ -779,12 +787,9 @@
 
 <body>
     <div class="row">
-        <select id="input" class="big" onchange="onSearch()" style="margin-right: 10px;">
-            <option value="">Select a swimmer or type to search...</option>
-            <option value="Ray Tang">Ray Tang</option>
-            <option value="Max Tang">Max Tang</option>
-        </select>
-        <input id="inputText" placeholder="Or type any name to search..." class="big" onkeypress="if(event.key==='Enter')onSearchText()" style="margin-right: 10px; display: none;">
+        <button onclick="searchRay()" class="big ray-btn" style="margin-right: 10px;">Ray</button>
+        <button onclick="searchMax()" class="big max-btn" style="margin-right: 10px;">Max</button>
+        <input id="input" placeholder="Enter swimmer name..." class="big" onkeypress="if(event.key==='Enter')onSearch()" style="margin-right: 10px;">
         <button onclick="onSearch()" class="big search">SEARCH</button>
         <button onclick="onSearchAll()" class="big search">19&amp;OVER</button>
     </div>
@@ -1664,39 +1669,24 @@
     // search functions
 
     const _inputElem = document.getElementById('input');
-    const _inputTextElem = document.getElementById('inputText');
-    
-    // Handle dropdown change
-    _inputElem.addEventListener('change', (event) => {
-        if (event.target.value) {
-            // Hide text input when dropdown is used
-            _inputTextElem.style.display = 'none';
-            _inputTextElem.value = '';
-        } else {
-            // Show text input when dropdown is cleared
-            _inputTextElem.style.display = 'block';
-        }
-    });
     
     // Handle text input keypress
-    _inputTextElem.addEventListener('keypress', (event) => {
+    _inputElem.addEventListener('keypress', (event) => {
         if (event.key == 'Enter') {
-            onSearchText();
+            onSearch();
         }
     });
-    
-    // Show text input initially since dropdown is empty
-    _inputTextElem.style.display = 'block';
 
     async function onSearch() {
         go('search', _inputElem.value);
     }
 
-    async function onSearchText() {
-        const textInput = document.getElementById('inputText');
-        if (textInput.value.trim()) {
-            go('search', textInput.value.trim());
-        }
+    function searchRay() {
+        go('swimmer', '500281');
+    }
+
+    function searchMax() {
+        go('swimmer', '1320806');
     }
 
     async function onSearchAll() {
