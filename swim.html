@@ -88,6 +88,11 @@
     .header {
         margin: 16px 0;
         font-size: 16px;
+        background-color: #e3f2fd;
+        border: 2px solid #2196f3;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
     }
 
     .hide {
@@ -136,6 +141,8 @@
         display: inline-block;
         padding: 5px 10px;
         text-wrap: nowrap;
+        font-weight: 500;
+        color: #1565c0;
     }
 
     .match-size button {
@@ -423,12 +430,15 @@
     .tabview {
         margin: 0;
         width: 100%;
+        box-sizing: border-box;
     }
 
     .tabs {
         margin: 0;
         background-color: #DDD;
         user-select: none;
+        position: relative;
+        z-index: 2;
     }
 
     .tab {
@@ -445,16 +455,35 @@
         background-color: #FFF;
         border: 1px solid #000;
         border-bottom: 1px solid #FFF;
+        margin-bottom: -1px;
+        z-index: 1;
+        position: relative;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .tab:hover {
+        background-color: #f0f0f0;
+        font-weight: 600;
+        color: #000;
     }
 
     .view {
         margin: 0;
+        border: 1px solid #000;
+        border-top: none;
+        border-radius: 0 0 5px 5px;
+        padding: 10px;
+        background-color: #FFF;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* swimmer page table base */
     .content {
-        display: inline-block;
+        display: block;
         margin: 0;
+        width: 100%;
     }
 
     /* swimmer page tab title */
@@ -463,6 +492,9 @@
         padding: 10px;
         min-width: 110px;
         text-align: center;
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
     }
 
     /* graph re-size panel */
@@ -2362,7 +2394,7 @@
         let cutsAge = data.cutsAge ? getAgeFromCutsValue(data.cutsAge) : data.swimmer.age;
         let meetStds = getMeetStandards(cutsAge);
 
-        let html = ['<div class="content"><h2>Personal Best</h2>',
+        let html = ['<div class="content" style="margin-top: 20px;">',
             '<div class="center-row">',
             '<style id="show-rk-style"></style>',
             createCheckbox('show-rk', 'show rankings', true, `document.getElementById('show-rk-style').innerText = this.checked ? '' : '.rk{display:none}'`)];
@@ -3301,7 +3333,7 @@
         // 0     1    2    3    4     5     6      7     8
 
         let idx = data.events.idx;
-        let html = ['<div class="content"><h2>Age Best Time</h2><table class="fill"><tbody>'];
+        let html = ['<div class="content" style="margin-top: 20px;"><table class="fill"><tbody>'];
 
         // get all age column
         let ages = new Set(data.events.map(e => e[idx.age]));
@@ -3398,7 +3430,7 @@
             courses[course].push(row);
         }
 
-        let html = ['<div class="content"><h2>Meets</h2>'];
+        let html = ['<div class="content" style="margin-top: 20px;">'];
 
         // create the meet tables
         for (let course of _courseOrder) {
