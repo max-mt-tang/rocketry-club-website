@@ -57,11 +57,15 @@
         padding: 5px;
     }
 
-    #input {
+    #input, #inputText {
         border-radius: 5px;
         padding: 9px;
         width: 100%;
         max-width: 300px;
+    }
+    
+    #inputText {
+        border: 1px solid #ccc;
     }
 
     .search {
@@ -775,7 +779,12 @@
 
 <body>
     <div class="row">
-        <input id="input" autofocus="" class="big">
+        <select id="input" class="big" onchange="onSearch()" style="margin-right: 10px;">
+            <option value="">Select a swimmer or type to search...</option>
+            <option value="Ray Tang">Ray Tang</option>
+            <option value="Max Tang">Max Tang</option>
+        </select>
+        <input id="inputText" placeholder="Or type any name to search..." class="big" onkeypress="if(event.key==='Enter')onSearchText()" style="margin-right: 10px; display: none;">
         <button onclick="onSearch()" class="big search">SEARCH</button>
         <button onclick="onSearchAll()" class="big search">19&amp;OVER</button>
     </div>
@@ -1655,14 +1664,39 @@
     // search functions
 
     const _inputElem = document.getElementById('input');
-    _inputElem.addEventListener('keypress', (event) => {
-        if (event.key == 'Enter') {
-            onSearch();
+    const _inputTextElem = document.getElementById('inputText');
+    
+    // Handle dropdown change
+    _inputElem.addEventListener('change', (event) => {
+        if (event.target.value) {
+            // Hide text input when dropdown is used
+            _inputTextElem.style.display = 'none';
+            _inputTextElem.value = '';
+        } else {
+            // Show text input when dropdown is cleared
+            _inputTextElem.style.display = 'block';
         }
     });
+    
+    // Handle text input keypress
+    _inputTextElem.addEventListener('keypress', (event) => {
+        if (event.key == 'Enter') {
+            onSearchText();
+        }
+    });
+    
+    // Show text input initially since dropdown is empty
+    _inputTextElem.style.display = 'block';
 
     async function onSearch() {
         go('search', _inputElem.value);
+    }
+
+    async function onSearchText() {
+        const textInput = document.getElementById('inputText');
+        if (textInput.value.trim()) {
+            go('search', textInput.value.trim());
+        }
     }
 
     async function onSearchAll() {
