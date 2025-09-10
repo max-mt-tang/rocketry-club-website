@@ -3448,26 +3448,15 @@
             let meetCutCells = document.querySelectorAll('.mc');
             console.log('Found', meetCutCells.length, 'meet cut cells');
             
-            // For now, just show a visual indication that the function is working
-            // by temporarily highlighting the meet cut columns
-            meetCutCells.forEach(cell => {
-                cell.style.backgroundColor = '#ffeb3b';
-                setTimeout(() => {
-                    cell.style.backgroundColor = '';
-                }, 1000);
-            });
+            // Get the current swimmer data
+            let swimmerData = getCurrentSwimmerData();
+            if (!swimmerData) {
+                console.error('No swimmer data available');
+                return;
+            }
             
-            // Show a temporary message to the user
-            let message = document.createElement('div');
-            message.style.cssText = 'position:fixed;top:10px;right:10px;background:#4caf50;color:white;padding:10px;border-radius:5px;z-index:9999;';
-            message.textContent = `Meet cuts updated for age: ${selectedAge}`;
-            document.body.appendChild(message);
-            
-            setTimeout(() => {
-                if (message.parentNode) {
-                    message.parentNode.removeChild(message);
-                }
-            }, 2000);
+            // Regenerate the entire table with the new cuts age
+            refreshSwimmerDisplay(swimmerData, selectedAge);
             
             console.log('Meet cuts update completed');
             
