@@ -3443,12 +3443,6 @@
         try {
             console.log('Updating meet cuts for age:', selectedAge);
             
-            // Get the numeric age for the standards
-            let cutsAge = getAgeFromCutsValue(selectedAge);
-            let meetStds = getMeetStandards(cutsAge);
-            
-            console.log('Meet standards for age', cutsAge, ':', meetStds);
-            
             // Get the current swimmer data
             let swimmerData = getCurrentSwimmerData();
             if (!swimmerData) {
@@ -3456,8 +3450,8 @@
                 return;
             }
             
-            // Update the meet cut values in the existing table without regenerating
-            updateMeetCutValues(meetStds, cutsAge);
+            // Regenerate the entire table with the new cuts age
+            refreshSwimmerDisplay(swimmerData, selectedAge);
             
             console.log('Meet cuts update completed');
             
@@ -3466,36 +3460,6 @@
         }
     }
 
-    function updateMeetCutValues(meetStds, cutsAge) {
-        // Find all meet cut cells and update their values
-        let meetCutCells = document.querySelectorAll('.mc');
-        console.log('Found', meetCutCells.length, 'meet cut cells to update');
-        
-        meetCutCells.forEach(cell => {
-            // Get the event information from the row
-            let row = cell.closest('tr');
-            if (row) {
-                // Find the event cell to get the event ID
-                let eventCell = row.querySelector('td.full .clickable');
-                if (eventCell) {
-                    let eventId = parseInt(eventCell.textContent.trim());
-                    if (!isNaN(eventId)) {
-                        // Find the corresponding meet standard for this event
-                        let meetStd = meetStds.find(std => std.event === eventId);
-                        if (meetStd) {
-                            // Update the cell content with the new time
-                            let timeDisplay = cell.querySelector('.dp');
-                            if (timeDisplay) {
-                                timeDisplay.textContent = meetStd.time;
-                            } else {
-                                cell.innerHTML = `<div class="dp">${meetStd.time}</div>`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 
     function getCurrentSwimmerData() {
         // Get the current swimmer data from the global variable
