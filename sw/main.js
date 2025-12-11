@@ -41,15 +41,24 @@ if (document.readyState === 'loading') {
 async function onSearch() {
     console.log("onSearch called");
 
-    // Try to get input element if not already found
-    if (!_inputElem) {
-        _inputElem = document.getElementById("input");
-        console.log("onSearch: Attempting to find input element:", !!_inputElem);
+    // Try to get input element (check both desktop and mobile inputs)
+    let inputValue = null;
+    const desktopInput = document.getElementById("input");
+    const mobileInput = document.getElementById("mobile-input");
+    
+    if (desktopInput && desktopInput.value) {
+        inputValue = desktopInput.value;
+    } else if (mobileInput && mobileInput.value) {
+        inputValue = mobileInput.value;
+    } else if (desktopInput) {
+        inputValue = desktopInput.value;
+    } else if (mobileInput) {
+        inputValue = mobileInput.value;
     }
 
-    if (_inputElem) {
-        console.log("Input value:", _inputElem.value);
-        go("search", _inputElem.value);
+    if (inputValue !== null) {
+        console.log("Input value:", inputValue);
+        go("search", inputValue);
     } else {
         console.error("Input element not found - checking DOM structure");
         const allInputs = document.querySelectorAll('input');
@@ -58,13 +67,23 @@ async function onSearch() {
 }
 
 async function onSearchAll() {
-    // Try to get input element if not already found
-    if (!_inputElem) {
-        _inputElem = document.getElementById("input");
+    // Try to get input element (check both desktop and mobile inputs)
+    let inputValue = null;
+    const desktopInput = document.getElementById("input");
+    const mobileInput = document.getElementById("mobile-input");
+    
+    if (desktopInput && desktopInput.value) {
+        inputValue = desktopInput.value;
+    } else if (mobileInput && mobileInput.value) {
+        inputValue = mobileInput.value;
+    } else if (desktopInput) {
+        inputValue = desktopInput.value;
+    } else if (mobileInput) {
+        inputValue = mobileInput.value;
     }
 
-    if (_inputElem) {
-        go("searchAll", _inputElem.value);
+    if (inputValue !== null) {
+        go("searchAll", inputValue);
     } else {
         console.error("Input element not found for searchAll");
     }

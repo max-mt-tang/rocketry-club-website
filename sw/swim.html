@@ -61,6 +61,18 @@ Last Updated: 2025
                     console.error('Error in toggleMobileMenu:', error);
                 }
             }
+
+            // Toggle mobile navigation sections
+            function toggleMobileNav() {
+                const row = document.querySelector('.top-banner .row');
+                if (row) {
+                    row.classList.toggle('nav-collapsed');
+                    const toggleBtn = document.querySelector('.mobile-nav-toggle');
+                    if (toggleBtn) {
+                        toggleBtn.textContent = row.classList.contains('nav-collapsed') ? '☰' : '✕';
+                    }
+                }
+            }
         </script>
 
         <!-- Core modules (load first) -->
@@ -117,9 +129,9 @@ Last Updated: 2025
                 </div>
 
                 <!-- ========================================
-                     MOBILE MENU TOGGLE BUTTON
+                     MOBILE NAVIGATION TOGGLE BUTTON
                      ======================================== -->
-                <button class="mobile-menu-toggle" onclick="toggleMobileMenu();">
+                <button class="mobile-nav-toggle" onclick="toggleMobileNav();">
                     ☰
                 </button>
 
@@ -239,9 +251,9 @@ Last Updated: 2025
                         />
 
                         <!-- Search buttons -->
-                        <div style="display: flex; gap: 4%;">
-                            <button onclick="onSearch()" class="big search" style="width: 14%; height: 40px;">Search</button>
-                            <button onclick="onSearchAll()" class="big search" style="width: 14%; height: 40px;">18Up</button>
+                        <div style="display: flex; gap: 10px; width: 100%;">
+                            <button onclick="onSearch()" class="big search" style="flex: 1; height: 44px; padding: 12px;">Search</button>
+                            <button onclick="onSearchAll()" class="big search" style="flex: 1; height: 44px; padding: 12px;">18Up</button>
                         </div>
                     </div>
                 </div>
