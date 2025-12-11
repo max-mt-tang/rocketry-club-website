@@ -488,7 +488,7 @@ div[class*="select"][id*="bcst"],
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 10002 !important;
+  z-index: 100000 !important;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
@@ -497,18 +497,20 @@ div[class*="select"][id*="bcst"],
   overflow-y: auto;
 }
 
-/* Ensure cuts age dropdown appears above everything */
+/* Ensure cuts age dropdown appears above everything - especially for Chrome mobile */
 #cuts-age-select .dropdown,
 #cuts-age-select + * .dropdown,
-.select-text + * .dropdown {
-  z-index: 10002 !important;
+.select-text + * .dropdown,
+.drop-layout .dropdown {
+  z-index: 100000 !important;
+  position: absolute !important;
 }
 
 /* Fix dropdown container positioning */
 #cuts-age-select,
 .drop-layout {
   position: relative !important;
-  z-index: 10002 !important;
+  z-index: 100000 !important;
 }
 
 /* Ensure parent containers don't clip dropdowns */
@@ -2130,7 +2132,8 @@ tbody tr:hover .full>.clickable {
 
   /* Mobile navigation layout */
   .top-banner {
-    overflow-x: hidden;
+    overflow-x: visible;
+    overflow-y: visible;
     position: fixed;
     top: 0;
     left: 0;
@@ -2150,6 +2153,7 @@ tbody tr:hover .full>.clickable {
     white-space: normal;
     gap: 10px;
     overflow-x: hidden;
+    position: relative;
   }
 
   /* My Favorites - narrower width, align right with Search Swimmers */
@@ -2309,6 +2313,11 @@ tbody tr:hover .full>.clickable {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     height: auto;
     min-height: 0;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: none;
+    width: auto;
   }
 
   .mobile-nav-toggle:hover {
