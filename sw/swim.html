@@ -65,11 +65,24 @@ Last Updated: 2025
             // Toggle mobile navigation sections
             function toggleMobileNav() {
                 const row = document.querySelector('.top-banner .row');
+                const banner = document.querySelector('.top-banner');
+                const content = document.getElementById('content');
                 if (row) {
                     row.classList.toggle('nav-collapsed');
+                    if (banner) {
+                        banner.classList.toggle('nav-collapsed');
+                    }
                     const toggleBtn = document.querySelector('.mobile-nav-toggle');
                     if (toggleBtn) {
                         toggleBtn.textContent = row.classList.contains('nav-collapsed') ? '☰' : '✕';
+                    }
+                    // Adjust content margin
+                    if (content) {
+                        if (row.classList.contains('nav-collapsed')) {
+                            content.style.marginTop = '60px';
+                        } else {
+                            content.style.marginTop = '';
+                        }
                     }
                 }
             }

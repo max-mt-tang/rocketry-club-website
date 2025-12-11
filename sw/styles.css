@@ -488,13 +488,44 @@ div[class*="select"][id*="bcst"],
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 10002 !important;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-height: 200px;
   overflow-y: auto;
+}
+
+/* Ensure cuts age dropdown appears above everything */
+#cuts-age-select .dropdown,
+#cuts-age-select + * .dropdown,
+.select-text + * .dropdown {
+  z-index: 10002 !important;
+}
+
+/* Fix dropdown container positioning */
+#cuts-age-select,
+.drop-layout {
+  position: relative !important;
+  z-index: 10002 !important;
+}
+
+/* Ensure parent containers don't clip dropdowns */
+.center-row,
+.content {
+  overflow: visible !important;
+}
+
+/* Ensure table cells don't clip dropdowns */
+.drop-layout td {
+  overflow: visible !important;
+  position: relative;
+}
+
+.drop-layout td > div {
+  overflow: visible !important;
+  position: relative;
 }
 
 /* Left align cuts age dropdown options */
@@ -543,8 +574,10 @@ div[class*="select"][id*="bcst"],
 .center-row {
   height: auto;
   min-height: 0;
-  overflow: visible;
+  overflow: visible !important;
   margin-top: 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .center-row > * {
@@ -555,6 +588,9 @@ div[class*="select"][id*="bcst"],
 table.fill.drop-layout {
   border-collapse: collapse;
   background: transparent !important;
+  overflow: visible !important;
+  position: relative;
+  z-index: 10002;
 }
 
 table.fill.drop-layout td {
@@ -562,9 +598,13 @@ table.fill.drop-layout td {
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  overflow: visible !important;
+  position: relative;
 }
 
 table.fill.drop-layout tr:last-child td {
+  overflow: visible !important;
+  position: relative;
   height: 0 !important;
   overflow: visible !important;
 }
@@ -2260,12 +2300,15 @@ tbody tr:hover .full>.clickable {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
-    padding: 10px 14px;
+    padding: 6px 12px;
     color: #ffffff;
-    font-size: 20px;
+    font-size: 18px;
+    line-height: 1;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    height: auto;
+    min-height: 0;
   }
 
   .mobile-nav-toggle:hover {
@@ -2278,6 +2321,26 @@ tbody tr:hover .full>.clickable {
   .top-banner .row.nav-collapsed .bcst-nav-group,
   .top-banner .row.nav-collapsed .search-nav-group {
     display: none !important;
+  }
+
+  /* Reduce top banner height when collapsed */
+  .top-banner .row.nav-collapsed {
+    min-height: 0;
+    padding-bottom: 0;
+    height: auto;
+  }
+
+  .top-banner.nav-collapsed {
+    min-height: 0;
+    padding-bottom: 0;
+    height: auto;
+  }
+
+  /* Adjust content margin when navigation is collapsed */
+  .top-banner.nav-collapsed ~ #content,
+  body:has(.top-banner.nav-collapsed) #content,
+  body:has(.top-banner .row.nav-collapsed) #content {
+    margin-top: 60px !important;
   }
 
   /* Mobile dropdown menu */
