@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swim Game - BCST</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #0C2340;
+        }
+        
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-header h1 {
+            color: #0C2340;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .game-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0C2340;
+        }
+        
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            border: 3px solid #0C2340;
+            border-radius: 10px;
+            background: #001f3f;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .game-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .controls-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .controls-info p {
+            font-size: 13px;
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .game-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .back-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .back-link a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+        
+        .back-link a:hover {
+            opacity: 0.8;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .game-over.show {
+            display: block;
+        }
+        
+        .game-over h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        .game-over p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🏊 Swim Champ Game</h1>
+            <p>Collect medals and avoid sharks! Use arrow keys or WASD to swim.</p>
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Lives</div>
+                <div class="stat-value" id="lives">3</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+        </div>
+        
+        <div style="position: relative;">
+            <canvas id="gameCanvas" width="720" height="480"></canvas>
+            <div class="game-over" id="gameOver">
+                <h2 id="gameOverTitle">Game Over!</h2>
+                <p id="gameOverMessage">Final Score: <span id="finalScore">0</span></p>
+                <button onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="game-controls">
+            <div class="controls-info">
+                <p><strong>Controls:</strong> Arrow Keys or WASD to move</p>
+                <p>🎖️ Collect medals to score points | 🦈 Avoid sharks</p>
+            </div>
+            <div class="game-buttons">
+                <button onclick="pauseGame()" id="pauseBtn">Pause</button>
+                <button onclick="restartGame()">Restart</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="back-link">
+        <a href="swim.html">← Back to Swim Tracker</a>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let score = 0;
+        let lives = 3;
+        let level = 1;
+        let gameRunning = false;
+        let gamePaused = false;
+        
+        // Player (swimmer)
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: 20,
+            speed: 5,
+            color: '#00bfff',
+            direction: 'right',
+            animationFrame: 0,
+            hasFins: false,
+            isCharging: false,
+            chargeDirection: { x: 0, y: 0 },
+            chargeSpeed: 0,
+            chargeDuration: 0,
+            maxChargeDuration: 30 // frames
+        };
+        
+        // Animation frame counter for swimming effect
+        let globalAnimationFrame = 0;
+        
+        // Medals (to collect)
+        const medals = [];
+        const medalSize = 12;
+        const medalsPerLevel = 15;
+        
+        // Fins (special power-up)
+        const fins = [];
+        const finSize = 15;
+        
+        // Obstacles (to avoid - sharks)
+        const obstacles = [];
+        const obstacleSize = 25;
+        
+        // Initialize shark with health
+        function createShark(x, y, vx, vy) {
+            return {
+                x: x,
+                y: y,
+                vx: vx,
+                vy: vy,
+                health: 100,
+                maxHealth: 100,
+                isDead: false
+            };
+        }
+        
+        // Splash effects
+        const splashes = [];
+        
+        // Track sharks hit this frame (to prevent multiple hits per charge)
+        let hitSharksThisFrame = new Set();
+        
+        // Animation helper - gets swimming motion offset
+        function getSwimmingOffset(frame, speed = 1) {
+            return Math.sin(frame * 0.1 * speed) * 2;
+        }
+        
+        // Get rotation angle based on direction
+        function getRotation(direction) {
+            const rotations = {
+                'up': -90,
+                'down': 90,
+                'left': -180,
+                'right': 0
+            };
+            return rotations[direction] || 0;
+        }
+        
+        // Create splash effect
+        function createSplash(x, y) {
+            const particleCount = 30;
+            const splash = {
+                x: x,
+                y: y,
+                particles: [],
+                age: 0,
+                maxAge: 60, // frames
+                active: true
+            };
+            
+            // Create particles that radiate outward
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (Math.PI * 2 * i) / particleCount + (Math.random() * 0.5 - 0.25);
+                const speed = 2 + Math.random() * 4;
+                splash.particles.push({
+                    x: 0,
+                    y: 0,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 3 + Math.random() * 5,
+                    life: 1.0,
+                    decay: 0.02 + Math.random() * 0.03,
+                    bubble: Math.random() > 0.5 // Some are bubbles, some are water droplets
+                });
+            }
+            
+            splashes.push(splash);
+        }
+        
+        // Update splash effects
+        function updateSplashes() {
+            for (let i = splashes.length - 1; i >= 0; i--) {
+                const splash = splashes[i];
+                if (!splash.active) {
+                    splashes.splice(i, 1);
+                    continue;
+                }
+                
+                splash.age++;
+                if (splash.age >= splash.maxAge) {
+                    splash.active = false;
+                    continue;
+                }
+                
+                // Update particles
+                splash.particles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vy += 0.1; // Gravity effect
+                    particle.vx *= 0.98; // Friction
+                    particle.life -= particle.decay;
+                    
+                    if (particle.life <= 0) {
+                        particle.life = 0;
+                    }
+                });
+            }
+        }
+        
+        // Draw splash effects
+        function drawSplashes(ctx) {
+            splashes.forEach(splash => {
+                if (!splash.active) return;
+                
+                const ageRatio = splash.age / splash.maxAge;
+                const baseAlpha = 1 - ageRatio;
+                
+                // Draw main splash circle (water disturbance)
+                if (ageRatio < 0.3) {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${baseAlpha * 0.4})`;
+                    ctx.beginPath();
+                    const splashSize = 80 * (1 + ageRatio * 2);
+                    ctx.arc(splash.x, splash.y, splashSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Outer ripple
+                    ctx.strokeStyle = `rgba(173, 216, 230, ${baseAlpha * 0.3})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(splash.x, splash.y, splashSize * 1.5, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                // Draw particles
+                splash.particles.forEach(particle => {
+                    if (particle.life <= 0) return;
+                    
+                    const alpha = baseAlpha * particle.life;
+                    
+                    if (particle.bubble) {
+                        // Draw bubbles
+                        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+                        ctx.strokeStyle = `rgba(173, 216, 230, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.arc(
+                            splash.x + particle.x,
+                            splash.y + particle.y,
+                            particle.size,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                        ctx.stroke();
+                        
+                        // Bubble highlight
+                        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
+                        ctx.beginPath();
+                        ctx.arc(
+                            splash.x + particle.x - particle.size * 0.3,
+                            splash.y + particle.y - particle.size * 0.3,
+                            particle.size * 0.3,
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                    } else {
+                        // Draw water droplets
+                        ctx.fillStyle = `rgba(173, 216, 230, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.ellipse(
+                            splash.x + particle.x,
+                            splash.y + particle.y,
+                            particle.size * 0.6,
+                            particle.size,
+                            Math.atan2(particle.vy, particle.vx),
+                            0,
+                            Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                });
+            });
+        }
+        
+        // Draw animated shark with opening/closing mouth
+        function drawAnimatedShark(ctx, x, y, size, rotation, animationFrame) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation * Math.PI / 180);
+            
+            // Calculate mouth open state (0 = closed, 1 = fully open)
+            const mouthPhase = (Math.sin(animationFrame * 0.15) + 1) / 2; // 0 to 1
+            const mouthOpen = 0.2 + mouthPhase * 0.6; // 20% to 80% open
+            
+            // Draw shark body (gray body shape)
+            ctx.fillStyle = '#2c3e50';
+            ctx.beginPath();
+            
+            // Shark body - elongated oval
+            ctx.ellipse(0, 0, size * 0.9, size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw tail fin
+            ctx.fillStyle = '#1a2332';
+            ctx.beginPath();
+            ctx.moveTo(-size * 0.8, 0);
+            ctx.lineTo(-size * 1.2, -size * 0.4);
+            ctx.lineTo(-size * 1.2, size * 0.4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw dorsal fin
+            ctx.beginPath();
+            ctx.moveTo(size * 0.2, -size * 0.5);
+            ctx.lineTo(size * 0.4, -size * 0.8);
+            ctx.lineTo(size * 0.5, -size * 0.5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw mouth - opening and closing animation
+            ctx.fillStyle = '#000000';
+            ctx.strokeStyle = '#8b0000';
+            ctx.lineWidth = 2;
+            
+            // Mouth opens wider as animation progresses
+            const mouthWidth = size * 0.3 * mouthOpen;
+            const mouthDepth = size * 0.2 * mouthOpen;
+            
+            ctx.beginPath();
+            // Top jaw
+            ctx.moveTo(size * 0.7, 0);
+            ctx.quadraticCurveTo(size * 0.85, -mouthDepth * 0.5, size * 0.9, -mouthWidth);
+            ctx.lineTo(size * 0.7, -mouthWidth * 0.3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Bottom jaw
+            ctx.beginPath();
+            ctx.moveTo(size * 0.7, 0);
+            ctx.quadraticCurveTo(size * 0.85, mouthDepth * 0.5, size * 0.9, mouthWidth);
+            ctx.lineTo(size * 0.7, mouthWidth * 0.3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Teeth when mouth is open
+            if (mouthOpen > 0.3) {
+                ctx.fillStyle = '#ffffff';
+                const toothCount = Math.floor(mouthOpen * 6);
+                for (let i = 0; i < toothCount; i++) {
+                    const t = i / (toothCount + 1);
+                    // Top teeth
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.75 + t * size * 0.15, -mouthWidth * 0.2);
+                    ctx.lineTo(size * 0.78 + t * size * 0.15, -mouthWidth * 0.6);
+                    ctx.lineTo(size * 0.81 + t * size * 0.15, -mouthWidth * 0.2);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Bottom teeth
+                    ctx.beginPath();
+                    ctx.moveTo(size * 0.75 + t * size * 0.15, mouthWidth * 0.2);
+                    ctx.lineTo(size * 0.78 + t * size * 0.15, mouthWidth * 0.6);
+                    ctx.lineTo(size * 0.81 + t * size * 0.15, mouthWidth * 0.2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+            
+            // Draw eye
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(size * 0.3, -size * 0.2, size * 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(size * 0.32, -size * 0.22, size * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add subtle red glow for danger
+            ctx.shadowColor = 'rgba(255, 0, 0, 0.4)';
+            ctx.shadowBlur = 15;
+            
+            ctx.restore();
+        }
+        
+        // Keys pressed
+        const keys = {};
+        
+        // Initialize game
+        function initGame() {
+            gameRunning = true;
+            gamePaused = false;
+            score = 0;
+            lives = 3;
+            level = 1;
+            medals.length = 0;
+            fins.length = 0;
+            obstacles.length = 0;
+            player.hasFins = false;
+            player.isCharging = false;
+            
+            // Create initial medals
+            createMedals();
+            createFins();
+            createObstacles();
+            
+            updateStats();
+            gameLoop();
+        }
+        
+        // Create medals
+        function createMedals() {
+            medals.length = 0;
+            for (let i = 0; i < medalsPerLevel + (level - 1) * 5; i++) {
+                medals.push({
+                    x: Math.random() * (canvas.width - medalSize * 2) + medalSize,
+                    y: Math.random() * (canvas.height - medalSize * 2) + medalSize,
+                    collected: false
+                });
+            }
+        }
+        
+        // Create obstacles (sharks with health)
+        function createObstacles() {
+            obstacles.length = 0;
+            const obstacleCount = 3 + level;
+            for (let i = 0; i < obstacleCount; i++) {
+                obstacles.push(createShark(
+                    Math.random() * (canvas.width - obstacleSize * 2) + obstacleSize,
+                    Math.random() * (canvas.height - obstacleSize * 2) + obstacleSize,
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2
+                ));
+            }
+        }
+        
+        // Create fins (power-ups)
+        function createFins() {
+            fins.length = 0;
+            const finCount = 3 + level; // Fewer than medals
+            for (let i = 0; i < finCount; i++) {
+                fins.push({
+                    x: Math.random() * (canvas.width - finSize * 2) + finSize,
+                    y: Math.random() * (canvas.height - finSize * 2) + finSize,
+                    collected: false
+                });
+            }
+        }
+        
+        // Start charge attack
+        function startCharge() {
+            if (!player.hasFins || player.isCharging) return;
+            
+            // Determine charge direction from current movement or last direction
+            let dirX = 0, dirY = 0;
+            
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) dirY = -1;
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) dirY = 1;
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) dirX = -1;
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) dirX = 1;
+            
+            // If no direction key pressed, use last direction
+            if (dirX === 0 && dirY === 0) {
+                switch(player.direction) {
+                    case 'up': dirY = -1; break;
+                    case 'down': dirY = 1; break;
+                    case 'left': dirX = -1; break;
+                    case 'right': dirX = 1; break;
+                    default: dirX = 1; break;
+                }
+            }
+            
+            // Normalize direction
+            const length = Math.sqrt(dirX * dirX + dirY * dirY);
+            if (length > 0) {
+                player.chargeDirection.x = dirX / length;
+                player.chargeDirection.y = dirY / length;
+            } else {
+                player.chargeDirection.x = 1;
+                player.chargeDirection.y = 0;
+            }
+            
+            player.isCharging = true;
+            player.chargeSpeed = 15; // Much faster than normal speed
+            player.chargeDuration = 0;
+        }
+        
+        // Update charge attack
+        function updateCharge() {
+            if (!player.isCharging) return;
+            
+            player.chargeDuration++;
+            
+            // Move player in charge direction
+            player.x += player.chargeDirection.x * player.chargeSpeed;
+            player.y += player.chargeDirection.y * player.chargeSpeed;
+            
+            // Keep in bounds
+            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
+            
+            // End charge after duration
+            if (player.chargeDuration >= player.maxChargeDuration) {
+                player.isCharging = false;
+                player.hasFins = false; // Fins are consumed after use
+                player.chargeSpeed = 0;
+            }
+        }
+        
+        // Update player position
+        function updatePlayer() {
+            // If charging, handle charge movement separately
+            if (player.isCharging) {
+                updateCharge();
+                return;
+            }
+            
+            let newX = player.x;
+            let newY = player.y;
+            
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                newY -= player.speed;
+                player.direction = 'up';
+            }
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                newY += player.speed;
+                player.direction = 'down';
+            }
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                newX -= player.speed;
+                player.direction = 'left';
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                newX += player.speed;
+                player.direction = 'right';
+            }
+            
+            // Boundary checking
+            if (newX >= player.size && newX <= canvas.width - player.size) {
+                player.x = newX;
+            }
+            if (newY >= player.size && newY <= canvas.height - player.size) {
+                player.y = newY;
+            }
+        }
+        
+        // Update obstacles
+        function updateObstacles() {
+            obstacles.forEach(obstacle => {
+                if (obstacle.isDead) return; // Skip dead sharks
+                
+                obstacle.x += obstacle.vx;
+                obstacle.y += obstacle.vy;
+                
+                // Bounce off walls
+                if (obstacle.x <= obstacleSize || obstacle.x >= canvas.width - obstacleSize) {
+                    obstacle.vx *= -1;
+                }
+                if (obstacle.y <= obstacleSize || obstacle.y >= canvas.height - obstacleSize) {
+                    obstacle.vy *= -1;
+                }
+                
+                // Keep in bounds
+                obstacle.x = Math.max(obstacleSize, Math.min(canvas.width - obstacleSize, obstacle.x));
+                obstacle.y = Math.max(obstacleSize, Math.min(canvas.height - obstacleSize, obstacle.y));
+            });
+        }
+        
+        // Check collisions
+        function checkCollisions() {
+            // Check medal collection
+            medals.forEach((medal, index) => {
+                if (!medal.collected) {
+                    const dx = player.x - medal.x;
+                    const dy = player.y - medal.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < player.size + medalSize) {
+                        medal.collected = true;
+                        score += 10;
+                        updateStats();
+                        
+                        // Check if level complete
+                        if (medals.every(m => m.collected) && fins.every(f => f.collected)) {
+                            level++;
+                            createMedals();
+                            createFins();
+                            createObstacles();
+                            updateStats();
+                        }
+                    }
+                }
+            });
+            
+            // Check fin collection
+            fins.forEach((fin, index) => {
+                if (!fin.collected) {
+                    const dx = player.x - fin.x;
+                    const dy = player.y - fin.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < player.size + finSize) {
+                        fin.collected = true;
+                        player.hasFins = true;
+                        // Create small visual effect
+                        createSplash(fin.x, fin.y);
+                    }
+                }
+            });
+            
+            // Reset hit tracking each frame
+            hitSharksThisFrame.clear();
+            
+            // Check obstacle collisions
+            obstacles.forEach((obstacle, index) => {
+                if (obstacle.isDead) return;
+                if (hitSharksThisFrame.has(index)) return; // Already hit this frame
+                
+                const dx = player.x - obstacle.x;
+                const dy = player.y - obstacle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < player.size + obstacleSize) {
+                    if (player.isCharging) {
+                        // Charge attack - damage shark and apply knockback
+                        obstacle.health -= 40;
+                        hitSharksThisFrame.add(index); // Mark as hit
+                        
+                        // Apply knockback to shark (push away from player)
+                        const knockbackForce = 10;
+                        const normalizedDx = dx / distance;
+                        const normalizedDy = dy / distance;
+                        
+                        // Set new velocity for knockback
+                        obstacle.vx = normalizedDx * knockbackForce;
+                        obstacle.vy = normalizedDy * knockbackForce;
+                        
+                        // Immediate position knockback
+                        const knockbackDistance = 15;
+                        obstacle.x += normalizedDx * knockbackDistance;
+                        obstacle.y += normalizedDy * knockbackDistance;
+                        
+                        // Keep shark in bounds after knockback
+                        obstacle.x = Math.max(obstacleSize, Math.min(canvas.width - obstacleSize, obstacle.x));
+                        obstacle.y = Math.max(obstacleSize, Math.min(canvas.height - obstacleSize, obstacle.y));
+                        
+                        // Create damage splash
+                        createSplash(obstacle.x, obstacle.y);
+                        
+                        // Check if shark is killed/eaten
+                        if (obstacle.health <= 0) {
+                            obstacle.isDead = true;
+                            obstacle.health = 0;
+                            score += 50; // Bonus for eating shark
+                            updateStats();
+                            
+                            // Multiple splashes on defeat for visual effect
+                            createSplash(obstacle.x, obstacle.y);
+                            setTimeout(() => createSplash(obstacle.x + 10, obstacle.y + 10), 50);
+                            setTimeout(() => createSplash(obstacle.x - 10, obstacle.y - 10), 100);
+                        }
+                    } else {
+                        // Normal collision - swimmer can eat shark (shark takes damage, swimmer takes NO damage)
+                        // Swimmer attacks shark with basic attack
+                        if (!hitSharksThisFrame.has(index)) {
+                            obstacle.health -= 20; // Basic attack does less damage than charge
+                            hitSharksThisFrame.add(index);
+                            
+                            // Small knockback
+                            const normalizedDx = dx / distance;
+                            const normalizedDy = dy / distance;
+                            obstacle.vx = normalizedDx * 5;
+                            obstacle.vy = normalizedDy * 5;
+                            obstacle.x += normalizedDx * 8;
+                            obstacle.y += normalizedDy * 8;
+                            
+                            // Keep shark in bounds
+                            obstacle.x = Math.max(obstacleSize, Math.min(canvas.width - obstacleSize, obstacle.x));
+                            obstacle.y = Math.max(obstacleSize, Math.min(canvas.height - obstacleSize, obstacle.y));
+                            
+                            // Create attack splash
+                            createSplash(obstacle.x, obstacle.y);
+                            
+                            // Check if shark is eaten
+                            if (obstacle.health <= 0) {
+                                obstacle.isDead = true;
+                                obstacle.health = 0;
+                                score += 50; // Bonus for eating shark
+                                updateStats();
+                                
+                                // Splash effects on eating shark
+                                createSplash(obstacle.x, obstacle.y);
+                                setTimeout(() => createSplash(obstacle.x + 10, obstacle.y + 10), 50);
+                                setTimeout(() => createSplash(obstacle.x - 10, obstacle.y - 10), 100);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Draw game
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#001f3f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid (subtle)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw medals
+            medals.forEach(medal => {
+                if (!medal.collected) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(medal.x, medal.y, medalSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw medal star
+                    ctx.fillStyle = '#FFA500';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🎖️', medal.x, medal.y);
+                }
+            });
+            
+            // Draw fins
+            fins.forEach(fin => {
+                if (!fin.collected) {
+                    // Draw fin with pulsing effect
+                    const pulse = Math.sin(globalAnimationFrame * 0.2) * 0.2 + 1;
+                    ctx.fillStyle = '#4a90e2';
+                    ctx.beginPath();
+                    ctx.ellipse(fin.x, fin.y, finSize * 0.8 * pulse, finSize * pulse, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw fin emoji or symbol
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🦶', fin.x, fin.y);
+                    
+                    // Glow effect
+                    ctx.shadowColor = '#4a90e2';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.ellipse(fin.x, fin.y, finSize * 0.8 * pulse, finSize * pulse, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            });
+            
+            // Draw obstacles (sharks) with swimming animation and animated mouths
+            obstacles.forEach((obstacle, index) => {
+                if (obstacle.isDead) return; // Don't draw dead sharks
+                
+                // Calculate swimming offset for this shark
+                const swimOffset = getSwimmingOffset(globalAnimationFrame + index * 10, 1.5);
+                const sharkY = obstacle.y + swimOffset;
+                
+                // Calculate rotation based on movement direction
+                let sharkRotation = 0;
+                if (Math.abs(obstacle.vx) > Math.abs(obstacle.vy)) {
+                    sharkRotation = obstacle.vx > 0 ? 0 : 180;
+                } else {
+                    sharkRotation = obstacle.vy > 0 ? 90 : -90;
+                }
+                
+                // Draw health bar above shark
+                const healthBarWidth = obstacleSize * 2;
+                const healthBarHeight = 4;
+                const healthRatio = obstacle.health / obstacle.maxHealth;
+                
+                // Background (red)
+                ctx.fillStyle = 'rgba(200, 0, 0, 0.7)';
+                ctx.fillRect(obstacle.x - healthBarWidth / 2, sharkY - obstacleSize - 10, healthBarWidth, healthBarHeight);
+                
+                // Health (green)
+                ctx.fillStyle = healthRatio > 0.5 ? 'rgba(0, 200, 0, 0.7)' : (healthRatio > 0.25 ? 'rgba(255, 200, 0, 0.7)' : 'rgba(255, 0, 0, 0.7)');
+                ctx.fillRect(obstacle.x - healthBarWidth / 2, sharkY - obstacleSize - 10, healthBarWidth * healthRatio, healthBarHeight);
+                
+                // Border
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(obstacle.x - healthBarWidth / 2, sharkY - obstacleSize - 10, healthBarWidth, healthBarHeight);
+                
+                // Draw animated shark with opening/closing mouth
+                // Each shark has slightly different animation phase
+                const sharkAnimationFrame = globalAnimationFrame + index * 15;
+                drawAnimatedShark(ctx, obstacle.x, sharkY, obstacleSize, sharkRotation, sharkAnimationFrame);
+                
+                // Draw swimming tail fin motion lines (behind the shark)
+                ctx.save();
+                ctx.translate(obstacle.x, sharkY);
+                ctx.rotate(sharkRotation * Math.PI / 180);
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                const tailOffset = Math.sin(sharkAnimationFrame * 0.2) * 3;
+                ctx.beginPath();
+                ctx.moveTo(-obstacleSize * 0.8, tailOffset);
+                ctx.lineTo(-obstacleSize * 1.2, tailOffset + 5);
+                ctx.moveTo(-obstacleSize * 0.8, -tailOffset);
+                ctx.lineTo(-obstacleSize * 1.2, -tailOffset - 5);
+                ctx.stroke();
+                
+                ctx.restore();
+            });
+            
+            // Draw player (swimmer) with swimming animation
+            const swimOffset = getSwimmingOffset(globalAnimationFrame, 2);
+            const swimmerY = player.y + swimOffset;
+            
+            // Draw swimmer body
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, swimmerY, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw swimming motion lines (bubbles/ripples)
+            ctx.save();
+            ctx.translate(player.x, swimmerY);
+            const rotation = getRotation(player.direction);
+            ctx.rotate(rotation * Math.PI / 180);
+            
+            // Draw motion lines behind swimmer
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            const tailWave = Math.sin(globalAnimationFrame * 0.3) * 4;
+            ctx.beginPath();
+            ctx.moveTo(-player.size * 0.8, tailWave);
+            ctx.lineTo(-player.size * 1.3, tailWave + 6);
+            ctx.moveTo(-player.size * 0.8, -tailWave);
+            ctx.lineTo(-player.size * 1.3, -tailWave - 6);
+            ctx.stroke();
+            
+            ctx.restore();
+            
+            // Draw swimmer emoji with slight rotation
+            ctx.save();
+            ctx.translate(player.x, swimmerY);
+            ctx.rotate(rotation * Math.PI / 180);
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('🏊', 0, 0);
+            ctx.restore();
+            
+            // Draw fins on player if they have them
+            if (player.hasFins) {
+                ctx.fillStyle = '#4a90e2';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                // Draw fins on feet (behind swimmer)
+                ctx.save();
+                ctx.translate(player.x, swimmerY);
+                ctx.rotate(rotation * Math.PI / 180);
+                ctx.beginPath();
+                ctx.ellipse(0, player.size * 0.7, player.size * 0.4, player.size * 0.3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+            
+            // Draw charge indicator
+            if (player.isCharging) {
+                ctx.strokeStyle = '#ffff00';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(player.x, swimmerY, player.size + 5, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Draw splash effects (on top of everything)
+            drawSplashes(ctx);
+            
+            // Draw pause overlay
+            if (gamePaused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '36px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+            }
+        }
+        
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning || gamePaused) {
+                if (gamePaused) {
+                    requestAnimationFrame(gameLoop);
+                }
+                return;
+            }
+            
+            // Increment animation frame for swimming effect
+            globalAnimationFrame++;
+            
+            updatePlayer();
+            updateObstacles();
+            updateSplashes();
+            checkCollisions();
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Update stats display
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('lives').textContent = lives;
+            document.getElementById('level').textContent = level;
+        }
+        
+        // End game
+        function endGame() {
+            gameRunning = false;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').classList.add('show');
+        }
+        
+        // Restart game
+        function restartGame() {
+            document.getElementById('gameOver').classList.remove('show');
+            initGame();
+        }
+        
+        // Pause game
+        function pauseGame() {
+            if (gameRunning) {
+                gamePaused = !gamePaused;
+                document.getElementById('pauseBtn').textContent = gamePaused ? 'Resume' : 'Pause';
+                if (!gamePaused) {
+                    gameLoop();
+                }
+            }
+        }
+        
+        // Keyboard events
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ' || e.key === 'Space') {
+                e.preventDefault();
+                // Spacebar triggers charge if player has fins, otherwise pauses
+                if (player.hasFins && !player.isCharging && gameRunning && !gamePaused) {
+                    startCharge();
+                } else {
+                    pauseGame();
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        // Start game on load
+        window.addEventListener('load', () => {
+            initGame();
+        });
+    </script>
+</body>
+</html>
+

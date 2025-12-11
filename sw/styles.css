@@ -1,0 +1,2294 @@
+/*
+ * ========================================
+ * SWIM TRACKER APPLICATION STYLES
+ * ========================================
+ * 
+ * This stylesheet contains all styling for the Swimming Performance Tracker
+ * application, including swimmer data tables, progress graphs, and UI controls.
+ * 
+ * Sections:
+ * 1. Base Styles & Typography
+ * 2. Table Headers & Data Display
+ * 3. Layout & Structure
+ * 4. Navigation & Interactive Elements
+ * 5. Forms & Input Controls
+ * 6. Responsive Design & Utilities
+ */
+
+/* ========================================
+ * 1. BASE STYLES & TYPOGRAPHY
+ * ======================================== */
+
+/* Center alignment for headings and center class */
+h1, h2, h3, .center {
+  text-align: center;
+}
+
+/* ========================================
+ * 2. TABLE HEADERS & DATA DISPLAY
+ * ======================================== */
+
+/* Primary table header styling (.wt = "white text" header)
+ * Used for main data table headers with professional blue gradient */
+.wt {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(0, 86, 179, 0.3) !important;
+  letter-spacing: 0.3px;
+}
+
+/* Secondary table header styling (.gy = "gray" header)
+ * Used for sub-headers and secondary information rows */
+.gy {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(73, 80, 87, 0.3) !important;
+  letter-spacing: 0.2px;
+}
+
+/* Ensure header cells (especially those with rowspan) retain gradient across full height */
+.wt th, .wt th[rowspan] {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-color: #0056b3 !important;
+} 
+
+/* Force dark blue gradient background for header row */
+tr.wt, tr.wt th, tr.wt td {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  background-color: transparent !important;
+  font-weight: 800 !important;
+  font: 800 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+}
+.gy th {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+  color: #ffffff !important;
+  border-color: #495057 !important;
+}
+
+div {
+  font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+tr>* {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+/* Column hide/show animations */
+.rk, .mt, .mc {
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.rk.hide, .mt.hide, .mc.hide {
+  opacity: 0;
+  transform: scaleX(0);
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+}
+
+/* Row highlighting for selected rows */
+tr.selected-row {
+  background-color: transparent !important;
+  box-shadow: none;
+  border: none;
+}
+
+/* Highlight only data cells, excluding merged Course and Stroke cells */
+tr.selected-row td:not(.age):not(.bold) {
+  background-color: #ffffff !important;
+}
+
+/* Make the entire selected row text bold without changing colors */
+tr.selected-row td,
+tr.selected-row th {
+  font-weight: 700 !important;
+}
+
+/* Ensure motivational times and meet cuts cells are also bold when row is selected */
+tr.selected-row td.mt,
+tr.selected-row td.mc {
+  font-weight: 700 !important;
+}
+
+/* Make nested content in motivational times and meet cuts cells bold when row is selected */
+tr.selected-row td.mt div,
+tr.selected-row td.mc div,
+tr.selected-row td.mt .dp,
+tr.selected-row td.mt .ad,
+tr.selected-row td.mc .dp,
+tr.selected-row td.mc .ad {
+  font-weight: 700 !important;
+}
+
+/* Make rankings cells and their nested content bold when row is selected */
+tr.selected-row td.rk,
+tr.selected-row td.rk div,
+tr.selected-row td.rk .dp,
+tr.selected-row td.rk .ad {
+  font-weight: 700 !important;
+}
+
+/* Make best time column text more prominent */
+td[onclick="selectRow(this)"] {
+  color: #0C2340 !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease;
+}
+
+/* Professional hover state for best time column cells */
+td[onclick="selectRow(this)"]:hover {
+  background-color: rgba(0, 123, 255, 0.1) !important;
+  color: #007bff !important;
+  cursor: pointer;
+}
+
+/* Preserve font color when a row is selected (avoid changing on select) */
+tr.selected-row td[onclick="selectRow(this)"] {
+  color: #0C2340 !important;
+}
+tr.selected-row td[onclick="selectRow(this)"]:hover {
+  color: #0C2340 !important;
+}
+
+/* General table styling with professional appearance */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Table header styling with professional borders */
+th {
+    padding: 12px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    text-align: center;
+    font-size: 13px;
+}
+
+/* Table cell styling with subtle borders */
+td {
+    white-space: nowrap;
+    text-align: right;
+    padding: 10px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+td.tc {
+  padding: 5px 7px;
+}
+
+/* ========================================
+ * 3. NAVIGATION & INTERACTIVE ELEMENTS
+ * ======================================== */
+
+/* Default button styling with modern font stack */
+button {
+  border: 0;
+  padding: 10px;
+  font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* Default select dropdown styling */
+select {
+  border-radius: 5px;
+  padding: 5px;
+}
+
+/* ========================================
+ * 4. FORMS & INPUT CONTROLS
+ * ======================================== */
+
+/* BCST Roster Dropdown Styling - Match Ray Tang button appearance */
+#bcst-group-container .select-text,
+#bcst-gender-container .select-text,
+#bcst-swimmer-container .select-text,
+#bcst-group-select .select-text,
+#bcst-gender-select .select-text,
+#bcst-swimmer-select .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease;
+  color: #0C2340 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  position: relative;
+  vertical-align: middle;
+  height: 40px !important;
+  box-sizing: border-box;
+}
+
+/* Also target the span inside select-text */
+#bcst-group-container .select-text span,
+#bcst-gender-container .select-text span,
+#bcst-swimmer-container .select-text span,
+#bcst-group-select .select-text span,
+#bcst-gender-select .select-text span,
+#bcst-swimmer-select .select-text span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+/* Specific min-widths for each dropdown */
+#bcst-group-container .select-text {
+  min-width: 120px;
+}
+
+#bcst-gender-container .select-text {
+  min-width: 100px;
+}
+
+#bcst-swimmer-container .select-text {
+  min-width: 180px;
+}
+
+/* Hover effects for BCST dropdowns with blue background */
+#bcst-group-select:hover,
+#bcst-gender-select:hover,
+#bcst-swimmer-select:hover {
+  background-color: #bbdefb !important;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4) !important;
+  border-color: #0056b3 !important;
+}
+
+/* Selected state for BCST dropdowns - show blue background when value is selected */
+#bcst-group-select[data-selected="true"],
+#bcst-gender-select[data-selected="true"],
+#bcst-swimmer-select[data-selected="true"] {
+  background-color: #90caf9 !important;
+  border-color: #0056b3 !important;
+  box-shadow: 0 1px 4px rgba(0, 123, 255, 0.3) !important;
+}
+
+/* Arrow styling matching cuts age */
+#bcst-group-container .select-text .arrow,
+#bcst-gender-container .select-text .arrow,
+#bcst-swimmer-container .select-text .arrow {
+  float: right;
+  margin-left: 6px;
+  color: #6c757d;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+/* Disabled dropdowns styling */
+#bcst-gender-container select[disabled],
+#bcst-swimmer-container select[disabled] {
+  background: #f5f5f5;
+  color: #999;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: not-allowed;
+}
+
+/* Custom dropdown styling for cuts age selector
+ * Light blue gradient to match BCST dropdowns */
+.select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  display: inline-block;
+  min-width: 100px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  color: #0C2340;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.4;
+  position: relative;
+  vertical-align: middle;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+/* Container for dropdown to enable proper positioning */
+.select-text + * {
+  position: relative;
+}
+
+.select-text:hover {
+  background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%) !important;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+/* BCST Dropdown Override - Make taller and align with buttons */
+.bcst-nav-group .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease;
+  color: #0C2340 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  position: relative;
+  vertical-align: middle;
+  height: 40px !important;
+  box-sizing: border-box;
+  min-width: 120px;
+}
+
+/* BCST Dropdown text styling */
+.bcst-nav-group .select-text span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+/* Ultra-specific BCST dropdown overrides by ID */
+#bcst-group-select.select-text,
+#bcst-gender-select.select-text,
+#bcst-swimmer-select.select-text,
+div[id="bcst-group-select"] .select-text,
+div[id="bcst-gender-select"] .select-text,
+div[id="bcst-swimmer-select"] .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #0C2340 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  min-width: 120px !important;
+}
+
+#bcst-group-select span,
+#bcst-gender-select span,
+#bcst-swimmer-select span,
+div[id="bcst-group-select"] span,
+div[id="bcst-gender-select"] span,
+div[id="bcst-swimmer-select"] span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+/* Final attempt - target all select-text elements within BCST containers */
+#bcst-group-container .select-text,
+#bcst-gender-container .select-text,
+#bcst-swimmer-container .select-text,
+#bcst-group-container div.select-text,
+#bcst-gender-container div.select-text,
+#bcst-swimmer-container div.select-text,
+div[id^="bcst-"] .select-text,
+.bcst-nav-group div[class*="select"] {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #0C2340 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  min-width: 120px !important;
+}
+
+/* Target spans within BCST containers */
+#bcst-group-container .select-text span,
+#bcst-gender-container .select-text span,
+#bcst-swimmer-container .select-text span,
+#bcst-group-container span,
+#bcst-gender-container span,
+#bcst-swimmer-container span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Maximum specificity override for BCST dropdowns - Force light blue background like Ray Tang button */
+body #bcst-group-container .select-text,
+body #bcst-gender-container .select-text,
+body #bcst-swimmer-container .select-text,
+body .bcst-nav-group .select-text,
+html body #bcst-group-select,
+html body #bcst-gender-select,
+html body #bcst-swimmer-select,
+html body div[id="bcst-group-select"],
+html body div[id="bcst-gender-select"],
+html body div[id="bcst-swimmer-select"] {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background-color: #e3f2fd !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Force background on all possible BCST dropdown states */
+.select-text[id*="bcst"],
+div[class*="select"][id*="bcst"],
+*[id*="bcst-group"] .select-text,
+*[id*="bcst-gender"] .select-text,
+*[id*="bcst-swimmer"] .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background-color: #e3f2fd !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.select-text .arrow {
+  float: right;
+  margin-left: 6px;
+  color: #6c757d;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+/* Dropdown positioning to prevent layout shifts */
+.dropdown {
+  position: absolute !important;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Left align cuts age dropdown options */
+#cuts-age-select .option {
+  text-align: left;
+}
+
+/* BCST dropdowns should match cuts age dropdown styling */
+#bcst-group-select .option,
+#bcst-gender-select .option,
+#bcst-swimmer-select .option {
+  text-align: left;
+}
+
+.dropdown.hide {
+  display: none !important;
+}
+
+.dropdown .option {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdown .option:last-child {
+  border-bottom: none;
+}
+
+/* Selected swimmer option styling */
+#bcst-swimmer-select .dropdown .option.selected,
+#bcst-swimmer-select .option.selected {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Also target any selected options in BCST dropdowns */
+#bcst-swimmer-container .option.selected {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Prevent toggle button row from expanding when dropdown opens */
+.center-row {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  margin-top: 15px;
+}
+
+.center-row > * {
+  vertical-align: top;
+}
+
+/* Hide the table structure used by dropdown to prevent grey rectangle */
+table.fill.drop-layout {
+  border-collapse: collapse;
+  background: transparent !important;
+}
+
+table.fill.drop-layout td {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+table.fill.drop-layout tr:last-child td {
+  height: 0 !important;
+  overflow: visible !important;
+}
+
+/* Hover states for clickable table headers */
+th[onclick] {
+  transition: all 0.3s ease;
+}
+
+th[onclick]:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #003d82 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#input {
+  border-radius: 6px;
+  padding: 9px 12px;
+  width: 100%;
+  max-width: 180px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #0C2340;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+#input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+#input::placeholder {
+  color: #6c757d;
+  font-weight: 400;
+} 
+
+.ray-btn {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #0C2340;
+  width: 100px;
+  margin-left: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  transition: all 0.3s ease;
+} 
+
+.ray-btn.pressed {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: #ffffff;
+  border: 1px solid #0056b3;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+} 
+
+.max-btn {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #0C2340;
+  width: 100px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  transition: all 0.3s ease;
+} 
+
+.max-btn.pressed {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: #ffffff;
+  border: 1px solid #0056b3;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.search {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #0C2340;
+  width: 100px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+/* Add spacing between consecutive search buttons */
+.search + .search {
+  margin-left: 10px;
+}
+
+/* Specific hover styles for navigation buttons */
+.ray-btn:hover,
+.max-btn:hover,
+.search:hover {
+  background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%) !important;
+  color: #0C2340 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3) !important;
+} 
+
+.search-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+} 
+
+/* ========================================
+ * 6. LAYOUT & STRUCTURE
+ * ======================================== */
+
+/* Navigation group containers for visual grouping */
+.nav-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  vertical-align: middle;
+  margin: 0 10px 0 0;
+  padding: 4px 12px 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative;
+  min-height: 60px;
+  transition: all 0.3s ease;
+}
+
+/* Group labels */
+.nav-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #495057;
+  text-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  padding: 0;
+  line-height: 1;
+  display: block;
+  text-align: left;
+}
+
+/* Container for buttons within nav groups to keep them horizontal */
+.nav-group-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Ensure buttons within nav groups stay horizontal */
+.nav-group button {
+  margin: 0 2px;
+}
+
+/* My Favorites buttons group */
+.nav-group.my-favorites-group {
+  margin: 0 20px 0 10px;
+}
+
+/* BCST team navigation group */
+.bcst-nav-group {
+  margin: 0 20px 0 10px;
+}
+
+/* Search navigation group */
+.search-nav-group {
+  margin-left: 20px;
+  min-width: 550px;
+}
+
+/* Hide mobile navigation elements on desktop */
+.mobile-menu-toggle,
+.mobile-dropdown {
+  display: none !important;
+}
+
+/* Ensure mobile button is hidden on desktop - stronger rule */
+button.mobile-menu-toggle {
+  display: none !important;
+}
+
+/* Main content container with top margin for fixed navigation */
+#content {
+  margin: 80px 10px 10px 10px; /* Add top margin to account for fixed banner and spacing */
+} 
+
+/* Swimmer information header bar
+ * Displays swimmer name, age, club, etc. with professional styling
+ * Positioned close to navigation for visual grouping */
+.header {
+  margin: 20px 0 15px 0;
+  font-size: 15px;
+  border-radius: 10px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.98) 100%);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  color: #212529;
+  font-weight: 600 !important;
+  font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+} 
+
+/* Professional styling for header spans */
+.header.match-size span,
+.match-size.header span {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin: 0 6px 0 0;
+  border-radius: 6px;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  background: transparent;
+  color: #495057 !important;
+  border: none;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+}
+
+/* Make swimmer name more prominent */
+.header.match-size span:first-child,
+.match-size.header span:first-child {
+  background: rgba(0, 123, 255, 0.08);
+  color: #007bff !important;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  padding: 5px 12px;
+  margin-right: 10px;
+}
+
+/* Add subtle separators between items */
+.header.match-size span:not(:first-child)::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  background: #dee2e6;
+  margin-right: 10px;
+  vertical-align: middle;
+} 
+
+/* Top 3 BC ranking highlight styles */
+.top3-highlight {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+  border: 2px solid #f39c12 !important;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3) !important;
+} 
+
+.top3-highlight td {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+  font-weight: 700 !important;
+} 
+
+ 
+
+.hide {
+  display: none !important;
+} 
+
+.top-margin {
+  margin: 10px 0 0 0;
+} 
+
+.big,
+select.gn,
+select.bl,
+select.rd {
+  font-size: 16px;
+} 
+
+.left,
+.left * {
+  text-align: left;
+} 
+
+/* Top banner styling - contains all search elements */
+.top-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 1000;
+  padding: 8px 5px;
+} 
+
+.row {
+  white-space: nowrap;
+  margin-bottom: 20px;
+} 
+
+.top-banner .row {
+  margin-top: 3px;
+  margin-bottom: 0;
+} 
+
+.row>* {
+  margin: auto 2px;
+  display: inline-block;
+} 
+
+.container {
+  display: inline-block;
+} 
+
+.match-size {
+  display: flex;
+} 
+
+.match-size>div {
+  flex-grow: 1;
+  width: 0;
+} 
+
+.match-size span {
+  display: inline-block;
+  padding: 8px 12px;
+  text-wrap: nowrap;
+  font-weight: 300;
+  color: #495057;
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 2px;
+} 
+
+.match-size button {
+  padding: 3px 5px;
+  margin: 5px 4px;
+} 
+
+/* Subtle zebra striping for better readability */
+tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 1);
+} 
+
+tr:nth-child(even) {
+  background-color: rgba(248, 249, 250, 0.8);
+}
+
+/* Professional hover effect for table rows */
+tbody tr {
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+tbody tr:hover {
+  background-color: rgba(227, 242, 253, 0.5) !important;
+  transform: scale(1.001);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.08);
+}
+
+/* Ensure text remains readable on hover - override white text color */
+tbody tr:hover td,
+tbody tr:hover td .clickable,
+tbody tr:hover .full,
+tbody tr:hover .full .clickable {
+  color: #212529 !important;
+}
+
+/* Keep name cells readable on hover */
+tbody tr:hover td.full,
+tbody tr:hover td.full .clickable {
+  color: #0C2340 !important;
+} 
+
+tr.d25 {
+  background-color: inherit;
+} 
+
+.hd {
+  text-align: center;
+} 
+
+.hd.FR {
+  background-color: #FDD;
+} 
+
+.d25.FR {
+  background-color: #FF000035;
+} 
+
+.d50.FR {
+  background-color: #FF000030;
+} 
+
+.d100.FR {
+  background-color: #FF000028;
+} 
+
+.d200.FR {
+  background-color: #FF000020;
+} 
+
+.d400.FR,
+.d500.FR {
+  background-color: #FF000018;
+} 
+
+.d800.FR,
+.d1000.FR {
+  background-color: #FF000010;
+} 
+
+.d1500.FR,
+.d1650.FR {
+  background-color: #FF000008;
+} 
+
+.hd.BK {
+  background-color: #CEF;
+} 
+
+.d25.BK {
+  background-color: #0AF5;
+} 
+
+.d50.BK {
+  background-color: #0AF4;
+} 
+
+.d100.BK {
+  background-color: #0AF3;
+} 
+
+.d200.BK {
+  background-color: #0AF2;
+} 
+
+.hd.BR {
+  background-color: #DFD;
+} 
+
+.d25.BR {
+  background-color: #0F75;
+} 
+
+.d50.BR {
+  background-color: #0F74;
+} 
+
+.d100.BR {
+  background-color: #0F73;
+} 
+
+.d200.BR {
+  background-color: #0F72;
+} 
+
+.hd.FL {
+  background-color: #FFD;
+} 
+
+.d25.FL {
+  background-color: #FF04;
+} 
+
+.d50.FL {
+  background-color: #FF03;
+} 
+
+.d100.FL {
+  background-color: #FF02;
+} 
+
+.d200.FL {
+  background-color: #FF01;
+} 
+
+.hd.IM {
+  background-color: #BFF;
+} 
+
+.d100.IM {
+  background-color: #0FF6;
+} 
+
+.d200.IM {
+  background-color: #0FF4;
+} 
+
+.d400.IM {
+  background-color: #0FF2;
+} 
+
+.age {
+  background-color: #DDD;
+  font-weight: bold;
+  text-align: center;
+} 
+
+.bold {
+  font-weight: bold;
+} 
+
+td .dp {
+  color: #284
+} 
+
+td .ad {
+  color: #A00
+} 
+
+td>div {
+  margin: 0;
+} 
+
+.st,
+.dd,
+.ds {
+  user-select: none;
+  font-size: x-small;
+  color: #555;
+  margin: 0 0 -4px 0;
+} 
+
+.st {
+  float: left;
+  margin-right: 50px;
+} 
+
+.dd {
+  position: absolute;
+  right: 3px;
+} 
+
+.ds {
+  float: right;
+} 
+
+/* Gray shadow for unmet motivational standards in Personal Best table */
+td>.r {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  z-index: -1;
+} 
+
+td {
+  position: relative;
+} 
+
+.gn>td,
+.gn {
+  background-color: #0F72;
+} 
+
+.bl>td,
+.bl {
+  background-color: #07F2;
+} 
+
+.rd>td,
+.rd {
+  background-color: #F002;
+} 
+
+.loader {
+  border: 5px solid #BBB;
+  border-top: 5px solid #39D;
+  border-radius: 50%;
+  width: 4px;
+  height: 4px;
+  animation: spin 2s linear infinite;
+  margin: 0;
+  float: right;
+} 
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.selected {
+  background-color: #0002;
+} 
+
+/* popup */
+.bs {
+  position: relative;
+  cursor: pointer;
+} 
+
+.bs .pop {
+  visibility: hidden;
+  padding: 5px;
+  background-color: #2c3e50;
+  color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #34495e;
+  white-space: nowrap;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  top: -40px;
+  transition-property: visibility;
+  transition-delay: 0s;
+} 
+
+.bs:hover .pop {
+  visibility: visible;
+  transition-delay: 0.3s;
+} 
+
+.clickable {
+  cursor: pointer;
+} 
+
+/* clibable table cell */
+.full>.clickable {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  padding: 0 5px;
+  min-height: 30px;
+  height: 100%;
+  text-decoration: underline;
+} 
+
+.full.left>.clickable {
+  justify-content: start;
+} 
+
+canvas {
+  display: block;
+} 
+
+/* ========================================
+ * 7. TAB NAVIGATION SYSTEM
+ * ======================================== */
+
+/* Main tab view container
+ * Houses the tab navigation and content views */
+.tabview {
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+} 
+
+.tabs {
+  margin: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  user-select: none;
+  position: relative;
+  z-index: 2;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 4px;
+  padding: 6px 6px 0 6px;
+} 
+
+.tab {
+  display: inline-block;
+  padding: 0;
+  cursor: pointer;
+  margin: 0;
+  border: none;
+  border-radius: 10px 10px 0 0;
+  transition: all 0.3s ease;
+} 
+
+/* Selected tab styling - professional blue gradient */
+.tabs>.selected {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  border: 1px solid rgba(0, 86, 179, 0.4);
+  border-bottom: 2px solid #ffffff;
+  border-radius: 10px 10px 0 0;
+  z-index: 1;
+  position: relative;
+  font-weight: 700;
+  color: #ffffff !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  box-shadow: 0 -2px 8px rgba(0, 123, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  transition: all 0.3s ease;
+} 
+
+/* Ensure white color persists on hover for selected tab */
+.tabs>.selected:hover {
+  color: #ffffff !important;
+} 
+
+/* Alternative selector for selected tab color */
+.tabs .tab.selected {
+  color: #ffffff !important;
+} 
+
+/* Target p elements inside selected tabs (most tabs use <p> tags) */
+.tabs .tab.selected p {
+  color: #ffffff !important;
+} 
+
+/* Alternative selector for p elements in selected tabs */
+.tabs>.selected p {
+  color: #ffffff !important;
+} 
+
+/* Target clickable divs inside selected tabs (Progress Graph tab uses <div class="clickable">) */
+.tabs>.selected .clickable {
+  color: #ffffff !important;
+} 
+
+/* Alternative selector for clickable divs in selected tabs */
+.tabs .tab.selected .clickable {
+  color: #ffffff !important;
+} 
+
+.tab:hover:not(.selected) {
+  background-color: rgba(248, 249, 250, 0.8);
+  border: 1px solid rgba(0, 123, 255, 0.25);
+  border-bottom: 2px solid rgba(0, 123, 255, 0.3);
+  font-weight: 600;
+  color: #007bff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  transition: all 0.2s ease;
+}
+
+.tab.selected:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  border: 1px solid rgba(0, 64, 133, 0.5);
+  box-shadow: 0 -2px 10px rgba(0, 123, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.12);
+} 
+
+.tab:last-child>* {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+} 
+
+.view {
+  margin: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 20px 24px 24px 24px;
+  background-color: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+} 
+
+/* swimmer page table base */
+.content {
+  display: block;
+  margin: 0;
+  width: 100%;
+} 
+
+/* swimmer page tab title */
+.tab>* {
+  margin: 0;
+  padding: 10px 20px;
+  min-width: 120px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  color: #495057;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  background: rgba(248, 249, 250, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px 10px 0 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  letter-spacing: 0.2px;
+}
+
+/* Selected tab content styling - override default tab styling */
+.tabs>.selected>*,
+.tabs .tab.selected>* {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+} 
+
+/* graph re-size panel */
+.resize {
+  font-size: x-large;
+  width: 40px;
+  height: 40px;
+  border: #000 1px solid;
+  border-radius: 20%;
+  user-select: none;
+  position: absolute;
+  background: #AAA7;
+  padding: 0 5px;
+} 
+
+.resize-panel {
+  position: relative;
+} 
+
+/* ---- */
+#datepicker {
+  max-width: 130px;
+  padding: 4px;
+  border-radius: 5px;
+  font: 16px Verdana;
+} 
+
+.tip {
+  display: inline-block;
+  position: relative;
+  font: 12px Verdana;
+  font-style: oblique;
+  margin: 0;
+} 
+
+#graph-title {
+  margin: 10px 0 0 0;
+} 
+
+/* add search */
+.add-search {
+  float: left;
+  margin: 0 0 0 20px;
+} 
+
+.add-search>div {
+  margin: 0 5px 5px 0;
+  padding: 2px 5px;
+} 
+
+.add-search input {
+  text-align: left;
+  font-size: 16px;
+  width: 150px;
+  border-radius: 5px;
+  padding: 7px 10px;
+  margin: 0 3px;
+} 
+
+.add-search button {
+  margin: 0 3px;
+  padding: 10px;
+  width: 80px;
+  background-color: #7DF;
+} 
+
+.add-search .loading {
+  width: 200px;
+  overflow: hidden;
+} 
+
+.add-search .loader {
+  width: 15px;
+  height: 15px;
+  margin: auto;
+  float: none;
+} 
+
+#adding-list {
+  padding: 10px;
+} 
+
+#adding-list td {
+  padding: 10px 7px;
+} 
+
+/* search table */
+#search-table .th:hover {
+  background-color: #0000;
+  color: #000;
+  cursor: default;
+} 
+
+#search-table tr {
+  cursor: pointer;
+} 
+
+.select-text:hover,
+#datepicker:hover,
+#search-table tr:hover,
+/* clibable table cell - exclude from table rows to prevent white text */
+tbody tr:hover .full>.clickable,
+.full>.clickable:hover:not(tbody tr:hover .full>.clickable),
+/* Removed generic hover - now using specific hover styles */
+.match-size button:hover,
+button.big:hover,
+.add-search button:hover,
+.dropdown .option:hover,
+.resize:hover,
+#adding-list tr:hover {
+  background-color: #57E;
+  color: #FFF;
+  text-decoration: none;
+}
+
+/* Override: keep text dark in table rows on hover */
+tbody tr:hover .full>.clickable {
+  background-color: transparent !important;
+  color: #0C2340 !important;
+} 
+
+/* ========================================
+ * 5. TOGGLE SWITCHES & CHECKBOXES
+ * ======================================== */
+
+/* Modern toggle switch styling
+ * Creates iOS-style toggle switches instead of traditional checkboxes */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0 20px;
+  border-radius: 72px
+} 
+
+.checkbox-wrapper:hover,
+.xbutton:hover {
+  background: #0002;
+} 
+
+.checkbox-wrapper>* {
+  cursor: pointer;
+} 
+
+.checkbox-wrapper label {
+  margin: 0 5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-weight: 400;
+  color: #0C2340;
+  font-size: 14px;
+} 
+
+/* Toggle switch input styling
+ * Removes default checkbox appearance and creates custom toggle switch */
+.checkbox-wrapper input {
+  appearance: none; /* Remove default checkbox styling */
+  background-color: #e9ecef; /* Light gray background for "off" state */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 20px; /* Rounded pill shape */
+  flex-shrink: 0;
+  height: 22px;
+  margin: 0;
+  position: relative; /* For positioning the toggle circle */
+  width: 40px; /* Wide enough for toggle circle to slide */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease; /* Smooth animations */
+} 
+
+.checkbox-wrapper input::before {
+  bottom: -6px;
+  content: "";
+  left: -6px;
+  position: absolute;
+  right: -6px;
+  top: -6px;
+}
+
+/* Toggle switch circle (the sliding part)
+ * Creates the white circle that slides left/right */
+.checkbox-wrapper input::after {
+  background-color: #ffffff; /* White circle */
+  border-radius: 50%; /* Perfect circle */
+  content: "";
+  height: 18px;
+  left: 1px; /* Start position (left side for "off") */
+  position: absolute;
+  top: 1px;
+  transition: all 0.3s ease; /* Smooth sliding animation */
+  width: 18px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+/* Toggle switch "on" state styling */
+.checkbox-wrapper input:checked {
+  background-color: #007bff; /* Blue background when toggled on */
+  border-color: #007bff;
+}
+
+/* Move circle to right side when toggled on */
+.checkbox-wrapper input:checked::after {
+  left: 19px; /* End position (right side for "on") */
+}
+
+.checkbox-wrapper input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.checkbox-wrapper input:hover {
+  background-color: #dee2e6;
+}
+
+.checkbox-wrapper input:checked:hover {
+  background-color: #0056b3;
+}
+
+/* ========================================
+ * FINAL BCST DROPDOWN OVERRIDES
+ * ======================================== */
+
+/* Ultimate override for BCST dropdown background - Match Ray Tang button light blue */
+[id*="bcst"] .select-text,
+[id*="bcst"].select-text,
+[class*="bcst"] .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background-color: #e3f2fd !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Force on any element that might be a BCST dropdown */
+#bcst-group-select,
+#bcst-gender-select,
+#bcst-swimmer-select,
+.bcst-nav-group .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background-color: #e3f2fd !important;
+}
+
+/* ========================================
+ * AI INSIGHTS STYLING
+ * ======================================== */
+
+.ai-insights-container {
+  padding: 20px;
+  max-width: 100%;
+}
+
+.ai-insights-section {
+  margin-bottom: 30px;
+}
+
+.ai-insights-section:last-child {
+  margin-bottom: 0;
+}
+
+.ai-insights-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0C2340;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(0, 123, 255, 0.2);
+}
+
+.ai-insight-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 247, 250, 0.98) 100%);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.ai-insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+}
+
+.ai-insight-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0C2340;
+  margin-bottom: 8px;
+}
+
+.ai-insight-content {
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.6;
+}
+
+.ai-insight-content a {
+  color: #007bff;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.ai-insight-content a:hover {
+  color: #0056b3;
+}
+
+.ai-insight-strength {
+  border-left: 4px solid #28a745;
+}
+
+.ai-insight-opportunity {
+  border-left: 4px solid #ffc107;
+}
+
+.ai-insight-trend {
+  border-left: 4px solid #007bff;
+}
+
+.ai-insight-recommendation {
+  border-left: 4px solid #6f42c1;
+  background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(255, 255, 255, 0.98) 100%);
+}
+
+.ai-insights-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* ========================================
+ * AI ANALYSIS UNIFIED CARD
+ * ======================================== */
+
+.ai-analysis-main-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.98) 100%);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ai-analysis-main-card:hover {
+  box-shadow: 0 6px 24px rgba(0, 123, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.ai-analysis-header {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.ai-analysis-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-analysis-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Regenerate button in header */
+.regenerate-ai-btn-header {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.regenerate-ai-btn-header:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.regenerate-ai-btn-header:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.regenerate-ai-btn-header:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ai-analysis-icon {
+  font-size: 22px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.ai-analysis-header .ai-analysis-title,
+.ai-analysis-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0C2340 !important;
+  margin: 0;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+}
+
+.ai-analysis-header h2.ai-analysis-title {
+  color: #0C2340 !important;
+}
+
+.ai-analysis-section {
+  padding: 20px 24px;
+  margin: 0;
+  background: white;
+  transition: all 0.2s ease;
+  border-left: 4px solid;
+}
+
+.ai-analysis-section:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ai-analysis-section:hover {
+  background: rgba(248, 249, 250, 0.8);
+  padding-left: 28px;
+}
+
+.ai-analysis-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ai-analysis-section-icon {
+  font-size: 20px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.ai-analysis-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0C2340;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.ai-analysis-section-content {
+  font-size: 15px;
+  color: #495057;
+  line-height: 1.8;
+  padding-left: 30px;
+  font-weight: 400;
+}
+
+.ai-analysis-section-content .event-name {
+  font-weight: 700;
+  color: #0C2340;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0.05) 100%);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 0 2px;
+  letter-spacing: 0.3px;
+  font-size: 15px;
+}
+
+/* Strength section (green) */
+.ai-analysis-strength {
+  border-left-color: #28a745 !important;
+  background: linear-gradient(90deg, rgba(40, 167, 69, 0.05) 0%, rgba(255, 255, 255, 1) 5%);
+}
+
+.ai-analysis-strength .ai-analysis-section-title {
+  color: #28a745;
+}
+
+.ai-analysis-strength:hover {
+  background: linear-gradient(90deg, rgba(40, 167, 69, 0.08) 0%, rgba(248, 249, 250, 0.8) 5%);
+}
+
+/* Improvement section (orange) */
+.ai-analysis-improvement {
+  border-left-color: #ff9800 !important;
+  background: linear-gradient(90deg, rgba(255, 152, 0, 0.05) 0%, rgba(255, 255, 255, 1) 5%);
+}
+
+.ai-analysis-improvement .ai-analysis-section-title {
+  color: #f57c00;
+}
+
+.ai-analysis-improvement:hover {
+  background: linear-gradient(90deg, rgba(255, 152, 0, 0.08) 0%, rgba(248, 249, 250, 0.8) 5%);
+}
+
+/* Trend section (blue) */
+.ai-analysis-trend {
+  border-left-color: #2196f3 !important;
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.05) 0%, rgba(255, 255, 255, 1) 5%);
+}
+
+.ai-analysis-trend .ai-analysis-section-title {
+  color: #1976d2;
+}
+
+.ai-analysis-trend:hover {
+  background: linear-gradient(90deg, rgba(33, 150, 243, 0.08) 0%, rgba(248, 249, 250, 0.8) 5%);
+}
+
+/* Profile section (purple) */
+.ai-analysis-profile {
+  border-left-color: #667eea !important;
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(255, 255, 255, 1) 5%);
+}
+
+.ai-analysis-profile .ai-analysis-section-title {
+  color: #5568d3;
+  font-size: 19px;
+}
+
+.ai-analysis-profile:hover {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.12) 0%, rgba(248, 249, 250, 0.8) 5%);
+}
+
+/* Recruiting section (purple/magenta) */
+.ai-analysis-recruiting {
+  border-left-color: #9c27b0 !important;
+  background: linear-gradient(90deg, rgba(156, 39, 176, 0.08) 0%, rgba(255, 255, 255, 1) 5%);
+}
+
+.ai-analysis-recruiting .ai-analysis-section-title {
+  color: #7b1fa2;
+  font-size: 19px;
+}
+
+.ai-analysis-recruiting:hover {
+  background: linear-gradient(90deg, rgba(156, 39, 176, 0.12) 0%, rgba(248, 249, 250, 0.8) 5%);
+}
+
+/* Action Items section (orange/red - high priority, very prominent) */
+.ai-analysis-action-items {
+  border-left-color: #ff6b35 !important;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.08) 50%, rgba(255, 255, 255, 0.95) 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.25), 0 0 0 1px rgba(255, 107, 53, 0.1) inset !important;
+  animation: pulse-glow 3s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.25), 0 0 0 1px rgba(255, 107, 53, 0.1) inset;
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(255, 107, 53, 0.35), 0 0 0 2px rgba(255, 107, 53, 0.15) inset;
+  }
+}
+
+.ai-analysis-action-items .ai-analysis-section-title {
+  color: #e55a2b;
+  font-size: 22px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.3px;
+}
+
+.ai-analysis-action-items:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.18) 0%, rgba(255, 107, 53, 0.12) 50%, rgba(255, 255, 255, 0.95) 100%) !important;
+  box-shadow: 0 6px 25px rgba(255, 107, 53, 0.35), 0 0 0 2px rgba(255, 107, 53, 0.15) inset !important;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.ai-analysis-action-items .ai-analysis-section-content {
+  padding-left: 0;
+}
+
+.ai-analysis-action-items .ai-analysis-section-icon {
+  font-size: 28px !important;
+  filter: drop-shadow(0 2px 4px rgba(255, 107, 53, 0.3));
+  animation: arrow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes arrow-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+/* Action item list items hover effect */
+.ai-analysis-action-items li {
+  transition: all 0.2s ease;
+}
+
+.ai-analysis-action-items li:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25) !important;
+  border-left-width: 6px !important;
+}
+
+/* ========================================
+ * AI REGENERATING INDICATOR ANIMATIONS
+ * ======================================== */
+
+.ai-regenerating-indicator {
+  background: rgba(0, 123, 255, 0.1);
+  border-left: 3px solid #007bff;
+  padding: 12px 18px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #007bff;
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Inline regenerating indicator in header */
+.ai-regenerating-indicator-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #007bff;
+  font-weight: 500;
+  padding: 4px 12px;
+  background: rgba(0, 123, 255, 0.08);
+  border-radius: 4px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.ai-regenerating-indicator-inline .regenerating-icon {
+  display: inline-block;
+  animation: rotate 2s linear infinite;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ai-regenerating-indicator strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.regenerating-icon {
+  display: inline-block;
+  animation: rotate 2s linear infinite;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.regenerating-subtext {
+  font-size: 12px;
+  color: #666;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    background: rgba(0, 123, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+  }
+  50% {
+    background: rgba(0, 123, 255, 0.15);
+    box-shadow: 0 2px 12px rgba(0, 123, 255, 0.25);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+ * MOBILE RESPONSIVE DESIGN
+ * ======================================== */
+
+/* Mobile and tablet devices */
+@media only screen and (max-width: 768px) {
+
+  /* Prevent horizontal scroll on mobile - but allow table scrolling */
+  body {
+    max-width: 100vw;
+  }
+
+  /* Mobile navigation layout */
+  .top-banner {
+    overflow-x: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+  }
+
+  .top-banner .row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 10px;
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    gap: 20px;
+    overflow-x: hidden;
+  }
+
+  /* Hide BCST and Search groups on mobile by default */
+  .bcst-nav-group,
+  .search-nav-group {
+    display: none;
+  }
+
+  /* Show only My Favorites group */
+  .my-favorites-group {
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    max-width: calc(100vw - 120px);
+    overflow: hidden;
+  }
+
+  /* Mobile hamburger/collapse button */
+  .mobile-menu-toggle,
+  button.mobile-menu-toggle {
+    display: inline-block !important;
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .mobile-menu-toggle:hover {
+    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    transform: translateY(-1px);
+  }
+
+  /* Mobile dropdown menu */
+  .mobile-dropdown {
+    display: none;
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    width: 280px;
+    max-width: calc(100vw - 20px);
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 1001;
+    padding: 15px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .mobile-dropdown.show {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* Mobile dropdown sections */
+  .mobile-dropdown-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .mobile-dropdown-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .mobile-dropdown-section .nav-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #495057;
+    text-shadow: none;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  /* Mobile BCST dropdowns in dropdown menu */
+  .mobile-dropdown .bcst-nav-group {
+    display: block;
+  }
+
+  .mobile-dropdown .bcst-nav-group .select-text {
+    margin-bottom: 8px;
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Mobile search section */
+  .mobile-dropdown .search-nav-group {
+    display: block;
+  }
+
+  .mobile-dropdown .search-nav-group input {
+    width: 100%;
+    max-width: 220px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-left: -10px;
+  }
+
+  .mobile-dropdown .search-nav-group button {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    display: block;
+  }
+
+  .mobile-dropdown .search-nav-group button:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Ensure content starts below fixed navigation */
+  .container {
+    margin-top: 80px;
+  }
+
+  /* Allow tables to scroll horizontally on mobile */
+  table {
+    display: table;
+    width: 100%;
+    min-width: max-content;
+  }
+
+  /* Wrap tables in scrollable containers */
+  .view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabview {
+    overflow-x: visible;
+  }
+
+  /* Ensure table cells don't wrap */
+  td, th {
+    white-space: nowrap;
+  }
+}
+
+/* Extra small mobile devices */
+@media only screen and (max-width: 480px) {
+
+  /* Further reduce navigation group spacing */
+  .nav-group {
+    margin: 0 6px 0 0;
+    padding: 4px 8px;
+  }
+
+  /* Smaller buttons for very small screens */
+  .nav-group button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  /* Adjust search group for small screens */
+  .search-nav-group {
+    min-width: 390px;
+    margin-left: 10px;
+  }
+
+  .search-nav-group input {
+    width: 120px;
+  }
+
+  /* Smaller BCST dropdowns */
+  .bcst-nav-group .select-text {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .bcst-nav-group .select-text .arrow {
+    font-size: 8px !important;
+  }
+}
+

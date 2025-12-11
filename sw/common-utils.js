@@ -1,234 +1,351 @@
+/**
+ * ================================================================================
+ * SWIM TRACKER - CORE MODULE
+ * ================================================================================
+ * 
+ * Core constants, utilities, and helper functions used throughout the application.
+ * This module provides the foundation for all other modules.
+ */
+
+// ================================================================================
+// SHARED CONSTANTS
+// ================================================================================
+
 const _courseOrder = ["SCY", "LCM", "SCM"];
 const _strokeOrder = ["FR", "BK", "BR", "FL", "IM"];
 const _storkeMap = {
-FR: "Free",
-BK: "Back",
-BR: "Breast",
-FL: "Fly",
-IM: "IM",
+    FR: "Free",
+    BK: "Back",
+    BR: "Breast",
+    FL: "Fly",
+    IM: "IM",
 };
 const _meetShortNames = {
-"Futures (LCM)": "FU",
-"Winter Juniors (SCY)": "WJ",
-"Summer Juniors (LCM)": "SJ",
-"Winter US Open (SCY)": "WO",
-"Winter US Open (LCM)": "WO",
-"Summer US Open": "SO",
-"Winter Nationals (LCM)": "WN",
-"Summer Nationals (LCM)": "SN",
-"Olympic Trials": "OT",
-"Olympic Trials Wave I": "OT1",
-"Olympic Trials Wave II": "OT2",
+    "Futures (LCM)": "FU",
+    "Winter Juniors (SCY)": "WJ",
+    "Summer Juniors (LCM)": "SJ",
+    "Winter US Open (SCY)": "WO",
+    "Winter US Open (LCM)": "WO",
+    "Summer US Open": "SO",
+    "Winter Nationals (LCM)": "WN",
+    "Summer Nationals (LCM)": "SN",
+    "Olympic Trials": "OT",
+    "Olympic Trials Wave I": "OT1",
+    "Olympic Trials Wave II": "OT2",
 };
+
+/** Time constants for date calculations */
 const _1DayInSec = 24 * 60 * 60;
 const _1WeekInSec = 7 * _1DayInSec;
 const _10YearsInSec = 10 * 365 * _1DayInSec;
 const _1DayInMilliSeconds = _1DayInSec * 1000;
+
+/**
+ * Swimming Event List - Maps event indices to swimming events
+ * Format: 'Distance Stroke Course' (e.g., '100 FR SCY' = 100 Freestyle Short Course Yards)
+ *
+ * Strokes: FR=Freestyle, BK=Backstroke, BR=Breaststroke, FL=Butterfly, IM=Individual Medley
+ * Courses: SCY=Short Course Yards, SCM=Short Course Meters, LCM=Long Course Meters
+ * Distances: Various (25, 50, 100, 200, 400, 500, 800, 1000, 1500, 1650)
+ *
+ * Index 0 is reserved, actual events start at index 1
+ * '_ _ _' entries are placeholders for unused indices
+ */
 const _eventList = [
-"0 _ _",
-"50 FR SCY",
-"100 FR SCY",
-"200 FR SCY",
-"500 FR SCY",
-"1000 FR SCY",
-"1650 FR SCY",
-"_ _ _",
-"_ _ _",
-"_ _ _",
-"_ _ _",
-"50 BK SCY",
-"100 BK SCY",
-"200 BK SCY",
-"50 BR SCY",
-"100 BR SCY",
-"200 BR SCY",
-"50 FL SCY",
-"100 FL SCY",
-"200 FL SCY",
-"100 IM SCY",
-"200 IM SCY",
-"400 IM SCY",
-"23 _ _",
-"24 _ _",
-"25 _ _",
-"26 _ _",
-"27 _ _",
-"50 FR SCM",
-"100 FR SCM",
-"200 FR SCM",
-"400 FR SCM",
-"800 FR SCM",
-"1500 FR SCM",
-"34 _ _",
-"35 _ _",
-"36 _ _",
-"37 _ _",
-"50 BK SCM",
-"100 BK SCM",
-"200 BK SCM",
-"50 BR SCM",
-"100 BR SCM",
-"200 BR SCM",
-"50 FL SCM",
-"100 FL SCM",
-"200 FL SCM",
-"100 IM SCM",
-"200 IM SCM",
-"400 IM SCM",
-"50 _ _",
-"51 _ _",
-"52 _ _",
-"53 _ _",
-"54 _ _",
-"50 FR LCM",
-"100 FR LCM",
-"200 FR LCM",
-"400 FR LCM",
-"800 FR LCM",
-"1500 FR LCM",
-"61 _ _",
-"62 _ _",
-"63 _ _",
-"64 _ _",
-"50 BK LCM",
-"100 BK LCM",
-"200 BK LCM",
-"50 BR LCM",
-"100 BR LCM",
-"200 BR LCM",
-"50 FL LCM",
-"100 FL LCM",
-"200 FL LCM",
-"200 IM LCM",
-"400 IM LCM",
-"76 _ _",
-"77 _ _",
-"78 _ _",
-"79 _ _",
-"80 _ _",
-"25 FR SCY",
-"25 BK SCY",
-"25 BR SCY",
-"25 FL SCY",
-"25 FR SCM",
-"25 BK SCM",
-"25 BR SCM",
-"25 FL SCM",
-"89 _ _",
-"90 _ _",
-"91 _ _",
+    "0 _ _",
+    "50 FR SCY",
+    "100 FR SCY",
+    "200 FR SCY",
+    "500 FR SCY",
+    "1000 FR SCY",
+    "1650 FR SCY",
+    "_ _ _",
+    "_ _ _",
+    "_ _ _",
+    "_ _ _",
+    "50 BK SCY",
+    "100 BK SCY",
+    "200 BK SCY",
+    "50 BR SCY",
+    "100 BR SCY",
+    "200 BR SCY",
+    "50 FL SCY",
+    "100 FL SCY",
+    "200 FL SCY",
+    "100 IM SCY",
+    "200 IM SCY",
+    "400 IM SCY",
+    "23 _ _",
+    "24 _ _",
+    "25 _ _",
+    "26 _ _",
+    "27 _ _",
+    "50 FR SCM",
+    "100 FR SCM",
+    "200 FR SCM",
+    "400 FR SCM",
+    "800 FR SCM",
+    "1500 FR SCM",
+    "34 _ _",
+    "35 _ _",
+    "36 _ _",
+    "37 _ _",
+    "50 BK SCM",
+    "100 BK SCM",
+    "200 BK SCM",
+    "50 BR SCM",
+    "100 BR SCM",
+    "200 BR SCM",
+    "50 FL SCM",
+    "100 FL SCM",
+    "200 FL SCM",
+    "100 IM SCM",
+    "200 IM SCM",
+    "400 IM SCM",
+    "50 _ _",
+    "51 _ _",
+    "52 _ _",
+    "53 _ _",
+    "54 _ _",
+    "50 FR LCM",
+    "100 FR LCM",
+    "200 FR LCM",
+    "400 FR LCM",
+    "800 FR LCM",
+    "1500 FR LCM",
+    "61 _ _",
+    "62 _ _",
+    "63 _ _",
+    "64 _ _",
+    "50 BK LCM",
+    "100 BK LCM",
+    "200 BK LCM",
+    "50 BR LCM",
+    "100 BR LCM",
+    "200 BR LCM",
+    "50 FL LCM",
+    "100 FL LCM",
+    "200 FL LCM",
+    "200 IM LCM",
+    "400 IM LCM",
+    "76 _ _",
+    "77 _ _",
+    "78 _ _",
+    "79 _ _",
+    "80 _ _",
+    "25 FR SCY",
+    "25 BK SCY",
+    "25 BR SCY",
+    "25 FL SCY",
+    "25 FR SCM",
+    "25 BK SCM",
+    "25 BR SCM",
+    "25 FL SCM",
+    "89 _ _",
+    "90 _ _",
+    "91 _ _",
 ];
+
+/**
+ * Event Index Map - Reverse lookup from event string to index
+ * Allows quick lookup of event index given an event string like "100 FR SCY"
+ */
 const _eventIndexMap = new Map();
 _eventList.forEach((item, index) => {
-_eventIndexMap.set(item, index);
+    _eventIndexMap.set(item, index);
 });
+
+// ================================================================================
+// UTILITY FUNCTIONS
+// ================================================================================
+
+/**
+ * Extracts the course (SCY/SCM/LCM) from an event index
+ * @param {number} event - Event index from _eventList
+ * @returns {string} Course code (SCY, SCM, or LCM)
+ */
 function getEventCourse(event) {
-return _eventList[event].split(" ")[2];
+    return _eventList[event].split(" ")[2];
 }
+
+/**
+ * Updates the main content area with new HTML
+ * @param {string} html - HTML string to display
+ */
 function updateContent(html) {
-document.getElementById("content").innerHTML = html;
+    document.getElementById("content").innerHTML = html;
 }
+
+/** Returns the smaller of two values */
 function min(a, b) {
-return a < b ? a : b;
+    return a < b ? a : b;
 }
+
+/** Returns the larger of two values */
 function max(a, b) {
-return a > b ? a : b;
+    return a > b ? a : b;
 }
+
+/**
+ * Formats a date string into MM/DD/YY format
+ * @param {string} date - ISO date string (YYYY-MM-DD)
+ * @returns {string} Formatted date (MM/DD/YY)
+ */
 function formatDate(date) {
-return (
-date.substring(5, 7) +
-"/" +
-date.substring(8, 10) +
-"/" +
-date.substring(2, 4)
-);
+    return (
+        date.substring(5, 7) +
+        "/" +
+        date.substring(8, 10) +
+        "/" +
+        date.substring(2, 4)
+    );
 }
+
+/**
+ * Formats swimming standard text for display
+ * @param {string} standard - Standard text (e.g., "A", "AA", "AAA", "Slower than B")
+ * @param {boolean} short - Whether to return abbreviated version
+ * @returns {string} Formatted standard text
+ */
 function formatStandard(standard, short) {
-if (standard == '"Slower than B"') {
-return "";
+    if (standard == '"Slower than B"') {
+        return "";
+    }
+
+    if (standard.startsWith('"')) {
+        return standard.substring(1, standard.length - 1);
+    }
+
+    if (short) {
+        let parts = standard.split(" ");
+        if (parseInt(parts[0]) > 1900) {
+            parts.shift();
+        }
+        standard = parts.join(" ");
+        if (_meetShortNames[standard]) {
+            standard = _meetShortNames[standard];
+        }
+    }
+
+    return standard;
 }
-if (standard.startsWith('"')) {
-return standard.substring(1, standard.length - 1);
-}
-if (short) {
-let parts = standard.split(" ");
-if (parseInt(parts[0]) > 1900) {
-parts.shift();
-}
-standard = parts.join(" ");
-if (_meetShortNames[standard]) {
-standard = _meetShortNames[standard];
-}
-}
-return standard;
-}
+
 function formatDelta(delta) {
-if (delta === null) {
-return "";
+    if (delta === null) {
+        return "";
+    }
+    delta /= 100;
+    return (delta > 0 ? "+" : "") + (delta != null ? delta.toFixed(2) : "");
 }
-delta /= 100;
-return (delta > 0 ? "+" : "") + (delta != null ? delta.toFixed(2) : "");
-}
+
 function getAgeKey(age) {
-age = Math.floor((age + 1) / 2) * 2;
-return age <= 10 ? "10U" : age > 18 ? "19O" : age - 1 + "-" + age;
+    age = Math.floor((age + 1) / 2) * 2;
+    return age <= 10 ? "10U" : age > 18 ? "19O" : age - 1 + "-" + age;
 }
+
+/**
+ * Converts numeric gender code to readable string
+ * @param {number} gender - 1 for Female, 2 for Male (Note: array index mapping)
+ * @returns {string} "Male", "Female", or "Male" as fallback
+ */
 function convertGenderCodeToString(gender) {
-let result = ["", "Female", "Male"][gender];
-if (!result) {
-result = "Male";
+    let result = ["", "Female", "Male"][gender];
+    if (!result) {
+        // Fallback: assume Male if we can't determine gender
+        result = "Male";
+    }
+    return result;
 }
-return result;
-}
+
 function convertToGenderCode(genderStr) {
-return genderStr == "Male" ? 2 : 1;
+    return genderStr == "Male" ? 2 : 1;
 }
+
+/**
+ * Converts swim time string to integer for calculations
+ * @param {string} stime - Time string (e.g., "1:23.45" or "23.45")
+ * @returns {number} Time in hundredths of seconds
+ */
 function timeToInt(stime) {
-let result = 0;
-if (stime) {
-let parts = stime.split(":");
-if (parts.length == 2) {
-result = parseInt(parts[0]) * 6000;
-parts[0] = parts[1];
+    let result = 0;
+    if (stime) {
+        let parts = stime.split(":");
+        if (parts.length == 2) {
+            result = parseInt(parts[0]) * 6000;
+            parts[0] = parts[1];
+        }
+        parts = parts[0].split(".");
+        result += parseInt(parts[0]) * 100 + parseInt(parts[1]);
+    }
+    return result;
 }
-parts = parts[0].split(".");
-result += parseInt(parts[0]) * 100 + parseInt(parts[1]);
-}
-return result;
-}
+
+/**
+ * Formats time integer back to readable string
+ * @param {number} time - Time in hundredths of seconds
+ * @returns {string} Formatted time string
+ */
 function formatTime(time) {
-let min = Math.floor(time / 6000);
-let sec = time % 6000;
-let minStr = min ? min + ":" : "";
-let secStr = (sec / 100).toFixed(2).padStart(5, "0");
-return minStr + secStr;
+    let min = Math.floor(time / 6000);
+    let sec = time % 6000;
+    let minStr = min ? min + ":" : "";
+    let secStr = (sec / 100).toFixed(2).padStart(5, "0");
+    return minStr + secStr;
 }
+
+/**
+ * Gets event sort key for ordering events
+ * @param {number} event - Event index
+ * @returns {number} Sort key for ordering
+ */
 function getEventSortKey(event) {
-let [dist, stroke, course] = _eventList[event].split(" ");
-return (
-_courseOrder.indexOf(course) * 100_000 +
-_strokeOrder.indexOf(stroke) * 10_000 +
-Number(dist)
-);
+    let [dist, stroke, course] = _eventList[event].split(" ");
+    return (
+        _courseOrder.indexOf(course) * 100_000 +
+        _strokeOrder.indexOf(stroke) * 10_000 +
+        Number(dist)
+    );
 }
+
+/**
+ * Gets a short display code for club names in rankings
+ * @param {string} club - Club code or full club name
+ * @param {string} clubName - Full club name
+ * @returns {string} Short club code for display
+ */
 function getClubDisplayCode(club, clubName) {
-if (club && club.length <= 4 && club !== clubName) {
-return club;
+    // If club is already a short code (typically 2-4 characters), use it
+    if (club && club.length <= 4 && club !== clubName) {
+        return club;
+    }
+    
+    // If club is the full name or not available, derive a code from clubName
+    if (clubName) {
+        // Handle specific known clubs
+        if (clubName.includes("Bellevue Club")) return "BC";
+        if (clubName.includes("Aquatic Club")) return "AC";
+        if (clubName.includes("Swimming")) {
+            // Extract initials from club name (e.g., "Pacific Northwest Swimming" -> "PNS")
+            let words = clubName.split(" ").filter(word => word.length > 2);
+            return words.map(word => word[0]).join("").toUpperCase().substring(0, 4);
+        }
+        
+        // Default: take first 2-3 characters of the first word
+        let firstWord = clubName.split(" ")[0];
+        return firstWord.substring(0, Math.min(3, firstWord.length)).toUpperCase();
+    }
+    
+    // Fallback
+    return club || "CLUB";
 }
-if (clubName) {
-if (clubName.includes("Bellevue Club")) return "BC";
-if (clubName.includes("Aquatic Club")) return "AC";
-if (clubName.includes("Swimming")) {
-let words = clubName.split(" ").filter(word => word.length > 2);
-return words.map(word => word[0]).join("").toUpperCase().substring(0, 4);
-}
-let firstWord = clubName.split(" ")[0];
-return firstWord.substring(0, Math.min(3, firstWord.length)).toUpperCase();
-}
-return club || "CLUB";
-}
+
+// ================================================================================
+// MEET STANDARDS DATA
+// ================================================================================
+
+// Meet standards data processing - this creates the getMeetStandards function
 (function () {
-let data = `
+    let data = `
 # 2024-10-01
 meet: SILVER: PNS 2024-2025 SILVER TIME
 5-10 SCM	LCM	SCY
@@ -301,6 +418,7 @@ meet: SILVER: PNS 2024-2025 SILVER TIME
 1:21.19	X	1:15.09	100	IM	1:07.89	X	1:14.49
 2:51.59	2:54.79	2:33.69	200	IM	2:19.29	2:36.39	2:33.19
 6:38.29	6:44.69	5:54.99	400	IM	5:22.19	6:14.69	6:08.29
+
 # 2024-10-01
 meet: GOLD: PNS 2024-2025 GOLD TIME
 5-10 SCM	LCM	SCY
@@ -373,6 +491,7 @@ meet: GOLD: PNS 2024-2025 GOLD TIME
 1:15.59	X	1:09.09	100	IM	1:02.69	X	1:09.39
 2:39.79	2:49.99	2:20.99	200	IM	2:07.19	2:30.79	2:21.89
 6:09.39	6:15.79	5:29.69	400	IM	4:59.19	5:47.99	5:41.59
+
 # 2025-09-20
 meet: PNS_14u : 2025 PNS 14u Championships Time Standards
 9-10  SCM	LCM	SCY
@@ -423,6 +542,7 @@ meet: PNS_14u : 2025 PNS 14u Championships Time Standards
 3:09.29 3:12.09 2:37.49 200 Fly         2:25.29 2:46.79 2:45.79
 2:41.69 2:47.59 2:22.59 200 IM          2:15.69 2:36.09 2:31.79
 5:58.19 6:07.59 5:14.29 400 IM          5:54.39 5:34.09 5:33.59
+
 # 2025-9-20
 meet: PNS_sc : 2025 WA State Senior Championships
 15-18 SCM LCM SCY
@@ -443,6 +563,7 @@ meet: PNS_sc : 2025 WA State Senior Championships
 2:51.99 2:54.39 2:31.09     200 Fly         2:10.69 2:31.69 2:29.59
 2:39.99 2:40.59 2:18.89     200 IM          2:04.59 2:23.89 2:22.39
 5:40.49 5:46.89 5:10.29     400 IM          4:40.09 5:19.19 5:27.89
+
 # MARCH 21-24, 2024 (01/15/24)
 meet: NWReg : 2024 Northwest Age Group Regionals (3/21/2024)
 SCY 15-18 14 13 12 11 6-10
@@ -498,6 +619,7 @@ SCM
 1:14.69 1:19.89 1:25.09 100 IM 1:26.69 1:21.39 1:13.69
 2:35.09 2:32.69 2:38.19 2:43.99 2:56.19 3:08.09 200 IM 3:11.59 2:57.89 2:39.99 2:29.59 2:22.09 2:21.49
 5:38.19 5:31.89 5:39.59 6:04.89 6:04.89 400 IM 5:50.29 5:50.29 5:22.39 5:08.19 5:13.49
+
 meet: WZone : 2024 Western Zone Age Group Championships (8/5/2024)
 6-10 SCY SCM LCM
 28.89	31.89	32.79	50	FR	32.79	31.59	28.59
@@ -541,6 +663,7 @@ meet: WZone : 2024 Western Zone Age Group Championships (8/5/2024)
 2:12.79	2:27.69	2:31.69	200	FL	2:22.19	2:17.49	2:04.29
 2:13.39	2:28.89	2:33.89	200	IM	2:25.09	2:18.89	2:05.69
 4:45.69	5:17.59	5:26.49	400	IM	5:08.59	4:56.79	4:28.29
+
 meet: SprSec : 2024 Spring Speedo Sectional (3/14/2024)
 11-18 SCY SCM LCM
 24.99 27.76 28.44 50 FR 25.79 24.72 22.41
@@ -557,6 +680,7 @@ meet: SprSec : 2024 Spring Speedo Sectional (3/14/2024)
 2:12.26 2:26.43 2:32.74 200 FL 2:20.25 2:14.37 2:00.94
 2:11.81 2:25.85 2:32.19 200 IM 2:19.28 2:12.30 1:59.85
 4:39.34 5:07.75 5:21.68 400 IM 5:00.19 4:45.76 4:18.37
+
 meet: SumSec : 2024 Summer Speedo Sectional (7/13/2024)
 11-18 SCY SCM LCM
 24.55 27.30 28.14 50 FR 25.49 24.35 22.05
@@ -573,6 +697,7 @@ meet: SumSec : 2024 Summer Speedo Sectional (7/13/2024)
 2:10.19 2:24.26 2:31.16 200 FL 2:19.05 2:11.94 1:58.81
 2:09.73 2:23.08 2:30.51 200 IM 2:17.70 2:10.12 1:57.77
 4:36.50 5:04.87 5:18.84 400 IM 4:57.79 4:40.45 4:13.34
+
 meet: Futures : 2025 Futures Championships (7/23/2025)
 11-18 SCY LCM
 23.89	27.39	50 FR	24.59	21.29
@@ -610,6 +735,7 @@ x	4:33.79	4x100 MED-R	4:05.89	x
 X	4:04.29	4x100 FR-R	3:40.89	X
 X	8:40.89	4x200 FR-R	8:00.49	X
 X	4:33.79	4x100 MED-R	4:05.89	X
+
 meet: Winter : 2024 Speedo Winter Junior Championships (12/11/2024)
 11-18 SCY LCM
 23.29 26.89 50 FR 24.09 20.59
@@ -626,6 +752,7 @@ meet: Winter : 2024 Speedo Winter Junior Championships (12/11/2024)
 2:01.69 2:18.39 200 FL 2:06.39 1:49.29
 2:02.19 2:22.09 200 IM 2:09.49 1:49.79
 4:21.69 5:00.29 400 IM 4:35.89 3:56.99
+
 meet: Junior : 2025 Speedo Junior National Championships (7/30/2025)
 11-18 SCY LCM
 22.99    26.59       50 FR       23.19     20.39
@@ -642,6 +769,7 @@ meet: Junior : 2025 Speedo Junior National Championships (7/30/2025)
 2:00.59  2:18.39     200 FL      2:05.09   1:47.89
 2:01.19  2:21.29     200 IM      2:07.99   1:48.79
 4:18.99  5:00.29     400 IM      4:33.09   3:52.69
+
 meet: PRO : 2025 TYR Pro Championships (8/5/2025)
 13-99 SCY LCM
 22.49     25.89       50 FR       22.89      19.59
@@ -661,6 +789,7 @@ meet: PRO : 2025 TYR Pro Championships (8/5/2025)
 3:25.49   3:55.69    4x100 FR-R   3:33.59    3:03.99
 7:28.29   8:29.99    4x200 FR-R   7:47.69    6:45.49
 3:45.59   4:21.49   4x100 MED-R   3:56.29    3:21.39
+
 meet: National : 2025 USA Swimming National Championships (6/3/2025)
 13-99 SCY LCM
 22.19    25.69       50 FR     22.69    19.39
@@ -677,6 +806,7 @@ meet: National : 2025 USA Swimming National Championships (6/3/2025)
 1:56.09  2:14.59     200 FL    2:00.89  1:43.39
 1:57.09  2:16.89     200 IM    2:02.89  1:43.89
 4:11.39  4:51.79     400 IM     4:24.69  3:45.49
+
 meet: OT : 2024 U.S. Olympic Team Trials (6/21/2024)
 13-99 LCM
 25.69 50 FR 22.79
@@ -693,137 +823,153 @@ meet: OT : 2024 U.S. Olympic Team Trials (6/21/2024)
 2:13.69 200 FL 2:00.49
 2:16.09 200 IM 2:03.49
 4:49.89 400 IM 4:25.19
+
 # onlineocr.net
 `;
-let a10Uexclude = new Set([
-"800 FR",
-"1000 FR",
-"1500 FR",
-"1650 FR",
-"200 BK",
-"200 BR",
-"200 FL",
-"400 IM",
-]);
-let a13Oexclude = new Set(["50 BK", "50 BR", "50 FL", "100 IM"]);
-const times = [];
-let rows = data.split("\n");
-let courseKey;
-let currentMeet;
-let currentMeetList = [];
-for (let row of rows) {
-if (row.startsWith("#") || row.trim() === "") {
-continue;
-}
-if (row.startsWith("meet:")) {
-let [_, short, full] = row.split(":");
-currentMeet = {
-meet: full.trim(),
-short: short.trim(),
-Female: new Map(),
-Male: new Map(),
-};
-times.push(currentMeet);
-continue;
-}
-let parts = row
-.replace(/free/gi, "FR")
-.replace(/back/gi, "BK")
-.replace(/breast/gi, "BR")
-.replace(/fly/gi, "FL")
-.replace(/fr/gi, "FR")
-.replace(/bk/gi, "BK")
-.replace(/br/gi, "BR")
-.replace(/fl/gi, "FL")
-.replace(/400\/500/gi, "400")
-.replace(/800\/1000/gi, "800")
-.replace(/1500\/1650/gi, "1500")
-.replace(/\s+/gi, " ")
-.trim()
-.split(" ");
-if (parts[0].indexOf("-") > 0) {
-if (currentMeet.age) {
-currentMeet = {
-meet: currentMeet.meet,
-short: currentMeet.short,
-Female: new Map(),
-Male: new Map(),
-};
-times.push(currentMeet);
-}
-currentMeet.age = parts
-.shift()
-.split("-")
-.map((x) => Number(x));
-courseKey = parts.length > 0 ? parts : courseKey;
-continue;
-}
-if (_courseOrder.includes(parts[0])) {
-courseKey = parts.shift();
-if (currentMeet) {
-times.pop();
-currentMeetList = parts.map((x) => ({
-meet: currentMeet.meet,
-short: currentMeet.short,
-age:
-x.indexOf("-") > 0
-? x.split("-").map((x) => Number(x))
-: [Number(x), Number(x)],
-Female: new Map(),
-Male: new Map(),
-}));
-times.push(...currentMeetList);
-currentMeet = null;
-}
-continue;
-}
-let event = parts.splice(parts.length / 2 - 1, 2).join(" ");
-let len = parts.length - 1;
-if (currentMeet) {
-for (let [i, course] of courseKey.entries()) {
-if (parseInt(parts[i])) {
-let key = fixDistance(event + " " + courseKey[i]);
-currentMeet.Female.set(key, [
-parts[i],
-timeToInt(parts[i]),
-]);
-currentMeet.Male.set(key, [
-parts[len - i],
-timeToInt(parts[len - i]),
-]);
-}
-}
-} else {
-let key = event + " " + courseKey;
-let i = 0;
-for (let meet of currentMeetList) {
-if (
-row.indexOf("-") < 0 &&
-((meet.age[1] <= 10 && a10Uexclude.has(event)) ||
-(meet.age[0] >= 13 && a13Oexclude.has(event)))
-) {
-continue;
-}
-if (parseInt(parts[i])) {
-meet.Female.set(key, [parts[i], timeToInt(parts[i])]);
-meet.Male.set(key, [
-parts[len - i],
-timeToInt(parts[len - i]),
-]);
-}
-++i;
-}
-}
-}
-window.getMeetStandards = function (age) {
-return times.filter((x) => x.age[0] <= age && age <= x.age[1]);
-};
+    let a10Uexclude = new Set([
+        "800 FR",
+        "1000 FR",
+        "1500 FR",
+        "1650 FR",
+        "200 BK",
+        "200 BR",
+        "200 FL",
+        "400 IM",
+    ]);
+    let a13Oexclude = new Set(["50 BK", "50 BR", "50 FL", "100 IM"]);
+    const times = [];
+
+    let rows = data.split("\n");
+    let courseKey;
+    let currentMeet;
+    let currentMeetList = [];
+    for (let row of rows) {
+        if (row.startsWith("#") || row.trim() === "") {
+            continue;
+        }
+        if (row.startsWith("meet:")) {
+            let [_, short, full] = row.split(":");
+            currentMeet = {
+                meet: full.trim(),
+                short: short.trim(),
+                Female: new Map(),
+                Male: new Map(),
+            };
+            times.push(currentMeet);
+            continue;
+        }
+        let parts = row
+            .replace(/free/gi, "FR")
+            .replace(/back/gi, "BK")
+            .replace(/breast/gi, "BR")
+            .replace(/fly/gi, "FL")
+            .replace(/fr/gi, "FR")
+            .replace(/bk/gi, "BK")
+            .replace(/br/gi, "BR")
+            .replace(/fl/gi, "FL")
+            .replace(/400\/500/gi, "400")
+            .replace(/800\/1000/gi, "800")
+            .replace(/1500\/1650/gi, "1500")
+            .replace(/\s+/gi, " ")
+            .trim()
+            .split(" ");
+
+        // 1 age - multi course
+        if (parts[0].indexOf("-") > 0) {
+            if (currentMeet.age) {
+                currentMeet = {
+                    meet: currentMeet.meet,
+                    short: currentMeet.short,
+                    Female: new Map(),
+                    Male: new Map(),
+                };
+                times.push(currentMeet);
+            }
+            currentMeet.age = parts
+                .shift()
+                .split("-")
+                .map((x) => Number(x));
+            courseKey = parts.length > 0 ? parts : courseKey;
+            continue;
+        }
+
+        // 1 course - multi age
+        if (_courseOrder.includes(parts[0])) {
+            courseKey = parts.shift();
+            if (currentMeet) {
+                times.pop();
+                currentMeetList = parts.map((x) => ({
+                    meet: currentMeet.meet,
+                    short: currentMeet.short,
+                    age:
+                        x.indexOf("-") > 0
+                            ? x.split("-").map((x) => Number(x))
+                            : [Number(x), Number(x)],
+                    Female: new Map(),
+                    Male: new Map(),
+                }));
+
+                times.push(...currentMeetList);
+                currentMeet = null;
+            }
+            continue;
+        }
+
+        let event = parts.splice(parts.length / 2 - 1, 2).join(" ");
+        let len = parts.length - 1;
+        if (currentMeet) {
+            // for age-group standards, one meets has multiple tables
+            for (let [i, course] of courseKey.entries()) {
+                if (parseInt(parts[i])) {
+                    let key = fixDistance(event + " " + courseKey[i]);
+                    currentMeet.Female.set(key, [
+                        parts[i],
+                        timeToInt(parts[i]),
+                    ]);
+                    currentMeet.Male.set(key, [
+                        parts[len - i],
+                        timeToInt(parts[len - i]),
+                    ]);
+                }
+            }
+        } else {
+            let key = event + " " + courseKey;
+            let i = 0;
+            for (let meet of currentMeetList) {
+                if (
+                    row.indexOf("-") < 0 && //don't have '-' in the line
+                    ((meet.age[1] <= 10 && a10Uexclude.has(event)) ||
+                        (meet.age[0] >= 13 && a13Oexclude.has(event)))
+                ) {
+                    continue;
+                }
+                if (parseInt(parts[i])) {
+                    meet.Female.set(key, [parts[i], timeToInt(parts[i])]);
+                    meet.Male.set(key, [
+                        parts[len - i],
+                        timeToInt(parts[len - i]),
+                    ]);
+                }
+                ++i;
+            }
+        }
+    }
+
+    window.getMeetStandards = function (age) {
+        return times.filter((x) => x.age[0] <= age && age <= x.age[1]);
+    };
 })();
+
+// ================================================================================
+// MOTIVATIONAL TIME STANDARDS
+// ================================================================================
+
 (function () {
-let data = `
+    let data = `
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 10 & under Girls Event 10 & under Boys
 10U
 39.79 35.99 32.09 30.89 29.59 28.29 50 FR SCY 27.49 28.69 29.89 31.09 34.59 38.19
@@ -838,8 +984,10 @@ let data = `
 1:56.69 1:41.39 1:26.09 1:20.99 1:15.99 1:10.89 100 FL SCY 1:09.79 1:14.59 1:19.49 1:24.39 1:38.99 1:53.49
 1:44.29 1:33.19 1:22.09 1:18.39 1:14.69 1:10.99 100 IM SCY 1:09.79 1:13.09 1:16.39 1:19.69 1:29.69 1:39.69
 3:42.09 3:18.79 2:55.49 2:47.69 2:39.99 2:32.19 200 IM SCY 2:30.89 2:38.39 2:45.89 2:53.49 3:15.99 3:38.59
+
 # 2:53.19 2:35.89 2:18.59 2:12.79 2:06.99 2:01.19 200 FR-R SCY 2:00.19 2:05.89 2:11.59 2:17.29 2:34.49 2:51.69
 # 3:14.99 2:55.49 2:35.99 2:29.49 2:22.99 2:16.49 200 MED-R SCY 2:15.39 2:21.79 2:28.29 2:34.69 2:53.99 3:13.39
+
 # 11-12 Girls Event 11-12 Boys
 11-12
 33.99 31.69 29.29 28.09 26.99 25.79 50 FR SCY 24.59 25.79 26.99 28.09 30.49 32.79
@@ -860,14 +1008,17 @@ let data = `
 1:25.19 1:19.09 1:13.09 1:09.99 1:06.99 1:03.89 100 IM SCY 1:01.09 1:03.99 1:06.99 1:09.99 1:15.89 1:21.89
 3:03.89 2:50.69 2:37.59 2:30.99 2:24.49 2:17.89 200 IM SCY 2:12.09 2:18.79 2:25.59 2:32.29 2:45.79 2:59.29
 6:31.69 6:03.69 5:35.79 5:21.79 5:07.79 4:53.79 400 IM SCY 4:42.79 4:56.29 5:09.79 5:23.19 5:50.09 6:17.09
+
 # 2:24.79 2:14.39 2:04.09 1:58.89 1:53.79 1:48.59 200 FR-R SCY 1:44.39 1:49.29 1:54.29 1:59.29 2:09.19 2:19.09
 # 5:18.09 4:55.39 4:32.69 4:21.29 4:09.99 3:58.59 400 FR-R SCY 3:50.09 4:00.99 4:11.99 4:22.89 4:44.79 5:06.79
 # 2:41.19 2:29.69 2:18.19 2:12.39 2:06.69 2:00.89 200 MED-R SCY 1:55.59 2:01.09 2:06.59 2:12.09 2:23.09 2:34.09
 # 5:53.49 5:28.29 5:02.99 4:50.39 4:37.79 4:25.09 400 MED-R SCY 4:14.79 4:26.99 4:39.09 4:51.19 5:15.49 5:39.79
+
 # Page 1 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 13-14 Girls Event 13-14 Boys
 13-14
 32.49 30.19 27.89 26.69 25.59 24.39 50 FR SCY 22.39 23.49 24.59 25.59 27.69 29.89
@@ -884,11 +1035,13 @@ let data = `
 2:51.19 2:38.99 2:26.69 2:20.59 2:14.49 2:08.39 200 FL SCY 1:57.59 2:03.19 2:08.79 2:14.39 2:25.59 2:36.79
 2:51.79 2:39.49 2:27.19 2:21.09 2:14.99 2:08.79 200 IM SCY 1:58.49 2:04.09 2:09.79 2:15.39 2:26.69 2:37.99
 6:05.79 5:39.69 5:13.49 5:00.49 4:47.39 4:34.29 400 IM SCY 4:13.29 4:25.39 4:37.39 4:49.49 5:13.59 5:37.69
+
 # 2:16.29 2:06.59 1:56.89 1:51.99 1:47.09 1:42.29 200 FR-R SCY 1:33.69 1:38.19 1:42.59 1:47.09 1:55.99 2:04.89
 # 4:57.29 4:35.99 4:14.79 4:04.19 3:53.59 3:42.99 400 FR-R SCY 3:24.89 3:34.59 3:44.39 3:54.19 4:13.69 4:33.19
 # 10:49.19 10:02.79 9:16.39 8:53.29 8:30.09 8:06.89 800 FR-R SCY 7:33.29 7:54.89 8:16.39 8:37.99 9:21.19 10:04.39
 # 2:29.89 2:19.19 2:08.49 2:03.09 1:57.79 1:52.39 200 MED-R SCY 1:43.69 1:48.59 1:53.59 1:58.49 2:08.39 2:18.19
 # 5:26.89 5:03.59 4:40.19 4:28.59 4:16.89 4:05.19 400 MED-R SCY 3:44.49 3:55.19 4:05.89 4:16.49 4:37.89 4:59.29
+
 # 15-16 Girls Event 15-16 Boys
 15-16
 31.79 29.49 27.29 26.09 24.99 23.89 50 FR SCY 21.19 22.19 23.19 24.19 26.29 28.29
@@ -905,15 +1058,18 @@ let data = `
 2:45.79 2:33.99 2:22.09 2:16.19 2:10.29 2:04.39 200 FL SCY 1:52.69 1:58.09 2:03.39 2:08.79 2:19.49 2:30.19
 2:46.19 2:34.29 2:22.39 2:16.49 2:10.59 2:04.59 200 IM SCY 1:53.19 1:58.59 2:03.99 2:09.39 2:20.19 2:30.89
 5:54.99 5:29.69 5:04.29 4:51.59 4:38.99 4:26.29 400 IM SCY 4:01.59 4:13.19 4:24.69 4:36.19 4:59.19 5:22.19
+
 # 2:15.19 2:05.59 1:55.89 1:51.09 1:46.29 1:41.39 200 FR-R SCY 1:31.39 1:35.69 1:40.09 1:44.39 1:53.09 2:01.79
 # 4:54.89 4:33.79 4:12.79 4:02.29 3:51.69 3:41.19 400 FR-R SCY 3:21.59 3:31.19 3:40.79 3:50.39 4:09.59 4:28.79
 # 10:47.79 10:01.59 9:15.29 8:52.19 8:28.99 8:05.89 800 FR-R SCY 7:27.79 7:49.09 8:10.39 8:31.79 9:14.39 9:57.09
 # 2:28.09 2:17.49 2:06.99 2:01.69 1:56.39 1:51.09 200 MED-R SCY 1:40.69 1:45.49 1:50.19 1:54.99 2:04.59 2:14.19
 # 5:23.29 5:00.19 4:37.09 4:25.59 4:13.99 4:02.49 400 MED-R SCY 3:40.69 3:51.19 4:01.69 4:12.19 4:33.19 4:54.19
+
 # Page 2 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 17-18 Girls Event 17-18 Boys
 17-18
 31.39 29.09 26.89 25.79 24.69 23.49 50 FR SCY 20.69 21.69 22.59 23.59 25.59 27.59
@@ -930,11 +1086,13 @@ let data = `
 2:42.79 2:31.19 2:19.49 2:13.69 2:07.89 2:02.09 200 FL SCY 1:49.79 1:55.09 2:00.29 2:05.49 2:15.99 2:26.39
 2:43.59 2:31.89 2:20.19 2:14.39 2:08.49 2:02.69 200 IM SCY 1:50.59 1:55.89 2:01.09 2:06.39 2:16.89 2:27.39
 5:50.69 5:25.59 5:00.59 4:47.99 4:35.49 4:22.99 400 IM SCY 3:57.99 4:09.39 4:20.69 4:31.99 4:54.69 5:17.39
+
 # 2:14.69 2:05.09 1:55.39 1:50.59 1:45.79 1:40.99 200 FR-R SCY 1:26.69 1:30.79 1:34.89 1:39.09 1:47.29 1:55.59
 # 4:49.49 4:28.79 4:08.19 3:57.79 3:47.49 3:37.19 400 FR-R SCY 3:10.39 3:19.39 3:28.49 3:37.49 3:55.69 4:13.79
 # 10:32.29 9:47.19 9:01.99 8:39.39 8:16.79 7:54.29 800 FR-R SCY 7:02.99 7:23.09 7:43.19 8:03.39 8:43.69 9:23.89
 # 2:26.89 2:16.39 2:05.89 2:00.69 1:55.39 1:50.19 200 MED-R SCY 1:34.69 1:39.19 1:43.69 1:48.19 1:57.19 2:06.29
 # 5:20.29 4:57.39 4:34.49 4:23.09 4:11.69 4:00.19 400 MED-R SCY 3:27.59 3:37.49 3:47.39 3:57.29 4:17.09 4:36.79
+
 # 10 & under Girls Event 10 & under Boys
 10U
 43.99 39.79 35.49 34.09 32.69 31.29 50 FR SCM 30.39 31.69 32.99 34.29 38.19 42.19
@@ -949,12 +1107,15 @@ let data = `
 2:08.89 1:52.09 1:35.19 1:29.49 1:23.89 1:18.29 100 FL SCM 1:17.09 1:22.49 1:27.79 1:33.19 1:49.29 2:05.49
 1:55.19 1:42.99 1:30.69 1:26.59 1:22.49 1:18.39 100 IM SCM 1:17.09 1:20.79 1:24.39 1:28.09 1:39.09 1:50.09
 4:05.39 3:39.59 3:13.89 3:05.29 2:56.79 2:48.19 200 IM SCM 2:46.69 2:55.09 3:03.39 3:11.69 3:36.59 4:01.59
+
 # 3:11.39 2:52.19 2:33.09 2:26.69 2:20.29 2:13.99 200 FR-R SCM 2:12.79 2:19.09 2:25.39 2:31.69 2:50.69 3:09.69
 # 3:35.49 3:13.89 2:52.39 2:45.19 2:37.99 2:30.79 200 MED-R SCM 2:29.59 2:36.69 2:43.79 2:50.89 3:12.29 3:33.69
+
 # Page 3 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 11-12 Girls Event 11-12 Boys
 11-12
 37.59 34.99 32.39 31.09 29.79 28.49 50 FR SCM 27.19 28.49 29.79 31.09 33.69 36.29
@@ -975,10 +1136,12 @@ let data = `
 1:34.19 1:27.49 1:20.69 1:17.39 1:13.99 1:10.59 100 IM SCM 1:07.49 1:10.69 1:13.99 1:17.29 1:23.89 1:30.49
 3:23.19 3:08.69 2:54.19 2:46.89 2:39.59 2:32.39 200 IM SCM 2:25.99 2:33.39 2:40.89 2:48.29 3:03.19 3:18.09
 7:12.79 6:41.89 6:10.99 5:55.59 5:40.09 5:24.59 400 IM SCM 5:12.49 5:27.39 5:42.29 5:57.19 6:26.89 6:56.69
+
 # 2:39.89 2:28.49 2:17.09 2:11.39 2:05.69 1:59.99 200 FR-R SCM 1:55.29 2:00.79 2:06.29 2:11.79 2:22.79 2:33.69
 # 5:51.59 5:26.39 5:01.29 4:48.79 4:36.19 4:23.69 400 FR-R SCM 4:14.19 4:26.29 4:38.39 4:50.49 5:14.69 5:38.99
 # 2:58.09 2:45.39 2:32.69 2:26.29 2:19.89 2:13.59 200 MED-R SCM 2:07.79 2:13.79 2:19.89 2:25.99 2:38.19 2:50.29
 # 6:30.59 6:02.69 5:34.79 5:20.89 5:06.89 4:52.99 400 MED-R SCM 4:41.59 4:54.99 5:08.39 5:21.79 5:48.59 6:15.39
+
 # 13-14 Girls Event 13-14 Boys
 13-14
 35.99 33.39 30.79 29.49 28.29 26.99 50 FR SCM 24.79 25.89 27.09 28.29 30.69 32.99
@@ -995,15 +1158,18 @@ let data = `
 3:09.19 2:55.69 2:42.19 2:35.39 2:28.59 2:21.89 200 FL SCM 2:09.99 2:16.19 2:22.39 2:28.49 2:40.89 2:53.29
 3:09.79 2:56.19 2:42.69 2:35.89 2:29.09 2:22.39 200 IM SCM 2:10.89 2:17.09 2:23.39 2:29.59 2:42.09 2:54.49
 6:44.19 6:15.29 5:46.39 5:31.99 5:17.59 5:03.09 400 IM SCM 4:39.89 4:53.19 5:06.49 5:19.89 5:46.49 6:13.19
+
 # 2:30.59 2:19.89 2:09.09 2:03.69 1:58.39 1:52.99 200 FR-R SCM 1:43.59 1:48.49 1:53.39 1:58.39 2:08.19 2:18.09
 # 5:28.49 5:04.99 4:41.59 4:29.79 4:18.09 4:06.39 400 FR-R SCM 3:46.39 3:57.19 4:07.89 4:18.69 4:40.29 5:01.79
 # 11:57.29 11:06.09 10:14.89 9:49.19 9:23.59 8:57.99 800 FR-R SCM 8:20.89 8:44.69 9:08.59 9:32.39 10:20.09 11:07.79
 # 2:45.59 2:33.79 2:21.89 2:15.99 2:10.09 2:04.19 200 MED-R SCM 1:54.59 1:59.99 2:05.49 2:10.89 2:21.79 2:32.69
 # 6:01.29 5:35.49 5:09.69 4:56.79 4:43.89 4:30.99 400 MED-R SCM 4:07.99 4:19.89 4:31.69 4:43.49 5:07.09 5:30.69
+
 # Page 4 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 15-16 Girls Event 15-16 Boys
 15-16
 35.09 32.59 30.09 28.89 27.59 26.39 50 FR SCM 23.39 24.59 25.69 26.79 28.99 31.19
@@ -1020,11 +1186,13 @@ let data = `
 3:03.19 2:50.09 2:37.09 2:30.49 2:23.99 2:17.39 200 FL SCM 2:04.49 2:10.39 2:16.39 2:22.29 2:34.19 2:45.99
 3:03.59 2:50.49 2:37.39 2:30.79 2:24.29 2:17.69 200 IM SCM 2:05.09 2:11.09 2:16.99 2:22.99 2:34.89 2:46.79
 6:32.29 6:04.29 5:36.29 5:22.29 5:08.19 4:54.19 400 IM SCM 4:26.99 4:39.69 4:52.39 5:05.19 5:30.59 5:55.99
+
 # 2:29.39 2:18.79 2:08.09 2:02.79 1:57.39 1:52.09 200 FR-R SCM 1:40.99 1:45.79 1:50.59 1:55.39 2:04.99 2:14.59
 # 5:25.89 5:02.59 4:39.29 4:27.69 4:15.99 4:04.39 400 FR-R SCM 3:42.79 3:53.39 4:03.99 4:14.59 4:35.79 4:57.09
 # 11:55.79 11:04.69 10:13.59 9:47.99 9:22.49 8:56.89 800 FR-R SCM 8:14.79 8:38.39 9:01.89 9:25.49 10:12.59 10:59.69
 # 2:43.59 2:31.99 2:20.29 2:14.39 2:08.59 2:02.69 200 MED-R SCM 1:51.19 1:56.49 2:01.79 2:07.09 2:17.69 2:28.29
 # 5:57.19 5:31.69 5:06.19 4:53.39 4:40.69 4:27.89 400 MED-R SCM 4:03.79 4:15.39 4:27.09 4:38.69 5:01.89 5:25.09
+
 # 17-18 Girls Event 17-18 Boys
 17-18
 34.69 32.19 29.69 28.49 27.19 25.99 50 FR SCM 22.79 23.89 24.99 26.09 28.29 30.39
@@ -1041,15 +1209,18 @@ let data = `
 2:59.89 2:46.99 2:34.19 2:27.69 2:21.29 2:14.89 200 FL SCM 2:01.39 2:07.09 2:12.89 2:18.69 2:30.19 2:41.79
 3:00.69 2:47.79 2:34.89 2:28.49 2:21.99 2:15.59 200 IM SCM 2:02.19 2:07.99 2:13.79 2:19.59 2:31.29 2:42.89
 6:27.49 5:59.79 5:32.09 5:18.29 5:04.49 4:50.59 400 IM SCM 4:22.99 4:35.49 4:48.09 5:00.59 5:25.59 5:50.69
+
 # 2:28.79 2:18.19 2:07.59 2:02.29 1:56.89 1:51.59 200 FR-R SCM 1:35.79 1:40.29 1:44.89 1:49.49 1:58.59 2:07.69
 # 5:19.89 4:57.09 4:34.19 4:22.79 4:11.39 3:59.89 400 FR-R SCM 3:30.29 3:40.39 3:50.39 4:00.39 4:20.39 4:40.39
 # 11:38.69 10:48.79 9:58.89 9:33.99 9:08.99 8:43.99 800 FR-R SCM 7:47.39 8:09.59 8:31.89 8:54.09 9:38.59 10:23.09
 # 2:42.29 2:30.69 2:19.09 2:13.29 2:07.49 2:01.69 200 MED-R SCM 1:44.59 1:49.59 1:54.59 1:59.59 2:09.49 2:19.49
 # 5:53.89 5:28.59 5:03.39 4:50.69 4:38.09 4:25.39 400 MED-R SCM 3:49.39 4:00.39 4:11.29 4:22.19 4:44.09 5:05.89
+
 # Page 5 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 10 & under Girls Event 10 & under Boys
 10U
 45.29 40.89 36.59 35.09 33.69 32.19 50 FR LCM 31.59 32.99 34.39 35.69 39.79 43.89
@@ -1063,8 +1234,10 @@ let data = `
 54.49 48.09 41.59 39.49 37.29 35.19 50 FL LCM 34.69 36.59 38.59 40.59 46.39 52.29
 2:12.79 1:55.39 1:37.99 1:32.19 1:26.39 1:20.59 100 FL LCM 1:19.59 1:25.09 1:30.69 1:36.19 1:52.89 2:09.49
 4:15.69 3:48.89 3:22.09 3:13.09 3:04.19 2:55.29 200 IM LCM 2:52.19 3:00.79 3:09.39 3:17.89 3:43.69 4:09.49
+
 # 3:17.49 2:57.79 2:37.99 2:31.39 2:24.79 2:18.29 200 FR-R LCM 2:17.19 2:23.69 2:30.19 2:36.79 2:56.39 3:15.89
 # 3:43.59 3:21.19 2:58.89 2:51.39 2:43.99 2:36.49 200 MED-R LCM 2:37.59 2:45.09 2:52.59 3:00.09 3:22.59 3:45.09
+
 # 11-12 Girls Event 11-12 Boys
 11-12
 38.49 35.89 33.19 31.89 30.49 29.19 50 FR LCM 28.09 29.39 30.69 32.09 34.79 37.39
@@ -1084,14 +1257,17 @@ let data = `
 3:31.09 3:15.99 3:00.89 2:53.39 2:45.89 2:38.29 200 FL LCM 2:33.59 2:40.89 2:48.29 2:55.59 3:10.19 3:24.79
 3:30.59 3:15.59 3:00.59 2:52.99 2:45.49 2:37.99 200 IM LCM 2:30.59 2:38.29 2:45.99 2:53.69 3:08.99 3:24.39
 7:28.89 6:56.79 6:24.79 6:08.69 5:52.69 5:36.69 400 IM LCM 5:28.39 5:44.09 5:59.69 6:15.39 6:46.59 7:17.89
+
 # 2:44.29 2:32.59 2:20.89 2:14.99 2:09.09 2:03.29 200 FR-R LCM 2:00.19 2:05.89 2:11.59 2:17.39 2:28.79 2:40.19
 # 6:03.69 5:37.69 5:11.79 4:58.79 4:45.79 4:32.79 400 FR-R LCM 4:26.79 4:39.49 4:52.19 5:04.89 5:30.29 5:55.69
 # 3:04.19 2:50.99 2:37.89 2:31.29 2:24.69 2:18.19 200 MED-R LCM 2:14.79 2:21.29 2:27.69 2:34.09 2:46.89 2:59.79
 # 6:48.79 6:19.59 5:50.39 5:35.79 5:21.19 5:06.59 400 MED-R LCM 4:59.69 5:13.99 5:28.19 5:42.49 6:10.99 6:39.59
+
 # Page 6 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 13-14 Girls Event 13-14 Boys
 13-14
 37.19 34.59 31.89 30.59 29.29 27.89 50 FR LCM 25.69 26.89 28.19 29.39 31.79 34.29
@@ -1108,11 +1284,13 @@ let data = `
 3:15.69 3:01.69 2:47.79 2:40.79 2:33.79 2:26.79 200 FL LCM 2:14.79 2:21.19 2:27.59 2:33.99 2:46.79 2:59.69
 3:17.19 3:03.09 2:48.99 2:41.99 2:34.89 2:27.89 200 IM LCM 2:17.19 2:23.69 2:30.19 2:36.69 2:49.79 3:02.89
 6:57.99 6:28.19 5:58.29 5:43.39 5:28.39 5:13.49 400 IM LCM 4:52.99 5:06.99 5:20.89 5:34.89 6:02.79 6:30.69
+
 # 2:35.59 2:24.39 2:13.29 2:07.79 2:02.19 1:56.69 200 FR-R LCM 1:47.69 1:52.79 1:57.89 2:03.09 2:13.29 2:23.59
 # 5:40.89 5:16.49 4:52.19 4:39.99 4:27.79 4:15.69 400 FR-R LCM 3:56.49 4:07.69 4:18.99 4:30.19 4:52.79 5:15.29
 # 12:28.29 11:34.79 10:41.39 10:14.59 9:47.89 9:21.19 800 FR-R LCM 8:42.99 9:07.89 9:32.79 9:57.69 10:47.49 11:37.29
 # 2:53.29 2:40.89 2:28.49 2:22.39 2:16.19 2:09.99 200 MED-R LCM 1:59.19 2:04.89 2:10.59 2:16.29 2:27.59 2:38.99
 # 6:18.39 5:51.39 5:24.29 5:10.79 4:57.29 4:43.79 400 MED-R LCM 4:21.79 4:34.29 4:46.79 4:59.19 5:24.09 5:49.09
+
 # 15-16 Girls Event 15-16 Boys
 15-16
 36.09 33.49 30.89 29.59 28.29 27.09 50 FR LCM 24.69 25.89 26.99 28.19 30.59 32.89
@@ -1129,15 +1307,18 @@ let data = `
 3:07.79 2:54.39 2:40.99 2:34.29 2:27.59 2:20.89 200 FL LCM 2:08.79 2:14.89 2:21.09 2:27.19 2:39.49 2:51.69
 3:11.19 2:57.49 2:43.89 2:36.99 2:30.19 2:23.39 200 IM LCM 2:12.09 2:18.39 2:24.69 2:30.99 2:43.59 2:56.19
 6:44.69 6:15.79 5:46.89 5:32.49 5:17.99 5:03.59 400 IM LCM 4:41.09 4:54.39 5:07.79 5:21.19 5:47.99 6:14.69
+
 # 2:36.49 2:25.39 2:14.19 2:08.59 2:02.99 1:57.39 200 FR-R LCM 1:44.89 1:49.89 1:54.89 1:59.89 2:09.89 2:19.89
 # 5:41.09 5:16.79 4:52.39 4:40.19 4:27.99 4:15.89 400 FR-R LCM 3:49.89 4:00.89 4:11.79 4:22.79 4:44.69 5:06.49
 # 12:25.39 11:32.19 10:38.89 10:12.29 9:45.69 9:19.09 800 FR-R LCM 8:32.59 8:56.99 9:21.39 9:45.79 10:34.69 11:23.49
 # 2:53.99 2:41.49 2:29.09 2:22.89 2:16.69 2:10.49 200 MED-R LCM 1:56.29 2:01.89 2:07.39 2:12.89 2:23.99 2:35.09
 # 6:14.39 5:47.69 5:20.89 5:07.59 4:54.19 4:40.79 400 MED-R LCM 4:15.89 4:28.09 4:40.19 4:52.39 5:16.79 5:41.19
+
 # Page 7 of 8
 # USA Swimming 2024-2028 Motivational Standards
 # 8/29/2024 1:21:39 AM
 # B BB A AA AAA AAAA AAAA AAA AA A BB B
+
 # 17-18 Girls Event 17-18 Boys
 17-18
 35.89 33.29 30.69 29.49 28.19 26.89 50 FR LCM 23.99 25.09 26.19 27.39 29.59 31.89
@@ -1154,64 +1335,85 @@ let data = `
 3:04.49 2:51.39 2:38.19 2:31.59 2:24.99 2:18.39 200 FL LCM 2:05.29 2:11.29 2:17.19 2:23.19 2:35.09 2:46.99
 3:09.29 2:55.79 2:42.29 2:35.49 2:28.79 2:21.99 200 IM LCM 2:08.99 2:15.09 2:21.19 2:27.39 2:39.59 2:51.89
 6:40.29 6:11.69 5:43.09 5:28.79 5:14.49 5:00.29 400 IM LCM 4:35.69 4:48.79 5:01.89 5:15.09 5:41.29 6:07.59
+
 # 2:34.19 2:23.19 2:12.19 2:06.69 2:01.19 1:55.59 200 FR-R LCM 1:40.99 1:45.79 1:50.59 1:55.39 2:04.99 2:14.59
 # 5:34.19 5:10.29 4:46.39 4:34.49 4:22.59 4:10.59 400 FR-R LCM 3:40.49 3:50.99 4:01.49 4:11.99 4:32.99 4:53.99
 # 12:15.79 11:23.29 10:30.69 10:04.39 9:38.19 9:11.89 800 FR-R LCM 8:10.89 8:34.19 8:57.59 9:20.99 10:07.69 10:54.49
 # 2:51.39 2:39.09 2:26.89 2:20.79 2:14.69 2:08.49 200 MED-R LCM 1:51.39 1:56.69 2:01.99 2:07.29 2:17.89 2:28.49
 # 6:10.89 5:44.39 5:17.89 5:04.69 4:51.39 4:38.19 400 MED-R LCM 4:02.89 4:14.49 4:26.09 4:37.59 5:00.79 5:23.89
+
 # Page 8 of 8
 `;
-const times = new Map();
-let rows = data.split("\n");
-let ageKey;
-for (let row of rows) {
-if (row.startsWith("#") || row.trim() === "") {
-continue;
-}
-let parts = row.split(" ");
-if (parts.length == 1) {
-ageKey = parts[0];
-continue;
-}
-let stds = "B BB A AA AAA AAAA d s c AAAA AAA AA A BB B".split(" ");
-let std = `${ageKey} ${parts[6]} ${parts[7]} ${parts[8]}`;
-for (i = 0; i < 6; ++i) {
-times.set(`Female ${std} ${stds[i]}`, [
-parts[i],
-timeToInt(parts[i]),
-]);
-}
-for (i = 9; i < 15; ++i) {
-times.set(`Male ${std} ${stds[i]}`, [
-parts[i],
-timeToInt(parts[i]),
-]);
-}
-}
-function getAgeGroupMotivationTime(key) {
-return times.get(key) || ["", 0];
-}
-window.getAgeGroupMotivationTime = getAgeGroupMotivationTime;
+    const times = new Map();
+
+    let rows = data.split("\n");
+    let ageKey;
+    for (let row of rows) {
+        if (row.startsWith("#") || row.trim() === "") {
+            continue;
+        }
+        let parts = row.split(" ");
+        if (parts.length == 1) {
+            ageKey = parts[0];
+            continue;
+        }
+
+        let stds = "B BB A AA AAA AAAA d s c AAAA AAA AA A BB B".split(" ");
+
+        let std = `${ageKey} ${parts[6]} ${parts[7]} ${parts[8]}`;
+
+        for (i = 0; i < 6; ++i) {
+            times.set(`Female ${std} ${stds[i]}`, [
+                parts[i],
+                timeToInt(parts[i]),
+            ]);
+        }
+
+        for (i = 9; i < 15; ++i) {
+            times.set(`Male ${std} ${stds[i]}`, [
+                parts[i],
+                timeToInt(parts[i]),
+            ]);
+        }
+    }
+
+    function getAgeGroupMotivationTime(key) {
+        return times.get(key) || ["", 0];
+    }
+
+    window.getAgeGroupMotivationTime = getAgeGroupMotivationTime;
 })();
+
 function fixDistance(eventStr) {
-let map = {
-"400 FR SCY": "500 FR SCY",
-"500 FR SCM": "400 FR SCM",
-"500 FR LCM": "400 FR LCM",
-"800 FR SCY": "1000 FR SCY",
-"1000 FR SCM": "800 FR SCM",
-"1000 FR LCM": "800 FR LCM",
-"1500 FR SCY": "1650 FR SCY",
-"1650 FR SCM": "1500 FR SCM",
-"1650 FR LCM": "1500 FR LCM",
-};
-return map[eventStr] || eventStr;
+    let map = {
+        "400 FR SCY": "500 FR SCY",
+        "500 FR SCM": "400 FR SCM",
+        "500 FR LCM": "400 FR LCM",
+        "800 FR SCY": "1000 FR SCY",
+        "1000 FR SCM": "800 FR SCM",
+        "1000 FR LCM": "800 FR LCM",
+        "1500 FR SCY": "1650 FR SCY",
+        "1650 FR SCM": "1500 FR SCM",
+        "1650 FR LCM": "1500 FR LCM",
+    };
+    return map[eventStr] || eventStr;
 }
+
+// ================================================================================
+// DATE PROTOTYPE EXTENSION
+// ================================================================================
+
 Date.prototype.toDateInputValue = function () {
-let local = new Date(this);
-local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
-return local.toJSON().slice(0, 10);
+    let local = new Date(this);
+    local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+    return local.toJSON().slice(0, 10);
 };
+
+// ================================================================================
+// GLOBAL EXPORTS
+// ================================================================================
+
+// Export all core functions and constants for global access
 window._courseOrder = _courseOrder;
 window._strokeOrder = _strokeOrder;
 window._storkeMap = _storkeMap;
@@ -1222,6 +1424,7 @@ window._1DayInSec = _1DayInSec;
 window._1WeekInSec = _1WeekInSec;
 window._10YearsInSec = _10YearsInSec;
 window._1DayInMilliSeconds = _1DayInMilliSeconds;
+
 window.getEventCourse = getEventCourse;
 window.updateContent = updateContent;
 window.min = min;
@@ -1237,8 +1440,15 @@ window.formatTime = formatTime;
 window.getEventSortKey = getEventSortKey;
 window.getClubDisplayCode = getClubDisplayCode;
 window.fixDistance = fixDistance;
+
+// getMeetStandards function is defined in the meet standards section above
+
+// ================================================================================
+// LSC (LOCAL SWIMMING COMMITTEE) DATA
+// ================================================================================
+
 (function () {
-let data = `
+    let data = `
 Adirondack Swimming|AD|Eastern
 Alaska Swimming|AK|Western
 Allegheny Mountain Swimming|AM|Eastern
@@ -1301,19 +1511,19 @@ Washington Swimming|WA|Western
 West Virginia Swimming|WV|Eastern
 Wisconsin Swimming|WI|Central
 Wyoming Swimming|WY|Western`;
-let lines = data.split("\n");
-let map = new Map();
-for (let line of lines) {
-let parts = line.split("|");
-if (parts.length == 3) {
-map.set(parts[1], [parts[0], parts[2]]);
-}
-}
-window.lscMap = map;
-window.getLSCName = function (lsc) {
-return (map.get(lsc) || ["", ""])[0];
-};
-window.getLSCZone = function (lsc) {
-return (map.get(lsc) || ["", ""])[1];
-};
+    let lines = data.split("\n");
+    let map = new Map();
+    for (let line of lines) {
+        let parts = line.split("|");
+        if (parts.length == 3) {
+            map.set(parts[1], [parts[0], parts[2]]);
+        }
+    }
+    window.lscMap = map;
+    window.getLSCName = function (lsc) {
+        return (map.get(lsc) || ["", ""])[0];
+    };
+    window.getLSCZone = function (lsc) {
+        return (map.get(lsc) || ["", ""])[1];
+    };
 })();

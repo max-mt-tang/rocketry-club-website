@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>高中生的健康饮食 - 班级博客</title>
+  <meta name="description" content="高中生健康饮食指南，了解如何通过合理饮食提升学习效率和身体健康。" />
+  <meta property="og:title" content="高中生的健康饮食 - 班级博客" />
+  <meta property="og:description" content="高中生健康饮食指南，了解如何通过合理饮食提升学习效率和身体健康。" />
+  <meta property="og:type" content="article" />
+  <style>
+    :root{
+      --bg:#f0f4f8; 
+      --card:#ffffff; 
+      --accent:#2b8cff; 
+      --accent-light:#e8f2ff;
+      --muted:#64748b;
+      --text:#1e293b;
+      --border:#e2e8f0;
+      --success:#10b981;
+      --radius:16px; 
+      --maxw:900px;
+      font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft Yahei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body{
+      background: linear-gradient(135deg, #f0f4f8 0%, #e6f0fa 100%);
+      margin:0; 
+      padding:32px 16px; 
+      display:flex; 
+      justify-content:center; 
+      color:var(--text);
+      min-height:100vh;
+    }
+    .container{
+      width:100%; 
+      max-width:var(--maxw);
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(10px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .card{
+      background:var(--card); 
+      border-radius:var(--radius); 
+      padding:40px; 
+      box-shadow:0 10px 40px rgba(15,23,42,0.08), 0 2px 8px rgba(15,23,42,0.04);
+      border:1px solid rgba(255,255,255,0.8);
+    }
+    header.meta{
+      display:flex; 
+      align-items:flex-start; 
+      justify-content:space-between; 
+      gap:20px; 
+      margin-bottom:32px;
+      padding-bottom:24px;
+      border-bottom:2px solid var(--border);
+    }
+    header .title{
+      font-size:2.25rem; 
+      font-weight:700;
+      color:var(--text);
+      letter-spacing:-0.5px;
+      line-height:1.2;
+      margin-bottom:12px;
+    }
+    .meta-line{
+      color:var(--muted); 
+      font-size:0.95rem;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .meta-line::before{
+      content:'📝';
+      font-size:1.1rem;
+    }
+    .controls{
+      display:flex; 
+      gap:10px; 
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .btn{
+      background:white; 
+      border:1.5px solid var(--border); 
+      padding:10px 16px; 
+      border-radius:10px; 
+      cursor:pointer; 
+      display:inline-flex; 
+      gap:6px; 
+      align-items:center;
+      font-size:0.9rem;
+      font-weight:500;
+      transition: all 0.2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      background:var(--accent-light);
+      border-color:var(--accent);
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(43,140,255,0.15);
+    }
+    .btn:active{
+      transform:translateY(0);
+    }
+    .btn.primary{
+      background:linear-gradient(135deg,var(--accent) 0%,#4aa3ff 100%); 
+      color:white; 
+      border:none;
+      font-weight:600;
+    }
+    .btn.primary:hover{
+      background:linear-gradient(135deg,#1a7ae8 0%,#3b92f0 100%);
+      transform:translateY(-2px);
+      box-shadow:0 6px 20px rgba(43,140,255,0.3);
+    }
+    .content{
+      line-height:1.9; 
+      margin:32px 0; 
+      font-size:1.1rem; 
+      color:var(--text);
+    }
+    .content > div {
+      text-align:justify;
+    }
+    .content br + br {
+      display:block;
+      content:'';
+      margin-top:16px;
+    }
+    .sidebar{
+      margin-top:32px; 
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:16px;
+    }
+    .card-small{
+      background:linear-gradient(135deg, #fbfdff 0%, #f0f7ff 100%);
+      border-radius:12px; 
+      padding:20px; 
+      box-shadow:0 2px 8px rgba(43,140,255,0.06);
+      border:1.5px solid rgba(43,140,255,0.12);
+      transition:all 0.3s ease;
+    }
+    .card-small:hover{
+      transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(43,140,255,0.12);
+      border-color:var(--accent);
+    }
+    .tip-title{
+      font-weight:700;
+      margin-bottom:10px;
+      color:var(--accent);
+      font-size:1.05rem;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .tip-title::before{
+      content:'💡';
+      font-size:1.2rem;
+    }
+    .card-small:last-child .tip-title::before{
+      content:'🎯';
+    }
+    .comments{
+      margin-top:48px;
+      padding-top:32px;
+      border-top:2px solid var(--border);
+    }
+    .comments h3{
+      font-size:1.5rem;
+      margin-bottom:24px;
+      color:var(--text);
+      font-weight:700;
+    }
+    .comment{
+      padding:16px 20px; 
+      border-radius:12px; 
+      background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      margin-bottom:12px;
+      border:1px solid var(--border);
+      transition:all 0.2s ease;
+    }
+    .comment:hover{
+      background:white;
+      box-shadow:0 4px 16px rgba(15,23,42,0.06);
+      transform:translateX(4px);
+    }
+    .comment .who{
+      font-weight:700;
+      color:var(--accent);
+    }
+    .comment .time{
+      color:var(--muted); 
+      font-size:0.85rem; 
+      margin-left:8px;
+    }
+    .comment .txt{
+      margin-top:8px;
+      color:var(--text);
+      line-height:1.6;
+    }
+    .comment-form{
+      display:flex; 
+      gap:12px; 
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+    .input{
+      flex:1; 
+      min-width:200px;
+      padding:12px 16px; 
+      border-radius:10px; 
+      border:1.5px solid var(--border); 
+      background:white;
+      font-size:0.95rem;
+      transition:all 0.2s ease;
+    }
+    .input:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-light);
+    }
+    .input::placeholder{
+      color:var(--muted);
+    }
+    .small-muted{
+      color:var(--muted); 
+      font-size:0.9rem; 
+      margin-top:16px;
+      padding:12px 16px;
+      background:var(--accent-light);
+      border-radius:8px;
+      border-left:3px solid var(--accent);
+    }
+    
+    /* Toast notification */
+    .toast{
+      position:fixed;
+      bottom:24px;
+      right:24px;
+      background:var(--text);
+      color:white;
+      padding:14px 20px;
+      border-radius:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.2);
+      opacity:0;
+      transform:translateY(20px);
+      transition:all 0.3s ease;
+      z-index:1000;
+      max-width:300px;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+    .toast.success{
+      background:var(--success);
+    }
+    
+    /* Character counter */
+    .char-counter{
+      font-size:0.85rem;
+      color:var(--muted);
+      text-align:right;
+      margin-top:4px;
+    }
+    .char-counter.warning{
+      color:#f59e0b;
+    }
+    .char-counter.error{
+      color:#ef4444;
+    }
+    
+    /* Button liked state */
+    .btn.liked{
+      background:var(--accent-light);
+      border-color:var(--accent);
+      color:var(--accent);
+    }
+    
+    /* Smooth animations */
+    @keyframes slideIn {
+      from {
+        opacity:0;
+        transform:translateX(-20px);
+      }
+      to {
+        opacity:1;
+        transform:translateX(0);
+      }
+    }
+    .comment.new-comment{
+      animation:slideIn 0.4s ease;
+    }
+    
+    /* Smooth scroll */
+    html{
+      scroll-behavior:smooth;
+    }
+    
+    @media (max-width:768px){
+      body{ padding:16px 12px; }
+      .card{ padding:24px 20px; }
+      header.meta{
+        flex-direction:column; 
+        align-items:flex-start; 
+        gap:16px;
+      }
+      header .title{ font-size:1.75rem; }
+      .controls{ width:100%; justify-content:flex-start; }
+      .sidebar{ grid-template-columns:1fr; }
+      .comment-form{ flex-direction:column; }
+      .input{ width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header class="meta">
+        <div>
+          <div class="title">高中生的健康饮食</div>
+          <div class="meta-line">作者：李明（高二） · 2025-10-30 · 阅读时间：3分钟</div>
+        </div>
+
+        <div class="controls">
+          <button id="likeBtn" class="btn" title="点赞" aria-label="点赞这篇文章">点赞👍 <span id="likeCount" style="margin-left:6px">124</span></button>
+          <button id="shareBtn" class="btn" title="转发" aria-label="分享这篇文章">转发🔁 <span id="shareCount" style="margin-left:6px">32</span></button>
+          <button id="focusComment" class="btn" title="留言" aria-label="跳转到评论区">留言💬 <span id="commentCount" style="margin-left:6px">18</span></button>
+        </div>
+      </header>
+
+      <article class="content" id="postContent"> <div>
+        🍎 高中生的健康饮食 <br><br>
+
+我们高中生每天都很忙，有补习、作业，还有学校餐厅和外卖的诱惑。快餐、薯条、冰淇淋虽然好吃，但太多高脂肪、高盐、高糖，对身体不好。健康饮食其实很简单：三餐要按时吃，早餐一定要吃，吃一些有蛋白质的食物，比如鸡蛋、鸡胸肉、或牛奶；中午多吃蔬菜，少吃油炸的食物；晚上别太晚吃，也别吃太多。
+<br><br>
+我们应该少吃零食，多吃水果，酸奶或坚果，这些食物有很多维生素，蛋白质，纤维、钙、铁和钾，能帮助消化、长个子、降低血糖防止糖尿病，让身体更健康。也要少吃碳水，比如不吃白米饭和白面包，多吃全谷物面包，因为它们比白面包更有营养。
+<br><br>
+我们可以从一些小地方开始改变。比如说你每周会点几次外卖呢？我们可以每周少买一次外卖。再比如说你每周会在学校餐厅买几次午餐呢？我们可以每周多吃一次自己带的午餐。
+还有，别忘了每天多喝水，早点睡觉，这两点对学习和身体都很重要。健康饮食其实是一种长期的积累，多吃有维生素和蛋白质的食物，少吃高盐高脂的快餐，我们都会越来越有精神！
+<br><br>
+欢迎在评论区留言分享你的健康餐，一起加油！</div></article>
+
+      <div class="sidebar">
+        <div class="card-small">
+          <div class="tip-title">今日小贴士</div>
+          <div>早餐吃一份蛋白 + 一份全谷物，学习更有精神。</div>
+        </div>
+        <div class="card-small">
+          <div class="tip-title">本周挑战</div>
+          <div>7天无含糖饮料（打卡并晒图）</div>
+        </div>
+      </div>
+
+      <section class="comments" id="commentsSection">
+        <h3 style="margin-top:18px;">留言（<span id="commentNum">3</span>）</h3>
+
+        <!-- existing comments -->
+        <div id="commentsList">
+          <div class="comment">
+            <div><span class="who">小红</span><span class="time"> · 1小时前</span></div>
+            <div class="txt">我把下午奶茶换成柠檬水了，精神好多了！👍</div>
+          </div>
+
+          <div class="comment">
+            <div><span class="who">阿杰</span><span class="time"> · 昨天</span></div>
+            <div class="txt">分享我的便当图：鸡胸+藜麦+西兰花，超好吃而且饱。</div>
+          </div>
+
+          <div class="comment">
+            <div><span class="who">班长</span><span class="time"> · 2天前</span></div>
+            <div class="txt">我们班组队做“午餐换蔬果”挑战，欢迎加入～（已报名10人）</div>
+          </div>
+        </div>
+
+        <!-- add comment -->
+        <div class="comment-form">
+          <input id="nameInput" class="input" placeholder="你的名字（可选）" aria-label="输入你的名字" maxlength="20" />
+          <input id="textInput" class="input" placeholder="输入你的留言……" aria-label="输入评论内容" maxlength="200" />
+          <button id="postBtn" class="btn primary" aria-label="发表评论">发表</button>
+        </div>
+        <div class="char-counter" id="charCounter">还可以输入 <span id="charRemaining">200</span> 个字</div>
+
+        <div class="small-muted">💡 提示：这是同学经验分享，不作为医疗建议。如有健康问题请咨询校医或家长。</div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Enhanced blog interactions with localStorage persistence
+    (function(){
+      const STORAGE_KEY = 'blog_healthy_eating';
+      const likeBtn = document.getElementById('likeBtn');
+      const shareBtn = document.getElementById('shareBtn');
+      const likeCount = document.getElementById('likeCount');
+      const shareCount = document.getElementById('shareCount');
+      const commentCount = document.getElementById('commentCount');
+      const commentsList = document.getElementById('commentsList');
+      const commentNum = document.getElementById('commentNum');
+      const textInput = document.getElementById('textInput');
+      const nameInput = document.getElementById('nameInput');
+      const charRemaining = document.getElementById('charRemaining');
+      const charCounter = document.getElementById('charCounter');
+      const postBtn = document.getElementById('postBtn');
+
+      // Load data from localStorage
+      function loadData(){
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if(stored){
+          try{
+            return JSON.parse(stored);
+          }catch(e){
+            console.error('Failed to parse stored data', e);
+          }
+        }
+        return {
+          liked: false,
+          likeCount: 124,
+          shareCount: 32,
+          commentCountNum: 18,
+          comments: []
+        };
+      }
+
+      // Save data to localStorage
+      function saveData(data){
+        try{
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }catch(e){
+          console.error('Failed to save data', e);
+        }
+      }
+
+      // Show toast notification
+      function showToast(message, type = 'success'){
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      // Initialize with stored data
+      let data = loadData();
+      likeCount.textContent = data.likeCount;
+      shareCount.textContent = data.shareCount;
+      commentCount.textContent = data.commentCountNum;
+      
+      if(data.liked){
+        likeBtn.classList.add('liked');
+      }
+
+      // Restore saved comments
+      if(data.comments && data.comments.length > 0){
+        data.comments.forEach(comment => {
+          const div = document.createElement('div');
+          div.className = 'comment';
+          div.innerHTML = `<div><span class="who">${escapeHtml(comment.name)}</span><span class="time"> · ${escapeHtml(comment.time)}</span></div>
+                          <div class="txt">${escapeHtml(comment.text)}</div>`;
+          commentsList.insertBefore(div, commentsList.firstChild);
+        });
+        const totalComments = 3 + data.comments.length;
+        commentNum.textContent = totalComments;
+      }
+
+      // Like button with toggle
+      likeBtn.addEventListener('click', () => {
+        data.liked = !data.liked;
+        if(data.liked){
+          data.likeCount++;
+          likeBtn.classList.add('liked');
+          showToast('👍 感谢点赞！', 'success');
+        }else{
+          data.likeCount--;
+          likeBtn.classList.remove('liked');
+        }
+        likeCount.textContent = data.likeCount;
+        saveData(data);
+      });
+
+      // Share button
+      shareBtn.addEventListener('click', () => {
+        data.shareCount++;
+        shareCount.textContent = data.shareCount;
+        saveData(data);
+        
+        if(navigator.share){
+          navigator.share({
+            title: document.title,
+            text: '分享一篇关于高中生健康饮食的文章，快来看看！',
+            url: location.href
+          }).then(() => {
+            showToast('🎉 分享成功！', 'success');
+          }).catch(() => {
+            showToast('已记录分享', 'success');
+          });
+        } else {
+          showToast('✅ 已记录分享！可复制链接分享给朋友', 'success');
+        }
+      });
+
+      // Focus comment button with smooth scroll
+      document.getElementById('focusComment').addEventListener('click', ()=> {
+        textInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => textInput.focus(), 500);
+      });
+
+      // Character counter
+      textInput.addEventListener('input', () => {
+        const length = textInput.value.length;
+        const remaining = 200 - length;
+        charRemaining.textContent = remaining;
+        
+        charCounter.classList.remove('warning', 'error');
+        if(remaining < 20){
+          charCounter.classList.add('warning');
+        }
+        if(remaining < 0){
+          charCounter.classList.add('error');
+        }
+      });
+
+      // Post comment function
+      function postComment(){
+        const name = nameInput.value.trim() || '匿名';
+        const text = textInput.value.trim();
+        
+        if(!text){
+          showToast('⚠️ 请输入留言内容', 'error');
+          textInput.focus();
+          return;
+        }
+
+        if(text.length > 200){
+          showToast('⚠️ 留言内容不能超过200字', 'error');
+          return;
+        }
+
+        // Create comment element with animation
+        const div = document.createElement('div');
+        div.className = 'comment new-comment';
+        const now = new Date();
+        const timeLabel = '刚刚';
+        div.innerHTML = `<div><span class="who">${escapeHtml(name)}</span><span class="time"> · ${timeLabel}</span></div>
+                         <div class="txt">${escapeHtml(text)}</div>`;
+
+        // Prepend to list
+        commentsList.insertBefore(div, commentsList.firstChild);
+
+        // Update counts
+        const cnum = parseInt(commentNum.textContent, 10) + 1;
+        commentNum.textContent = cnum;
+        data.commentCountNum++;
+        commentCount.textContent = data.commentCountNum;
+
+        // Save to data
+        data.comments = data.comments || [];
+        data.comments.unshift({
+          name: name,
+          text: text,
+          time: timeLabel,
+          timestamp: Date.now()
+        });
+        saveData(data);
+
+        // Clear inputs
+        textInput.value = '';
+        nameInput.value = '';
+        charRemaining.textContent = '200';
+        charCounter.classList.remove('warning', 'error');
+
+        // Show success message
+        showToast('✅ 留言发表成功！', 'success');
+
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          div.classList.remove('new-comment');
+        }, 400);
+      }
+
+      // Post button click
+      postBtn.addEventListener('click', postComment);
+
+      // Enter key to submit (Ctrl+Enter or Cmd+Enter)
+      textInput.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+          e.preventDefault();
+          postComment();
+        }
+      });
+
+      // Basic HTML escape
+      function escapeHtml(s){
+        return String(s).replace(/[&<>"']/g, function(m){
+          return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+        });
+      }
+
+      // Keyboard accessibility
+      document.addEventListener('keydown', (e) => {
+        // Press 'L' to like
+        if(e.key === 'l' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT'){
+          e.preventDefault();
+          likeBtn.click();
+        }
+        // Press 'C' to focus comment
+        if(e.key === 'c' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT'){
+          e.preventDefault();
+          document.getElementById('focusComment').click();
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
