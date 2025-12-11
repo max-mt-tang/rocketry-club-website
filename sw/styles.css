@@ -802,15 +802,13 @@ button.mobile-menu-toggle {
   display: none !important;
 }
 
-/* Main content container with top margin for fixed navigation */
+/* Main content container */
 #content {
-  margin: 80px 10px 10px 10px; /* Add top margin to account for fixed banner and spacing */
+  margin: 10px 10px 10px 10px; /* No extra top margin needed since banner is not fixed */
 }
 
 @media only screen and (max-width: 768px) {
-  #content {
-    margin-top: 200px; /* Increased margin for mobile banner with all sections visible */
-  }
+  /* Top banner uses same layout as desktop, no special mobile styles needed */
 } 
 
 /* Swimmer information header bar
@@ -909,7 +907,7 @@ select.rd {
 
 /* Top banner styling - contains all search elements */
 .top-banner {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   right: 0;
@@ -2130,148 +2128,6 @@ tbody tr:hover .full>.clickable {
     max-width: 100vw;
   }
 
-  /* Mobile navigation layout */
-  .top-banner {
-    overflow-x: visible;
-    overflow-y: visible;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-  }
-
-  .top-banner .row {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: 10px 40px 10px 10px;
-    width: 100%;
-    max-width: 100%;
-    white-space: normal;
-    gap: 10px;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  /* My Favorites - narrower width, align right with Search Swimmers */
-  .my-favorites-group {
-    width: auto;
-    flex: 0 0 auto;
-    order: 1;
-    display: flex !important;
-    max-width: calc(100% - 150px);
-    margin: 0 80px 0 10px !important;
-  }
-
-  /* Override desktop margin for mobile */
-  .nav-group.my-favorites-group {
-    margin-right: 80px !important;
-    margin-left: 10px !important;
-  }
-
-
-  /* Show BCST and Search groups on mobile - side by side */
-  .bcst-nav-group {
-    display: inline-flex !important;
-    flex-direction: column;
-    width: calc(50% - 15px) !important;
-    max-width: calc(50% - 15px) !important;
-    margin: 0 5px 0 0 !important;
-    padding: 4px 8px 8px 8px !important;
-    flex-shrink: 0;
-    min-width: 0 !important;
-    order: 2;
-    flex: 0 0 calc(50% - 15px) !important;
-    vertical-align: top;
-    box-sizing: border-box !important;
-  }
-
-  .search-nav-group {
-    display: inline-flex !important;
-    flex-direction: column;
-    width: calc(50% - 15px) !important;
-    max-width: calc(50% - 15px) !important;
-    margin: 0 10px 0 5px !important;
-    padding: 4px 8px 8px 8px !important;
-    flex-shrink: 0;
-    min-width: 0 !important;
-    order: 3;
-    flex: 0 0 calc(50% - 15px) !important;
-    vertical-align: top;
-    box-sizing: border-box !important;
-  }
-
-  /* Ensure nav-group doesn't force block display */
-  .nav-group.bcst-nav-group,
-  .nav-group.search-nav-group {
-    display: inline-flex !important;
-  }
-
-  /* Mobile BCST nav group styling */
-  .bcst-nav-group .nav-group-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .bcst-nav-group select {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-bottom: 0 !important;
-    padding: 14px 14px !important;
-    font-size: 15px !important;
-    line-height: 1.5 !important;
-    height: auto !important;
-    min-height: 48px !important;
-    box-sizing: border-box !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    color: #0C2340 !important;
-    -webkit-appearance: none;
-    appearance: none;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    min-width: 0 !important;
-  }
-
-  /* Ensure dropdown options display fully */
-  .bcst-nav-group select option {
-    white-space: normal !important;
-    padding: 10px 12px !important;
-    line-height: 1.5 !important;
-    height: auto !important;
-  }
-
-  /* Mobile search nav group styling */
-  .search-nav-group .nav-group-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .search-nav-group input {
-    width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding: 10px 12px !important;
-    font-size: 14px !important;
-    box-sizing: border-box !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 6px !important;
-  }
-
-  .search-nav-group button {
-    width: 100% !important;
-    padding: 10px 12px !important;
-    font-size: 14px !important;
-    margin: 0 !important;
     white-space: nowrap;
   }
 
@@ -2279,198 +2135,21 @@ tbody tr:hover .full>.clickable {
     gap: 8px;
   }
 
-  /* Show My Favorites group on mobile */
-  .my-favorites-group {
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-    overflow: hidden;
-  }
-
-  /* Hide old mobile menu toggle */
+  /* Hide mobile menu toggle buttons */
   .mobile-menu-toggle,
-  button.mobile-menu-toggle {
-    display: none !important;
-  }
-
-  /* Show mobile navigation toggle button */
+  button.mobile-menu-toggle,
   .mobile-nav-toggle {
-    display: inline-block !important;
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 10001;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    padding: 6px 12px;
-    color: #ffffff;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    height: auto;
-    min-height: 0;
-    white-space: nowrap;
-    overflow: visible;
-    text-overflow: clip;
-    max-width: none;
-    width: auto;
-  }
-
-  .mobile-nav-toggle:hover {
-    background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
-    transform: translateY(-1px);
-  }
-
-  /* Collapsed state - hide navigation sections */
-  .top-banner .row.nav-collapsed .my-favorites-group,
-  .top-banner .row.nav-collapsed .bcst-nav-group,
-  .top-banner .row.nav-collapsed .search-nav-group {
     display: none !important;
   }
 
-  /* Reduce top banner height when collapsed */
-  .top-banner .row.nav-collapsed {
-    min-height: 0;
-    padding-bottom: 0;
-    height: auto;
-  }
-
-  .top-banner.nav-collapsed {
-    min-height: 0;
-    padding-bottom: 0;
-    height: auto;
-  }
-
-  /* Adjust content margin when navigation is collapsed */
-  .top-banner.nav-collapsed ~ #content,
-  body:has(.top-banner.nav-collapsed) #content,
-  body:has(.top-banner .row.nav-collapsed) #content {
-    margin-top: 60px !important;
-  }
-
-  /* Mobile dropdown menu */
+  /* Hide mobile dropdown menu */
   .mobile-dropdown {
-    display: none;
-    position: fixed !important;
-    top: 60px;
-    left: 10px;
-    right: 10px;
-    width: calc(100vw - 20px);
-    max-width: 400px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    z-index: 99999 !important;
-    padding: 20px;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    box-sizing: border-box;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
+    display: none !important;
   }
 
-  .mobile-dropdown.show {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* Mobile dropdown sections */
-  .mobile-dropdown-section {
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .mobile-dropdown-section:last-child {
-    margin-bottom: 0;
-    padding-bottom: 0;
-    border-bottom: none;
-  }
-
-  .mobile-dropdown-section .nav-group-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: #0C2340;
-    text-shadow: none;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  /* Mobile BCST dropdowns in dropdown menu */
-  .mobile-dropdown .bcst-nav-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .mobile-dropdown .bcst-nav-group select {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-    margin-left: 0 !important;
-    padding: 12px 14px !important;
-    font-size: 15px !important;
-    box-sizing: border-box !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 6px !important;
-    background: #ffffff !important;
-    color: #0C2340 !important;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .mobile-dropdown .bcst-nav-group .select-text {
-    margin-bottom: 10px;
-    padding: 12px 14px !important;
-    font-size: 15px !important;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /* Mobile search section */
-  .mobile-dropdown .search-nav-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .mobile-dropdown .search-nav-group input {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-    box-sizing: border-box !important;
-    padding: 12px 14px !important;
-    font-size: 15px !important;
-    margin-left: 0 !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 6px !important;
-  }
-
-  .mobile-dropdown .search-nav-group button {
-    width: 100% !important;
-    margin-bottom: 0 !important;
-    padding: 12px 14px !important;
-    font-size: 15px !important;
-    display: block !important;
-    border-radius: 6px !important;
-  }
-
-  .mobile-dropdown .search-nav-group button:last-child {
-    margin-bottom: 0;
-  }
-
-  /* Ensure content starts below fixed navigation - increased for mobile banner with all sections */
+  /* Ensure content starts below navigation */
   .container {
-    margin-top: 200px;
+    margin-top: 10px;
   }
 
   /* Allow tables to scroll horizontally on mobile */
@@ -2498,37 +2177,6 @@ tbody tr:hover .full>.clickable {
 
 /* Extra small mobile devices */
 @media only screen and (max-width: 480px) {
-
-  /* Further reduce navigation group spacing */
-  .nav-group {
-    margin: 0 6px 0 0;
-    padding: 4px 8px;
-  }
-
-  /* Smaller buttons for very small screens */
-  .nav-group button {
-    padding: 6px 10px;
-    font-size: 13px;
-  }
-
-  /* Adjust search group for small screens */
-  .search-nav-group {
-    min-width: 390px;
-    margin-left: 10px;
-  }
-
-  .search-nav-group input {
-    width: 120px;
-  }
-
-  /* Smaller BCST dropdowns */
-  .bcst-nav-group .select-text {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-  }
-
-  .bcst-nav-group .select-text .arrow {
-    font-size: 8px !important;
-  }
+  /* Top banner uses same layout as desktop, no special mobile styles needed */
 }
 
