@@ -497,7 +497,7 @@ async function displaySwimmerDetails(data) {
             <div style="font-size: 16px; color: #666; font-weight: 500; margin-bottom: 8px;">Generating AI Insights...</div>
             <div style="font-size: 13px; color: #999;" id="ai-insights-status">Analyzing swim data...</div>
         </div>`;
-        tabView.addTab("<p>💡 Insights</p>", loadingHtml);
+        tabView.addTab("<p>AI Insights</p>", loadingHtml);
         
         // Generate initial insights (may not have rankings yet) - do this asynchronously
         (async () => {

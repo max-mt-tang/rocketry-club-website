@@ -81,19 +81,14 @@ tr>* {
 }
 
 /* Column hide/show animations */
-.rk, .mt, .mc {
+.rk, .mt, .mc, .event-count, .rk-wz, .rk-us, .mc-silver, .mc-gold {
   transition: all 0.3s ease;
   opacity: 1;
   transform: scaleX(1);
 }
 
-.rk.hide, .mt.hide, .mc.hide {
-  opacity: 0;
-  transform: scaleX(0);
-  width: 0;
-  padding: 0;
-  border: none;
-  overflow: hidden;
+.rk.hide, .mt.hide, .mc.hide, .event-count.hide, .rk-wz.hide, .rk-us.hide, .mc-silver.hide, .mc-gold.hide {
+  display: none !important;
 }
 
 /* Row highlighting for selected rows */
@@ -1823,6 +1818,32 @@ tbody tr:hover .full>.clickable {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Copy AI Prompt button */
+.copy-ai-prompt-btn {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copy-ai-prompt-btn:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+  box-shadow: 0 3px 6px rgba(108, 117, 125, 0.4);
+  transform: translateY(-1px);
+}
+
+.copy-ai-prompt-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
 }
 
 .ai-analysis-icon {

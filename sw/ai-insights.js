@@ -429,7 +429,7 @@ function identifyStrengths(data) {
     if (!idx) return [];
 
     // Extract rankings and cuts from the rendered table
-    const rankings = extractRankingsFromTable();
+    const rankings = extractRankingsFromDOM();
     const cutsInfo = extractCutsFromTable();
     
     // Create a map of event -> ranking for quick lookup
@@ -943,23 +943,36 @@ function extractCutsFromTable() {
 /**
  * Extract all rankings from the rendered table (BC, PN, Zone/WZ, USA)
  */
-function extractRankingsFromTable() {
+function extractRankingsFromDOM() {
     const rankings = [];
     
     // Find all ranking cells in the Personal Best table
     const tables = document.querySelectorAll('table.fill');
-    if (tables.length === 0) return rankings;
+    console.log(`[extractRankingsFromDOM] Found ${tables.length} tables with class 'fill'`);
+    if (tables.length === 0) {
+        // Try any table as fallback
+        const anyTables = document.querySelectorAll('table');
+        console.log(`[extractRankingsFromDOM] Fallback: Found ${anyTables.length} tables total`);
+        return rankings;
+    }
 
     // Process each table (typically one per course: SCY, LCM, SCM)
-    tables.forEach(table => {
-        const rows = table.querySelectorAll('tbody tr');
-        if (rows.length === 0) return;
+    tables.forEach((table, tableIndex) => {
+        const allRows = table.querySelectorAll('tr');
+        console.log(`[extractRankingsFromDOM] Table ${tableIndex}: ${allRows.length} total rows`);
+        if (allRows.length === 0) return;
 
-        // Find ranking column headers to identify all ranking columns
-        const headerRow = table.querySelector('thead tr:last-child');
-        if (!headerRow) return;
+        // Find ranking column headers - look for tr.gy which contains individual ranking headers
+        // Table structure: tr.wt (main headers), tr.gy (sub-headers including ranking columns)
+        const headerRow = table.querySelector('tr.gy');
+        if (!headerRow) {
+            console.log(`[extractRankingsFromDOM] Table ${tableIndex}: No header row (tr.gy) found`);
+            return;
+        }
 
         const rankingHeaders = headerRow.querySelectorAll('th.rk');
+        console.log(`[extractRankingsFromDOM] Table ${tableIndex}: ${rankingHeaders.length} ranking headers found`);
+        
         const rankingColumnIndices = {
             bc: -1,
             pn: -1,
@@ -972,6 +985,7 @@ function extractRankingsFromTable() {
             const headerText = header.textContent.trim().toUpperCase();
             const bsElement = header.querySelector('.bs');
             const bsText = (bsElement ? bsElement.textContent.trim() : '').toUpperCase();
+            console.log(`[extractRankingsFromDOM] Header ${index}: text="${headerText}", bs="${bsText}", hidden=${header.classList.contains('hide')}`);
             
             // Identify ranking type by header text or position
             if (rankingColumnIndices.bc < 0 && (index === 0 || headerText.includes('BC') || bsText.includes('BC') || headerText.includes('CLUB'))) {
@@ -984,11 +998,26 @@ function extractRankingsFromTable() {
                 rankingColumnIndices.usa = index;
             }
         });
+        console.log(`[extractRankingsFromDOM] Column indices:`, rankingColumnIndices);
+        
+        // Get data rows (not header rows)
+        const rows = table.querySelectorAll('tr:not(.wt):not(.gy)');
+        console.log(`[extractRankingsFromDOM] Table ${tableIndex}: ${rows.length} data rows`);
 
         // Extract rankings from each row
-        rows.forEach((row) => {
+        let rowsWithRankings = 0;
+        rows.forEach((row, rowIdx) => {
             const rankingCells = row.querySelectorAll('td.rk');
             if (rankingCells.length === 0) return;
+            rowsWithRankings++;
+            
+            // Debug first row
+            if (rowIdx === 0) {
+                console.log(`[extractRankingsFromDOM] First data row has ${rankingCells.length} ranking cells`);
+                rankingCells.forEach((cell, i) => {
+                    console.log(`  Cell ${i}: text="${cell.textContent.trim()}", hasLoader=${!!cell.querySelector('.loader')}`);
+                });
+            }
 
             // Extract event name from Course, Stroke, Distance columns
             const courseCell = row.querySelector('td.age');
@@ -1014,15 +1043,24 @@ function extractRankingsFromTable() {
                 return; // Skip if we can't identify the event
             }
             
+            // Helper to extract rank from cell, skipping loaders
+            const getRankFromCell = (cell) => {
+                if (!cell) return null;
+                // Skip if cell contains a loader (still loading)
+                if (cell.querySelector('.loader')) return null;
+                // Get text content, excluding any nested elements with class 'loader'
+                const text = cell.textContent.trim();
+                // Skip if empty or just a dash
+                if (!text || text === '-' || text === '—') return null;
+                const rank = parseInt(text);
+                return (rank > 0 && rank < 10000) ? rank : null;
+            };
+            
             // Extract rankings from cells
-            const bcRank = rankingColumnIndices.bc >= 0 && rankingCells[rankingColumnIndices.bc] ? 
-                          parseInt(rankingCells[rankingColumnIndices.bc].textContent.trim()) || null : null;
-            const pnRank = rankingColumnIndices.pn >= 0 && rankingCells[rankingColumnIndices.pn] ? 
-                          parseInt(rankingCells[rankingColumnIndices.pn].textContent.trim()) || null : null;
-            const zoneRank = rankingColumnIndices.zone >= 0 && rankingCells[rankingColumnIndices.zone] ? 
-                            parseInt(rankingCells[rankingColumnIndices.zone].textContent.trim()) || null : null;
-            const usaRank = rankingColumnIndices.usa >= 0 && rankingCells[rankingColumnIndices.usa] ? 
-                           parseInt(rankingCells[rankingColumnIndices.usa].textContent.trim()) || null : null;
+            const bcRank = rankingColumnIndices.bc >= 0 ? getRankFromCell(rankingCells[rankingColumnIndices.bc]) : null;
+            const pnRank = rankingColumnIndices.pn >= 0 ? getRankFromCell(rankingCells[rankingColumnIndices.pn]) : null;
+            const zoneRank = rankingColumnIndices.zone >= 0 ? getRankFromCell(rankingCells[rankingColumnIndices.zone]) : null;
+            const usaRank = rankingColumnIndices.usa >= 0 ? getRankFromCell(rankingCells[rankingColumnIndices.usa]) : null;
 
             // Get best time from the row
             const timeCell = row.querySelector('td[onclick="selectRow(this)"]');
@@ -1033,6 +1071,8 @@ function extractRankingsFromTable() {
                 // Find best (lowest) ranking
                 const ranks = [bcRank, pnRank, zoneRank, usaRank].filter(r => r && r > 0);
                 const bestRank = ranks.length > 0 ? Math.min(...ranks) : Infinity;
+                
+                console.log(`[extractRankingsFromDOM] Found ranking: ${eventName} BC=${bcRank} PN=${pnRank} WZ=${zoneRank} US=${usaRank}`);
                 
                 rankings.push({
                     event: eventName,
@@ -1046,8 +1086,10 @@ function extractRankingsFromTable() {
                 });
             }
         });
+        console.log(`[extractRankingsFromDOM] Table ${tableIndex}: ${rowsWithRankings} rows had ranking cells`);
     });
 
+    console.log(`[extractRankingsFromDOM] Total rankings extracted: ${rankings.length}`);
     return rankings;
 }
 
@@ -2666,6 +2708,7 @@ function renderInsights(insightsData, isRegenerating = false, swimmerData = null
         html.push('<h2 class="ai-analysis-title">AI Performance Analysis</h2>');
         html.push('</div>');
         html.push('<div class="ai-analysis-header-right">');
+        html.push('<button id="copy-ai-prompt-btn" onclick="copyAIPrompt()" class="copy-ai-prompt-btn" title="Copy swimmer data as a prompt for ChatGPT or Gemini">📋 Copy AI Prompt</button>');
         if (isRegenerating) {
             html.push('<div id="ai-regenerating-indicator" class="ai-regenerating-indicator-inline"><span class="regenerating-icon">⏳</span> <strong>Regenerating...</strong></div>');
         } else {
@@ -2964,13 +3007,27 @@ function renderInsights(insightsData, isRegenerating = false, swimmerData = null
         html.push('</div>');
     }
 
-    // Add game link at the bottom
-    html.push('<div class="ai-insights-section" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid rgba(0, 0, 0, 0.1); text-align: center;">');
-    html.push('<h3 class="ai-insights-title">🎮 Fun & Games</h3>');
-    html.push('<div class="ai-insight-card" style="text-align: center; padding: 20px;">');
-    html.push('<p style="margin-bottom: 15px; color: #495057; font-size: 15px;">Take a break from analyzing times and enjoy a fun swimmer game!</p>');
-    html.push('<a href="swim-game.html" target="_blank" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.2s ease;">🎮 Play Swimmer Game</a>');
-    html.push('<p style="margin-top: 10px; color: #888; font-size: 13px;">Collect medals, hunt sharks, and test your reflexes!</p>');
+    // Add AI Prompt section at the bottom
+    html.push('<div class="ai-insights-section" style="margin-top: 20px;">');
+    html.push('<h3 class="ai-insights-title">Get AI Analysis from <a href="https://chat.openai.com" target="_blank" onclick="copyAIPromptFromTextarea()" style="color: #10a37f; text-decoration: none;">ChatGPT</a> or <a href="https://gemini.google.com" target="_blank" onclick="copyAIPromptFromTextarea()" style="color: #4285f4; text-decoration: none;">Gemini</a></h3>');
+    html.push('<div class="ai-insight-card" style="padding: 20px;">');
+    html.push('<p style="margin-bottom: 15px; color: #495057; font-size: 14px;">Edit and customize this prompt, then copy and paste it into ChatGPT, Gemini, or Claude:</p>');
+    html.push('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">');
+    html.push('<span style="font-size: 12px; color: #6c757d;">💡 Tip: Click "Refresh" after rankings load, then edit if needed</span>');
+    html.push('<div style="display: flex; gap: 8px;">');
+    html.push('<button onclick="refreshAIPromptTextarea()" class="copy-ai-prompt-btn" style="padding: 8px 16px; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🔄 Refresh</button>');
+    html.push('<button onclick="copyAIPromptFromTextarea()" class="copy-ai-prompt-btn" style="padding: 8px 16px;">📋 Copy</button>');
+    html.push('</div>');
+    html.push('</div>');
+    // Generate the prompt
+    let promptText = '';
+    if (swimmerData) {
+        promptText = generateAIPrompt(swimmerData);
+    } else {
+        promptText = 'Loading prompt...';
+    }
+    // Use textarea for editable prompt
+    html.push(`<textarea id="ai-prompt-textarea" style="width: 100%; min-height: 400px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 12px; color: #333; line-height: 1.5; resize: vertical; box-sizing: border-box;">${promptText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>`);
     html.push('</div>');
     html.push('</div>');
 
@@ -3015,11 +3072,9 @@ function getSwimCloudId(swimmer) {
  * Get Gemini API key from localStorage or prompt user
  */
 function getGeminiApiKey() {
-    // Check if API key is stored
-    let apiKey = localStorage.getItem('gemini_api_key');
-    // Don't prompt for API key automatically - AI features are optional
-    // Users can set it manually via browser console: localStorage.setItem('gemini_api_key', 'your-key-here')
-    return apiKey || null;
+    // Return API key from localStorage if available, otherwise return null silently
+    // No longer prompts user for API key
+    return localStorage.getItem('gemini_api_key') || null;
 }
 
 /**
@@ -3029,7 +3084,7 @@ function determineSwimmerSpecialization(data) {
     const idx = data.events.idx;
     if (!idx) return null;
     
-    const rankings = extractRankingsFromTable();
+    const rankings = extractRankingsFromDOM();
     const cutsInfo = extractCutsFromTable();
     
     // Analyze event distribution
@@ -3933,7 +3988,7 @@ function formatSwimmerDataForGemini(data, athleteStats = {}) {
     }
     
     // Add BC and PN rankings if available
-    const rankings = extractRankingsFromTable();
+    const rankings = extractRankingsFromDOM();
     if (rankings.length > 0) {
         summary += `\nClub Rankings (BC = Bellevue Club, PN = Pacific Northwest):\n`;
         // Sort by best ranking and show top 10
@@ -5689,11 +5744,841 @@ async function proceedWithRegeneration(height, weight) {
     }
 }
 
+/**
+ * Generate a copyable AI prompt with swimmer data for ChatGPT/Gemini
+ */
+function generateAIPrompt(data) {
+    if (!data || !data.events || !data.swimmer) {
+        return "No swimmer data available.";
+    }
+    
+    const swimmer = data.swimmer;
+    const events = data.events;
+    const idx = events.idx;
+    
+    // Group events by event string (includes course) and find best times
+    const bestTimes = new Map();
+    const eventListMap = typeof _eventList !== 'undefined' ? _eventList : {};
+    
+    for (const event of events) {
+        const eventKey = event[idx.event];
+        const time = event[idx.time];
+        const date = event[idx.date];
+        const timeInt = window.timeToInt ? window.timeToInt(time) : 0;
+        
+        // Get proper event name from _eventList (e.g., "50 BR SCY")
+        const eventStr = eventListMap[eventKey] || `Event_${eventKey}`;
+        
+        // Skip placeholder events
+        if (eventStr.includes('_')) continue;
+        
+        // Use event string as key to separate SCY/LCM
+        if (!bestTimes.has(eventStr) || timeInt < bestTimes.get(eventStr).timeInt) {
+            bestTimes.set(eventStr, { time, date, timeInt, eventKey, eventStr });
+        }
+    }
+    
+    // Extract rankings from DOM if available
+    let rankingsText = '';
+    try {
+        const rankings = extractRankingsFromDOM();
+        if (rankings && rankings.length > 0) {
+            // Sort by best rank
+            rankings.sort((a, b) => (a.bestRank || 999) - (b.bestRank || 999));
+            for (const r of rankings) {
+                let rankParts = [];
+                if (r.bcRank && r.bcRank > 0) rankParts.push(`BC: #${r.bcRank}`);
+                if (r.pnRank && r.pnRank > 0) rankParts.push(`PN: #${r.pnRank}`);
+                if (r.zoneRank && r.zoneRank > 0) rankParts.push(`WZ: #${r.zoneRank}`);
+                if (r.usaRank && r.usaRank > 0) rankParts.push(`US: #${r.usaRank}`);
+                if (rankParts.length > 0) {
+                    rankingsText += `- ${r.event}: ${r.time} → ${rankParts.join(', ')}\n`;
+                }
+            }
+        }
+    } catch (e) {
+        console.log('Could not extract rankings from DOM:', e);
+    }
+    
+    // Extract motivational standards and meet cuts from DOM
+    let standardsText = '';
+    let majorCutsText = ''; // Separate tracking for major meet cuts
+    const majorCutsList = ['NWReg', 'PNS', 'WZone', 'SECT', 'SprSec', 'SumSec', 'FUT', 'Futures', 'JO', 'FW'];
+    const majorCutsAchieved = {}; // { cutName: [events] }
+    const majorCutsGaps = {}; // { cutName: [{event, gap}] }
+    
+    try {
+        const tables = document.querySelectorAll('table.fill');
+        const stdNames = ['B', 'BB', 'A', 'AA', 'AAA', 'AAAA'];
+        
+        tables.forEach(table => {
+            // First, get meet cut names from header row (tr.gy)
+            const headerRow = table.querySelector('tr.gy');
+            const meetCutNames = [];
+            if (headerRow) {
+                const mcHeaders = headerRow.querySelectorAll('th.mc');
+                mcHeaders.forEach(th => {
+                    // Get short name from .bs element or popup
+                    const bsEl = th.querySelector('.bs');
+                    const popupEl = th.querySelector('.popup-content');
+                    let name = '';
+                    if (bsEl) {
+                        name = bsEl.textContent.trim();
+                    } else if (popupEl) {
+                        name = popupEl.textContent.trim().split(' ')[0];
+                    } else {
+                        name = th.textContent.trim().split('\n')[0];
+                    }
+                    meetCutNames.push(name);
+                });
+            }
+            console.log('[extractStandards] Meet cut names from header:', meetCutNames);
+            
+            const rows = table.querySelectorAll('tr:not(.wt):not(.gy)');
+            rows.forEach(row => {
+                // Get event info
+                const courseCell = row.querySelector('td.age');
+                const strokeCell = row.querySelector('td.bold');
+                const distanceCell = row.querySelector('td.full .clickable');
+                
+                if (!distanceCell) return;
+                
+                const course = courseCell ? courseCell.textContent.trim() : '';
+                const stroke = strokeCell ? strokeCell.textContent.trim() : '';
+                const distance = distanceCell ? distanceCell.textContent.trim() : '';
+                
+                if (!distance || !stroke) return;
+                
+                const eventName = `${distance} ${stroke}${course ? ' ' + course : ''}`;
+                
+                // Extract motivational standards (td.mt cells)
+                const mtCells = row.querySelectorAll('td.mt');
+                const mcCells = row.querySelectorAll('td.mc');
+                
+                let achieved = [];
+                let gaps = [];
+                
+                // Process motivational times (B, BB, A, AA, AAA, AAAA)
+                mtCells.forEach((cell, i) => {
+                    const content = cell.textContent.trim();
+                    if (!content) return;
+                    
+                    // Check if achieved (dp class) or not (ad class)
+                    const isAchieved = cell.querySelector('.dp') !== null;
+                    const deltaEl = cell.querySelector('.time-delta, .sub');
+                    const delta = deltaEl ? deltaEl.textContent.trim() : '';
+                    const stdName = stdNames[i] || `Std${i+1}`;
+                    
+                    if (isAchieved) {
+                        achieved.push(stdName);
+                    } else if (delta) {
+                        gaps.push(`${stdName}: ${delta}`);
+                    }
+                });
+                
+                // Process meet cuts (NWReg, PNS, WZone, etc.) - use header names
+                mcCells.forEach((cell, i) => {
+                    const content = cell.textContent.trim();
+                    if (!content) return;
+                    
+                    const isAchieved = cell.querySelector('.dp') !== null;
+                    const deltaEl = cell.querySelector('.time-delta, .sub');
+                    const delta = deltaEl ? deltaEl.textContent.trim() : '';
+                    const cutName = meetCutNames[i] || `Cut${i+1}`;
+                    
+                    if (isAchieved) {
+                        achieved.push(cutName);
+                        // Track major cuts separately
+                        if (majorCutsList.some(mc => cutName.toUpperCase().includes(mc.toUpperCase()))) {
+                            if (!majorCutsAchieved[cutName]) majorCutsAchieved[cutName] = [];
+                            majorCutsAchieved[cutName].push(eventName);
+                        }
+                    } else if (delta) {
+                        gaps.push(`${cutName}: ${delta}`);
+                        // Track gaps for major cuts
+                        if (majorCutsList.some(mc => cutName.toUpperCase().includes(mc.toUpperCase()))) {
+                            if (!majorCutsGaps[cutName]) majorCutsGaps[cutName] = [];
+                            majorCutsGaps[cutName].push({ event: eventName, gap: delta });
+                        }
+                    }
+                });
+                
+                // Format output: achieved first, then gaps
+                if (achieved.length > 0 || gaps.length > 0) {
+                    let line = `- ${eventName}: `;
+                    if (achieved.length > 0) {
+                        line += `✅ Achieved: ${achieved.join(', ')}`;
+                    }
+                    if (gaps.length > 0) {
+                        if (achieved.length > 0) line += ' | ';
+                        line += `Gaps: ${gaps.join(', ')}`;
+                    }
+                    standardsText += line + '\n';
+                }
+            });
+        });
+        
+        // Build major cuts summary
+        const achievedCuts = Object.keys(majorCutsAchieved);
+        if (achievedCuts.length > 0) {
+            majorCutsText += '### ✅ MAJOR MEET CUTS ACHIEVED:\n';
+            for (const cut of achievedCuts) {
+                majorCutsText += `- **${cut}**: ${majorCutsAchieved[cut].join(', ')}\n`;
+            }
+            majorCutsText += '\n';
+        }
+        
+        // Build closest gaps summary (sorted by gap size)
+        const gapCuts = Object.keys(majorCutsGaps);
+        if (gapCuts.length > 0) {
+            majorCutsText += '### 🎯 CLOSEST TO MAJOR CUTS (Priority Targets):\n';
+            const allGaps = [];
+            for (const cut of gapCuts) {
+                for (const g of majorCutsGaps[cut]) {
+                    allGaps.push({ cut, event: g.event, gap: g.gap });
+                }
+            }
+            // Sort by gap (convert to seconds for sorting)
+            allGaps.sort((a, b) => {
+                const parseGap = (g) => {
+                    const match = g.match(/([+-]?\d+\.?\d*)/);
+                    return match ? parseFloat(match[1]) : 999;
+                };
+                return parseGap(a.gap) - parseGap(b.gap);
+            });
+            // Show top 10 closest
+            const topGaps = allGaps.slice(0, 10);
+            for (const g of topGaps) {
+                majorCutsText += `- **${g.event}** → ${g.cut}: ${g.gap} away\n`;
+            }
+        }
+        
+    } catch (e) {
+        console.log('Could not extract standards from DOM:', e);
+    }
+    
+    // Format best times grouped by course
+    let bestTimesText = '';
+    const scyTimes = [];
+    const lcmTimes = [];
+    const scmTimes = [];
+    
+    for (const [eventStr, bt] of bestTimes) {
+        const parts = eventStr.split(' ');
+        const course = parts[2] || 'SCY';
+        const displayName = `${parts[0]} ${parts[1]}`; // e.g., "50 BR"
+        
+        if (course === 'SCY') {
+            scyTimes.push({ name: displayName, time: bt.time, date: bt.date });
+        } else if (course === 'LCM') {
+            lcmTimes.push({ name: displayName, time: bt.time, date: bt.date });
+        } else if (course === 'SCM') {
+            scmTimes.push({ name: displayName, time: bt.time, date: bt.date });
+        }
+    }
+    
+    // Sort by event name
+    const sortFn = (a, b) => a.name.localeCompare(b.name);
+    scyTimes.sort(sortFn);
+    lcmTimes.sort(sortFn);
+    scmTimes.sort(sortFn);
+    
+    if (scyTimes.length > 0) {
+        bestTimesText += 'Short Course Yards (SCY):\n';
+        for (const bt of scyTimes) {
+            bestTimesText += `- ${bt.name}: ${bt.time} (${bt.date})\n`;
+        }
+    }
+    if (lcmTimes.length > 0) {
+        bestTimesText += '\nLong Course Meters (LCM):\n';
+        for (const bt of lcmTimes) {
+            bestTimesText += `- ${bt.name}: ${bt.time} (${bt.date})\n`;
+        }
+    }
+    if (scmTimes.length > 0) {
+        bestTimesText += '\nShort Course Meters (SCM):\n';
+        for (const bt of scmTimes) {
+            bestTimesText += `- ${bt.name}: ${bt.time} (${bt.date})\n`;
+        }
+    }
+    
+    // Calculate improvement trends
+    let improvementText = '';
+    const recentEvents = new Map();
+    for (const event of events) {
+        const eventKey = event[idx.event];
+        const eventStr = eventListMap[eventKey] || `Event_${eventKey}`;
+        if (eventStr.includes('_')) continue;
+        
+        if (!recentEvents.has(eventStr)) {
+            recentEvents.set(eventStr, []);
+        }
+        recentEvents.get(eventStr).push({
+            time: event[idx.time],
+            date: event[idx.date],
+            timeInt: window.timeToInt ? window.timeToInt(event[idx.time]) : 0
+        });
+    }
+    
+    for (const [eventStr, times] of recentEvents) {
+        if (times.length >= 3) {
+            times.sort((a, b) => a.date.localeCompare(b.date));
+            const oldest = times[0];
+            const newest = times[times.length - 1];
+            const improvement = oldest.timeInt - newest.timeInt;
+            if (improvement !== 0) {
+                const parts = eventStr.split(' ');
+                const eventName = `${parts[0]} ${parts[1]} ${parts[2] || ''}`.trim();
+                const sign = improvement > 0 ? '-' : '+';
+                const delta = Math.abs(improvement) / 100;
+                improvementText += `- ${eventName}: ${sign}${delta.toFixed(2)}s (from ${oldest.time} to ${newest.time})\n`;
+            }
+        }
+    }
+    
+    // Helper function to generate meet history text
+    function generateMeetHistoryText(events, idx) {
+        if (!events || events.length === 0) return 'No meet history available';
+        
+        // Get all unique dates and sort them
+        const dates = events.map(e => e[idx.date]).filter(d => d).sort();
+        if (dates.length === 0) return 'No meet dates available';
+        
+        const firstDate = new Date(dates[0]);
+        const lastDate = new Date(dates[dates.length - 1]);
+        
+        // Count meets by year
+        const meetsByYear = new Map();
+        const dateSet = new Set();
+        for (const event of events) {
+            const date = event[idx.date];
+            if (date && !dateSet.has(date)) {
+                dateSet.add(date);
+                const year = date.substring(0, 4);
+                meetsByYear.set(year, (meetsByYear.get(year) || 0) + 1);
+            }
+        }
+        
+        // Find gaps (more than 6 months between meets)
+        const sortedDates = Array.from(dateSet).sort();
+        const gaps = [];
+        for (let i = 1; i < sortedDates.length; i++) {
+            const prev = new Date(sortedDates[i - 1]);
+            const curr = new Date(sortedDates[i]);
+            const monthsDiff = (curr - prev) / (1000 * 60 * 60 * 24 * 30);
+            if (monthsDiff > 6) {
+                gaps.push({
+                    from: sortedDates[i - 1],
+                    to: sortedDates[i],
+                    months: Math.round(monthsDiff)
+                });
+            }
+        }
+        
+        // Calculate career span
+        const careerMonths = Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24 * 30));
+        const careerYears = (careerMonths / 12).toFixed(1);
+        
+        let text = '';
+        text += `- First recorded meet: ${dates[0]}\n`;
+        text += `- Most recent meet: ${dates[dates.length - 1]}\n`;
+        text += `- Career span: ${careerYears} years (${careerMonths} months)\n`;
+        text += `- Total meet days: ${dateSet.size}\n`;
+        text += `\nMeets per year:\n`;
+        
+        const sortedYears = Array.from(meetsByYear.keys()).sort();
+        for (const year of sortedYears) {
+            const count = meetsByYear.get(year);
+            text += `  ${year}: ${count} meet day${count > 1 ? 's' : ''}\n`;
+        }
+        
+        if (gaps.length > 0) {
+            text += `\n⚠️ SIGNIFICANT GAPS DETECTED (6+ months without competing):\n`;
+            for (const gap of gaps) {
+                text += `  - ${gap.months} months: ${gap.from} to ${gap.to}\n`;
+            }
+            text += `\nNote: Gaps may indicate breaks from swimming, injury recovery, or returning after time away.\n`;
+        } else {
+            text += `\n✅ No significant gaps - consistent competition history\n`;
+        }
+        
+        return text;
+    }
+    
+    // Gender codes: 1 = Female, 2 = Male (handle both string and number)
+    // Try to get gender from swimmer object first, then from events
+    let genderVal = swimmer.gender;
+    if (genderVal === undefined || genderVal === null || genderVal === '') {
+        // Try to get from first event
+        if (events.length > 0 && idx.gender !== undefined) {
+            genderVal = events[0][idx.gender];
+        }
+    }
+    let genderStr = 'Male'; // Default to Male if unknown
+    if (genderVal == 1 || genderVal === 'F' || genderVal === 'Female') {
+        genderStr = 'Female';
+    } else if (genderVal == 2 || genderVal === 'M' || genderVal === 'Male') {
+        genderStr = 'Male';
+    }
+    
+    // Get name - handle potential duplicates
+    let fullName = '';
+    if (swimmer.firstName && swimmer.lastName) {
+        let first = swimmer.firstName.trim();
+        let last = swimmer.lastName.trim();
+        
+        // Remove duplicate words in firstName (e.g., "Ray Ray" -> "Ray")
+        const firstWords = first.split(/\s+/);
+        const uniqueFirstWords = [];
+        for (const word of firstWords) {
+            if (!uniqueFirstWords.some(w => w.toLowerCase() === word.toLowerCase())) {
+                uniqueFirstWords.push(word);
+            }
+        }
+        first = uniqueFirstWords.join(' ');
+        
+        // Check if firstName already contains lastName (e.g., "Ray Tang" + "Tang")
+        const firstLower = first.toLowerCase();
+        const lastLower = last.toLowerCase();
+        if (firstLower.endsWith(lastLower) || firstLower.includes(lastLower)) {
+            fullName = first;
+        } else {
+            fullName = `${first} ${last}`;
+        }
+    } else if (swimmer.name) {
+        fullName = swimmer.name.trim();
+    } else {
+        fullName = (swimmer.firstName || swimmer.lastName || 'Unknown').trim();
+    }
+    
+    const prompt = `You are an expert swim coach analyzing a competitive swimmer's performance data. Please provide personalized insights, identify strengths and areas for improvement, and give specific training recommendations.
+
+## SWIMMER PROFILE
+- Name: ${fullName}
+- Age: ${swimmer.age}
+- Approximate Grade: ${swimmer.age >= 18 ? 'College' : swimmer.age >= 17 ? '12th (Senior)' : swimmer.age >= 16 ? '11th (Junior)' : swimmer.age >= 15 ? '10th (Sophomore)' : swimmer.age >= 14 ? '9th (Freshman)' : swimmer.age >= 13 ? '8th' : swimmer.age >= 12 ? '7th' : swimmer.age >= 11 ? '6th' : swimmer.age >= 10 ? '5th' : swimmer.age + ' years old'}
+- Gender: ${genderStr}
+- Club: ${swimmer.clubName}
+- LSC: ${swimmer.lsc}
+- Years until College Recruiting: ${swimmer.age >= 16 ? 'NOW - recruiting age' : 16 - swimmer.age + ' years'}
+
+## PERSONAL BEST TIMES (Short Course Yards)
+${bestTimesText || 'No times recorded'}
+
+## RANKINGS (Age Group: ${swimmer.age >= 13 && swimmer.age <= 14 ? '13-14' : swimmer.age >= 11 && swimmer.age <= 12 ? '11-12' : swimmer.age >= 9 && swimmer.age <= 10 ? '9-10' : swimmer.age <= 8 ? '8 & Under' : 'Open'})
+BC = Club ranking, PN = LSC (Pacific Northwest) ranking, WZ = Western Zone ranking, US = USA Swimming national ranking
+${rankingsText || '(No rankings data available)'}
+
+## 🏆 MAJOR MEET QUALIFICATION STATUS
+${majorCutsText || '(No major meet cuts data available - make sure Personal Best tab is loaded)'}
+
+## MOTIVATIONAL STANDARDS & MEET CUTS (Full Detail)
+✅ = Achieved, time shown = gap to achieve
+B < BB < A < AA < AAA < AAAA (USA Swimming motivational times)
+FW = Far Western, JO = Junior Olympics, PNS = PN Swimming Champs, SECT = Sectionals, FUT = Futures
+${standardsText || 'Standards not yet loaded - make sure Personal Best tab is showing'}
+
+## RECENT IMPROVEMENT TRENDS
+${improvementText || 'Not enough data for trend analysis'}
+
+## COMPETITION HISTORY & GAPS
+${generateMeetHistoryText(events, idx)}
+
+## TOTAL RECORDED SWIMS
+${events.length} competition swims across ${bestTimes.size} different events
+
+---
+
+Please provide a comprehensive analysis:
+
+## 1. SWIMMER TYPE ANALYSIS
+- Is this swimmer a **sprinter** (excels at 50/100), **middle distance** (200/500), or **distance** swimmer (500+)?
+- What stroke(s) are their specialty? (Freestyle, Backstroke, Breaststroke, Butterfly, IM)
+- Based on their times across events, what's their natural strength?
+
+## 2. TOP EVENTS & RANKINGS ANALYSIS
+- Identify their **3 best events** based on rankings (lowest rank = best)
+- Which events should they prioritize for competitions?
+- Any events where their ranking is surprisingly good or bad compared to their times?
+
+## 3. NEXT STANDARDS TO TARGET (Priority Order)
+- List events where they're **closest to achieving the next standard** (smallest gap)
+- For each, specify: current time, target time, gap, and estimated timeline to achieve
+- Which 2-3 events should they focus on for the NEXT meet to make cuts?
+
+## 3.5 REGIONAL & NATIONAL MEET CUTS ANALYSIS
+
+Analyze this swimmer's path to qualifying for these major meets (in order of difficulty):
+
+### NWReg (Northwest Regional Championships)
+- Which events are they closest to NWReg cuts?
+- Gap to NWReg cut for top 3 events
+- Realistic timeline to achieve NWReg cuts
+- This is often the first "big meet" goal for developing swimmers
+
+### PNS_14u (Pacific Northwest Swimming 14 & Under Championships)
+- Age eligibility check (must be 14 or under)
+- Which events can they qualify in before aging out?
+- Priority events for PNS qualification
+- If already qualified, which additional events should they target?
+
+### WZone (Western Zone Championships)
+- Western Zone is a multi-LSC regional championship
+- Gap analysis for WZone cuts
+- Which events are realistic for WZone qualification?
+- Timeline: When could they make their first WZone team?
+
+### SprSec / SumSec (Spring Sectionals / Summer Sectionals)
+- Sectionals are the step between LSC championships and national-level meets
+- Gap to Sectionals cuts (usually 2-5 seconds faster than JO)
+- Which events have best chance for Sectionals?
+- Typical age swimmers first qualify: 14-16
+- Is this swimmer on track for Sectionals within 1-2 years?
+
+### Futures (USA Swimming Futures Championships)
+- Futures is the entry point to national-level competition
+- Gap to Futures cuts for realistic events
+- What improvement rate would be needed to hit Futures?
+- Typical path: JO → Sectionals → Futures → Junior Nationals
+- Realistic assessment: Is Futures achievable for this swimmer?
+
+### Meet Cuts Progression Table
+Create a table showing the path for their top 3 events:
+| Event | Current | NWReg | PNS | WZone | Sectionals | Futures | Jr Nationals |
+|-------|---------|-------|-----|-------|------------|---------|--------------|
+| Gap in seconds from current time to each cut |
+
+### Priority Meet Cuts (Next 6-12 months)
+Based on their current times and improvement trajectory:
+1. Which meet cut should be their #1 priority?
+2. Which event gives them the best chance?
+3. What specific time do they need?
+4. Realistic timeline with monthly checkpoints
+
+## 4. TRAINING RECOMMENDATIONS
+Based on their swimmer type and goals:
+- **Endurance work** - Do they need more aerobic base? (long swims, threshold sets)
+- **Speed work** - Do they need more explosiveness? (sprints, race pace work)
+- **Technique focus** - Any stroke-specific drills recommended?
+- **Turns & underwaters** - Often worth 0.5-1.0 seconds
+- **Starts** - Can gain 0.2-0.5 seconds with better dives
+
+## 5. GOAL SETTING & ACTION PLAN
+
+### SHORT-TERM GOALS (Next 1-3 months)
+- **Immediate focus events** (1-2 events to prioritize right now)
+- **Target times** for the next meet
+- **Weekly training focus**: What should they work on in practice this month?
+- **Technique cues**: 2-3 specific things to think about during races
+
+### MEDIUM-TERM GOALS (3-6 months / This Season)
+- **Season-end target times** for top 3 events
+- **Meet cuts to achieve** this season (be specific: which standard, which event)
+- **Training phase**: What should this part of the season focus on? (base building, race prep, taper)
+- **Competition plan**: How many meets? Which are "A" meets vs training meets?
+
+### LONG-TERM GOALS (1-2 years)
+- **Where should they be in 1 year?** (specific times)
+- **Where should they be in 2 years?** (specific times)
+- **What standards should they target?** (JO, Sectionals, Futures, Junior Nationals)
+- **Development priorities**: What skills/events to develop over the next 1-2 years?
+
+### HOW TO GET THERE (Action Plan)
+- **Practice priorities**: What % of practice should be sprint vs distance vs technique?
+- **Dryland/Strength**: What should they add outside the pool?
+- **Mental training**: Race strategy, dealing with pressure, goal visualization
+- **Recovery**: Sleep, nutrition, rest day importance
+- **Key milestones**: Checkpoints to measure progress (e.g., "By March, should be under X in 100 Free")
+
+## 6. LONG-TERM PROJECTION (D1 College Swimming Potential)
+Consider this swimmer's age (${swimmer.age}) and current times:
+- **By Age 16 / Grade 11**: What times would they need to be D1 recruitable?
+- **Junior Nationals / Futures cuts**: Are these realistic goals? By what age?
+- **Sectionals / Speedo Series**: When could they achieve these cuts?
+- Based on their improvement rate, project where they could be at age 16-18
+- What percentage of swimmers at their current level make D1? Be realistic.
+
+D1 Recruiting Reference Times (approximate):
+- Men: 50 FR ~20.0, 100 FR ~44.0, 200 FR ~1:38, 100 BR ~55.0, 100 BK ~49.0, 100 FL ~48.0, 200 IM ~1:50
+- Women: 50 FR ~23.0, 100 FR ~50.0, 200 FR ~1:48, 100 BR ~1:02, 100 BK ~55.0, 100 FL ~55.0, 200 IM ~2:02
+
+## 7. COMPETITION HISTORY ANALYSIS
+- Is this swimmer actively competing or returning after a break?
+- If there are gaps, how might this affect their development?
+- For returning swimmers: What's typical for comeback timeline? How long to return to previous level?
+- Competition frequency: Are they competing enough to improve?
+
+## 8. MOTIVATIONAL ASSESSMENT
+- What makes this swimmer special based on their data?
+- Realistic encouragement based on actual progress
+- Key milestones to celebrate along the way
+- For returning swimmers: Celebrate the comeback, set realistic re-entry goals
+
+## 9. VISUALIZATIONS & TABLES (Generate diagrams, charts, and summary tables)
+
+### 9.1 Event Strength Radar Chart
+Create a visual showing relative strength across strokes (FR, BK, BR, FL, IM) using a text-based radar/spider chart or bar chart.
+
+### 9.2 Progress Timeline
+Show a timeline visualization of:
+- Past progress (key milestones achieved)
+- Current position
+- Future goals with target dates
+
+### 9.3 Standards Gap Chart
+Create a bar chart showing how close they are to each standard:
+\`\`\`
+Event     | Current | B | BB | A | AA | JO | FW
+----------|---------|---|----|----|----|----|----
+50 FR     | ████████████░░░░░░░░░  (75% to B)
+100 BR    | ██████████████████░░░  (90% to BB)
+\`\`\`
+
+### 9.4 Training Focus Pie Chart
+Show recommended training time allocation:
+- Sprint work %
+- Distance/Endurance %
+- Technique %
+- Dryland %
+
+### 9.5 Development Trajectory Graph
+Show projected times over the next 2-3 years with milestones marked.
+
+### 9.6 Summary Tables (Markdown format)
+
+**Table 1: Top Events Summary**
+| Event | Best Time | BC Rank | Standard Achieved | Next Target | Gap |
+|-------|-----------|---------|-------------------|-------------|-----|
+| ... | ... | ... | ... | ... | ... |
+
+**Table 2: Goal Timeline**
+| Timeframe | Event | Current Time | Target Time | Training Focus |
+|-----------|-------|--------------|-------------|----------------|
+| 1 month | ... | ... | ... | ... |
+| 3 months | ... | ... | ... | ... |
+| 6 months | ... | ... | ... | ... |
+| 1 year | ... | ... | ... | ... |
+
+**Table 3: Weekly Training Plan Template**
+| Day | Focus | Main Set Example | Distance |
+|-----|-------|------------------|----------|
+| Mon | ... | ... | ... |
+| Tue | ... | ... | ... |
+| ... | ... | ... | ... |
+
+**Table 4: Standards Checklist**
+| Event | B | BB | A | AA | JO | FW | Sectionals |
+|-------|---|----|----|----|----|-----|------------|
+| 50 FR | ✅ | ✅ | ⏳ | ❌ | ❌ | ❌ | ❌ |
+| (✅ = achieved, ⏳ = close/in progress, ❌ = not yet) |
+
+**Table 5: D1 Projection Comparison**
+| Event | Current Time | D1 Target | Gap | Projected Age to Reach |
+|-------|--------------|-----------|-----|------------------------|
+| ... | ... | ... | ... | ... |
+
+Be specific with times and data. Don't be overly optimistic - give honest, actionable feedback a coach would give. If this swimmer has gaps in their history, acknowledge it and provide comeback-specific advice.`;
+
+    return prompt;
+}
+
+/**
+ * Copy AI prompt to clipboard
+ */
+async function copyAIPrompt() {
+    const data = window.refreshInsights?._data;
+    if (!data) {
+        alert('No swimmer data available. Please load a swimmer first.');
+        return;
+    }
+    
+    const prompt = generateAIPrompt(data);
+    
+    try {
+        await navigator.clipboard.writeText(prompt);
+        
+        // Show success feedback
+        const btn = document.getElementById('copy-ai-prompt-btn');
+        if (btn) {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#28a745';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+        }
+    } catch (err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = prompt;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('AI prompt copied to clipboard! Paste it into ChatGPT or Gemini.');
+    }
+}
+
+/**
+ * Copy AI prompt from the editable textarea
+ */
+async function copyAIPromptFromTextarea() {
+    const textarea = document.getElementById('ai-prompt-textarea');
+    if (!textarea) {
+        alert('Prompt not found. Please try again.');
+        return;
+    }
+    
+    const prompt = textarea.value;
+    
+    try {
+        await navigator.clipboard.writeText(prompt);
+        
+        // Show success feedback on the button
+        const buttons = document.querySelectorAll('.copy-ai-prompt-btn');
+        buttons.forEach(btn => {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#28a745';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+        });
+    } catch (err) {
+        // Fallback for older browsers
+        textarea.select();
+        document.execCommand('copy');
+        alert('Prompt copied to clipboard!');
+    }
+}
+
+/**
+ * Refresh the AI prompt textarea with latest data (including rankings)
+ */
+async function refreshAIPromptTextarea() {
+    const textarea = document.getElementById('ai-prompt-textarea');
+    const data = window.refreshInsights?._data;
+    
+    if (!textarea) {
+        console.log('Textarea not found');
+        return;
+    }
+    
+    if (!data) {
+        alert('No swimmer data available.');
+        return;
+    }
+    
+    // Show loading state
+    const buttons = document.querySelectorAll('.copy-ai-prompt-btn');
+    buttons.forEach(btn => {
+        if (btn.textContent.includes('Refresh')) {
+            btn.innerHTML = '⏳ Loading...';
+        }
+    });
+    
+    try {
+        // Switch to Personal Best tab first to ensure table is rendered
+        if (window.TabView && window.TabView.tab) {
+            TabView.tab('swimmerTabView', 0);
+        }
+        
+        // Wait for tab switch and initial render
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Wait for BC rankings to finish loading
+        let maxWait = 10; // Max 10 seconds
+        let waited = 0;
+        while (waited < maxWait) {
+            const loaders = document.querySelectorAll('table.fill td.rk .loader');
+            const loadedCells = document.querySelectorAll('table.fill td.rk .clickable');
+            console.log(`[refreshAIPromptTextarea] Loaders: ${loaders.length}, Loaded cells: ${loadedCells.length}`);
+            
+            // If we have some loaded cells and few loaders, we're good enough
+            if (loaders.length === 0 || (loadedCells.length > 0 && loaders.length <= 2)) {
+                console.log(`[refreshAIPromptTextarea] Rankings appear loaded after ${waited}s`);
+                break;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            waited++;
+        }
+        
+        if (waited >= maxWait) {
+            console.log(`[refreshAIPromptTextarea] Timeout waiting for rankings, continuing anyway`);
+        }
+        
+        // Trigger PN/WZ/US calculation if not already done
+        if (window.calculatePNWZUSRankings) {
+            try {
+                await window.calculatePNWZUSRankings();
+                // Wait a bit for background actions to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (e) {
+                console.log('Could not calculate PN/WZ/US rankings:', e);
+            }
+        }
+        
+        // Debug: Check what tables are found
+        const tables = document.querySelectorAll('table.fill');
+        console.log(`[refreshAIPromptTextarea] Found ${tables.length} tables`);
+        tables.forEach((t, i) => {
+            const rankCells = t.querySelectorAll('td.rk');
+            const withNumbers = Array.from(rankCells).filter(c => {
+                const text = c.textContent.trim();
+                return text && !isNaN(parseInt(text)) && parseInt(text) > 0;
+            });
+            console.log(`[refreshAIPromptTextarea] Table ${i}: ${rankCells.length} rank cells, ${withNumbers.length} with numbers`);
+        });
+        
+        // Regenerate the prompt with latest data
+        const newPrompt = generateAIPrompt(data);
+        textarea.value = newPrompt;
+        
+        // Show feedback
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Loading') || btn.textContent.includes('Refresh')) {
+                btn.innerHTML = '✅ Updated!';
+                btn.style.background = '#28a745';
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 Refresh';
+                    btn.style.background = '';
+                }, 1500);
+            }
+        });
+        
+        // Switch back to AI Insights tab
+        if (window.TabView && window.TabView.tab) {
+            TabView.tab('swimmerTabView', 4); // AI Insights is tab 4
+        }
+    } catch (e) {
+        console.error('Error refreshing AI prompt:', e);
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Loading')) {
+                btn.innerHTML = '❌ Error';
+                btn.style.background = '#dc3545';
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 Refresh';
+                    btn.style.background = '';
+                }, 2000);
+            }
+        });
+    }
+}
+
 window.generateInsights = generateInsights;
 window.renderInsights = renderInsights;
 window.getSwimCloudId = getSwimCloudId;
 window.getGeminiAnalysis = getGeminiAnalysis;
 window.getGeminiApiKey = getGeminiApiKey;
 window.regenerateAIAnalysis = regenerateAIAnalysis;
-window.createSpecialtyChart = createSpecialtyChart; // Make available globally for independent use
+window.createSpecialtyChart = createSpecialtyChart;
+window.generateAIPrompt = generateAIPrompt;
+window.copyAIPrompt = copyAIPrompt;
+window.copyAIPromptFromTextarea = copyAIPromptFromTextarea;
+window.refreshAIPromptTextarea = refreshAIPromptTextarea;
 

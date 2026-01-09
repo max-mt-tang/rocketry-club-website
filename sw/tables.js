@@ -56,14 +56,14 @@ function createBestTimeTableHeader(data) {
 
     let html = [
         '<tr class="wt"><th rowspan="2">Course</th><th rowspan="2">Stroke</th><th rowspan="2">Distance</th>',
-        '<th rowspan="2">Best<br>Time</th><th rowspan="2">Event<br>Date</th><th rowspan="2">',
+        '<th rowspan="2">Best<br>Time</th><th rowspan="2">Event<br>Date</th><th class="event-count hide" rowspan="2" onclick="toggleEventCountCheckbox()" style="cursor: pointer;">',
         window.createPopup("Event<br>Count", "Total Event Count"),
-        '</th><th class="rk" colspan="4" onclick="toggleRankingsCheckbox()" style="cursor: pointer;">Rankings</th>',
+        '</th><th class="rk" colspan="1" onclick="toggleRankingsCheckbox()" style="cursor: pointer;">Ranking</th>',
     ];
 
     if (data.swimmer.age < 19) {
         html.push(
-            `<th colspan="${stdName.length}" class="mt" onclick="toggleMotivationalCheckbox()" style="cursor: pointer;">`,
+            `<th colspan="${stdName.length}" class="mt hide" onclick="toggleMotivationalCheckbox()" style="cursor: pointer;">`,
             window.createPopup(
                 "Motivational Standards",
                 "USA Swimming 2024-2028 Motivational Standards",
@@ -78,32 +78,42 @@ function createBestTimeTableHeader(data) {
     );
 
     // Add individual ranking column headers in second row
+    // BC is always visible, PN/WZ/US are hidden by default for performance
     html.push(
         '<th class="rk">',
         window.createPopup(window.getClubDisplayCode(data.swimmer.club, data.swimmer.clubName), data.swimmer.clubName),
         '</th>',
-        '<th class="rk">',
+        '<th class="rk rk-pn hide" onclick="togglePNWZUSRankingsCheckbox()" style="cursor: pointer;">',
         window.createPopup(data.swimmer.lsc, window.getLSCName(data.swimmer.lsc)),
         '</th>',
-        '<th class="rk">',
+        '<th class="rk rk-wz hide" onclick="togglePNWZUSRankingsCheckbox()" style="cursor: pointer;">',
         window.createPopup(
             data.swimmer.zone ? data.swimmer.zone[0] + "Z" : "?Z",
             data.swimmer.zone ? data.swimmer.zone + " Zone" : "Unknown Zone"
         ),
         '</th>',
-        '<th class="rk">',
+        '<th class="rk rk-us hide" onclick="togglePNWZUSRankingsCheckbox()" style="cursor: pointer;">',
         window.createPopup("US", "USA Swimming"),
         '</th>'
     );
 
     if (data.swimmer.age < 19) {
         for (let std of stdName) {
-            html.push('<th class="mt">', std, "</th>");
+            html.push('<th class="mt hide">', std, "</th>");
         }
     }
 
     for (let std of meetStds) {
-        html.push('<th class="mc">', window.createPopup(std.short, std.meet), "</th>");
+        let extraClass = "";
+        let hideClass = "";
+        if (std.short === "SILVER") {
+            extraClass = " mc-silver";
+            hideClass = " hide";
+        } else if (std.short === "GOLD") {
+            extraClass = " mc-gold";
+            hideClass = " hide";
+        }
+        html.push(`<th class="mc${extraClass}${hideClass}">`, window.createPopup(std.short, std.meet), "</th>");
     }
 
     html.push("</tr>");
@@ -132,31 +142,21 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
         : data.swimmer.age;
     let meetStds = window.getMeetStandards ? window.getMeetStandards(cutsAge) : [];
 
+    // Toggle buttons - essential toggles visible, rest in collapsible "More" section
     let html = [
         '<div class="content" style="margin-top: 8px;">',
         '<div class="center-row" style="margin-top: -5px;">',
+    ];
+
+    // Essential toggles (always visible)
+    html.push(
         '<style id="show-rk-style"></style>',
         window.createCheckbox(
             "show-rk",
-            "show rankings",
+            "rankings",
             true,
             `window.toggleColumns('.rk', this.checked)`,
         ),
-    ];
-
-    if (data.swimmer.age < 19) {
-        html.push(
-            '<style id="show-mt-style"></style>',
-            window.createCheckbox(
-                "show-mt",
-                "motivation times",
-                true,
-                `window.toggleColumns('.mt', this.checked)`,
-            ),
-        );
-    }
-
-    html.push(
         '<style id="show-mc-style"></style>',
         window.createCheckbox(
             "show-mc",
@@ -166,14 +166,59 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
         ),
     );
 
-    // Shadow toggle for motivational standards
+    // "More columns" expandable section
     html.push(
+        '<span class="more-columns-toggle" onclick="window.toggleMoreColumns()" style="cursor: pointer; margin-left: 12px; padding: 4px 8px; color: #555; font-size: 13px; font-weight: 500; user-select: none; background: #f0f0f0; border-radius: 4px;">',
+        '⚙️ more',
+        '</span>',
+        '<span class="more-columns-section" style="display: none;">',
+    );
+
+    // Hidden toggles in "More" section
+    html.push(
+        '<style id="show-event-count-style"></style>',
+        window.createCheckbox(
+            "show-event-count",
+            "event count",
+            false,
+            `window.toggleColumns('.event-count', this.checked)`,
+        ),
+        '<style id="show-rk-pn-wz-us-style"></style>',
+        window.createCheckbox(
+            "show-rk-pn-wz-us",
+            "PN/WZ/US",
+            false,
+            `window.togglePNWZUSRankings(this.checked)`,
+        ),
+    );
+
+    if (data.swimmer.age < 19) {
+        html.push(
+            '<style id="show-mt-style"></style>',
+            window.createCheckbox(
+                "show-mt",
+                "motivation",
+                false,
+                `window.toggleColumns('.mt', this.checked)`,
+            ),
+        );
+    }
+
+    html.push(
+        '<style id="show-silver-gold-style"></style>',
+        window.createCheckbox(
+            "show-silver-gold",
+            "silver/gold",
+            false,
+            `window.toggleColumns('.mc-silver, .mc-gold', this.checked)`,
+        ),
         window.createCheckbox(
             "show-shadow",
-            "show shadow",
+            "shadow",
             false,
             `window.toggleShadow(this.checked)`,
         ),
+        '</span>', // close more-columns-section
     );
 
     // Top 3 BC ranking highlight toggle (initially disabled)
@@ -323,9 +368,10 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
                 time,
                 "</td><td>",
                 formatDate(date),
-                "</td><td>",
+                "</td><td class=\"event-count hide\">",
                 count,
                 "</td>",
+                // BC (Club) ranking - always calculated
                 await buildRankingCell(
                     data.swimmer.pkey,
                     timeInt,
@@ -336,7 +382,8 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
                     data.swimmer.lsc,
                     data.swimmer.club,
                 ),
-                await buildRankingCell(
+                // PN (LSC) ranking - placeholder, calculate on demand for performance
+                buildPNWZUSPlaceholderCell(
                     data.swimmer.pkey,
                     timeInt,
                     genderStr,
@@ -344,21 +391,32 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
                     ageKey,
                     data.swimmer.zone,
                     data.swimmer.lsc,
+                    null,
+                    "rk-pn",
                 ),
-                await buildRankingCell(
+                // WZ ranking - placeholder, calculate on demand for performance
+                buildPNWZUSPlaceholderCell(
                     data.swimmer.pkey,
                     timeInt,
                     genderStr,
                     event,
                     ageKey,
                     data.swimmer.zone,
+                    null,
+                    null,
+                    "rk-wz",
                 ),
-                await buildRankingCell(
+                // US ranking - placeholder, calculate on demand for performance
+                buildPNWZUSPlaceholderCell(
                     data.swimmer.pkey,
                     timeInt,
                     genderStr,
                     event,
                     ageKey,
+                    null,
+                    null,
+                    null,
+                    "rk-us",
                 ),
             );
 
@@ -380,6 +438,7 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
             }
 
             let motivationTimeCount = stds.length;
+            let meetStdIndex = 0;
             for (let std of meetStds) {
                 if (!std || !std[genderStr]) {
                     console.log("Meet standard missing data:", {
@@ -387,15 +446,33 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
                         genderStr: genderStr,
                         hasGender: std ? !!std[genderStr] : false,
                     });
-                    stds.push(["", 0]);
+                    stds.push(["", 0, ""]);
+                    meetStdIndex++;
                     continue;
                 }
-                stds.push(std[genderStr].get(eventStr) || ["", 0]);
+                let extraClass = "";
+                if (std.short === "SILVER") {
+                    extraClass = "mc-silver hide";
+                } else if (std.short === "GOLD") {
+                    extraClass = "mc-gold hide";
+                }
+                let stdData = std[genderStr].get(eventStr) || ["", 0];
+                stds.push([stdData[0], stdData[1], extraClass]);
+                meetStdIndex++;
             }
 
             let preTime;
-            for (let [i, [stdStr, stdInt]] of stds.entries()) {
-                let css = i < motivationTimeCount ? "mt" : "mc";
+            for (let [i, stdData] of stds.entries()) {
+                let stdStr = stdData[0];
+                let stdInt = stdData[1];
+                let extraClass = "";
+                if (i >= motivationTimeCount && stdData.length > 2) {
+                    extraClass = stdData[2];
+                }
+                let css = i < motivationTimeCount ? "mt hide" : "mc";
+                if (extraClass) {
+                    css += " " + extraClass;
+                }
                 if (!stdInt) {
                     html.push(`<td class="${css}"></td>`);
                     continue;
@@ -910,6 +987,43 @@ function toggleColumns(selector, show) {
             element.classList.add("hide");
         }
     });
+    
+    // Update Rankings header colspan if ranking columns were toggled
+    // Check for .rk, .rk-wz, or .rk-us selectors
+    if (selector.includes(".rk")) {
+        requestAnimationFrame(() => {
+            updateRankingsColspan();
+        });
+    }
+}
+
+function updateRankingsColspan() {
+    // Find all tables
+    const tables = document.querySelectorAll('table.fill');
+    
+    tables.forEach((table) => {
+        // Find ranking header cells (BC, PN, WZ, US) in the second row of this table
+        const rankingHeaders = table.querySelectorAll('tr.gy th.rk');
+        let visibleCount = 0;
+        
+        rankingHeaders.forEach((header) => {
+            // Check if header is visible (not hidden via .hide class)
+            if (!header.classList.contains('hide')) {
+                visibleCount++;
+            }
+        });
+        
+        // Ensure at least 1 column is visible (minimum for BC)
+        if (visibleCount === 0) {
+            visibleCount = 1;
+        }
+        
+        // Update Rankings header (first row) in this table to use the correct colspan
+        const rankingsHeaders = table.querySelectorAll('tr.wt th.rk[colspan]');
+        rankingsHeaders.forEach((rankingsHeader) => {
+            rankingsHeader.setAttribute('colspan', visibleCount);
+        });
+    });
 }
 
 function toggleShadow(show) {
@@ -945,6 +1059,7 @@ function toggleRankingsCheckbox() {
     if (checkbox) {
         checkbox.checked = !checkbox.checked;
         toggleColumns(".rk", checkbox.checked);
+        updateRankingsColspan();
     }
 }
 
@@ -961,6 +1076,154 @@ function toggleMeetCheckbox() {
     if (checkbox) {
         checkbox.checked = !checkbox.checked;
         toggleColumns(".mc", checkbox.checked);
+    }
+}
+
+function toggleEventCountCheckbox() {
+    const checkbox = document.getElementById("show-event-count");
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        toggleColumns(".event-count", checkbox.checked);
+    }
+}
+
+// Toggle PN/WZ/US rankings checkbox (called when clicking column headers)
+function togglePNWZUSRankingsCheckbox() {
+    const checkbox = document.getElementById("show-rk-pn-wz-us");
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        togglePNWZUSRankings(checkbox.checked);
+    }
+}
+
+// Legacy function for backward compatibility
+function toggleWZUSRankingsCheckbox() {
+    togglePNWZUSRankingsCheckbox();
+}
+
+// Toggle PN/WZ/US rankings visibility and calculate if showing
+async function togglePNWZUSRankings(show) {
+    toggleColumns(".rk-pn, .rk-wz, .rk-us", show);
+    
+    // Ensure colspan is updated
+    requestAnimationFrame(() => {
+        updateRankingsColspan();
+    });
+    
+    // If showing and rankings haven't been calculated yet, calculate them now
+    if (show) {
+        await calculatePNWZUSRankings();
+    }
+}
+
+// Legacy function for backward compatibility
+async function toggleWZUSRankings(show) {
+    await togglePNWZUSRankings(show);
+}
+
+// Calculate PN/WZ/US rankings for all placeholder cells
+async function calculatePNWZUSRankings() {
+    const placeholders = document.querySelectorAll('.pn-wz-us-placeholder');
+    
+    if (placeholders.length === 0) {
+        console.log('[calculatePNWZUSRankings] No placeholder cells found');
+        return;
+    }
+    
+    console.log(`[calculatePNWZUSRankings] Calculating rankings for ${placeholders.length} cells...`);
+    
+    // Process in batches to avoid overwhelming the browser
+    const batchSize = 5;
+    for (let i = 0; i < placeholders.length; i += batchSize) {
+        const batch = Array.from(placeholders).slice(i, i + batchSize);
+        
+        await Promise.all(batch.map(async (cell) => {
+            // Skip if already calculated
+            if (cell.dataset.calculated === 'true') {
+                return;
+            }
+            
+            const pkey = cell.dataset.pkey;
+            const timeInt = parseInt(cell.dataset.timeint);
+            const genderStr = cell.dataset.gender;
+            const event = cell.dataset.event;
+            const ageKey = cell.dataset.agekey;
+            const zone = cell.dataset.zone || null;
+            const lsc = cell.dataset.lsc || null;
+            const club = cell.dataset.club || null;
+            const extraClass = cell.dataset.extraclass || '';
+            
+            // Build the ranking cell content
+            const rankDataKey = window.getRankDataKey(genderStr, event, ageKey, zone, lsc, club);
+            const id = rankDataKey + "_" + pkey;
+            
+            // Update cell with loader
+            cell.innerHTML = window.createClickableDiv(
+                '<div class="loader"></div>',
+                `go('rank','${rankDataKey}')`
+            );
+            cell.id = id;
+            
+            // Queue background action to fetch ranking
+            if (window._backgroundActions) {
+                window._backgroundActions.push([window.getRank, [rankDataKey, timeInt, pkey, id]]);
+            }
+            
+            cell.dataset.calculated = 'true';
+            cell.classList.remove('pn-wz-us-placeholder');
+        }));
+        
+        // Small delay between batches
+        if (i + batchSize < placeholders.length) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+    }
+    
+    // Background actions will be processed automatically by the background runner
+    console.log('[calculatePNWZUSRankings] Done queuing calculations - background runner will process them');
+}
+
+// Legacy function for backward compatibility
+async function calculateWZUSRankings() {
+    await calculatePNWZUSRankings();
+}
+
+// Build a placeholder cell for PN/WZ/US rankings (not calculated until shown)
+function buildPNWZUSPlaceholderCell(pkey, timeInt, genderStr, event, ageKey, zone, lsc, club, extraClass = "") {
+    const cellClass = "full rk hide" + (extraClass ? " " + extraClass : "") + " pn-wz-us-placeholder";
+    
+    // Store data attributes for later calculation
+    return `<td class="${cellClass}" 
+        data-pkey="${pkey}" 
+        data-timeint="${timeInt}" 
+        data-gender="${genderStr}" 
+        data-event="${event}" 
+        data-agekey="${ageKey}" 
+        data-zone="${zone || ''}" 
+        data-lsc="${lsc || ''}" 
+        data-club="${club || ''}" 
+        data-extraclass="${extraClass}"
+        data-calculated="false">
+        <div class="clickable">-</div>
+    </td>`;
+}
+
+function toggleSilverGoldRankingsCheckbox() {
+    const checkbox = document.getElementById("show-silver-gold");
+    if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        toggleColumns(".mc-silver, .mc-gold", checkbox.checked);
+    }
+}
+
+// Toggle the "More columns" expandable section
+function toggleMoreColumns() {
+    const toggleBtn = document.querySelector('.more-columns-toggle');
+    const section = document.querySelector('.more-columns-section');
+    if (toggleBtn && section) {
+        const isHidden = section.style.display === 'none';
+        section.style.display = isHidden ? 'inline' : 'none';
+        toggleBtn.textContent = isHidden ? '◀ less' : '▶ more';
     }
 }
 
@@ -1165,11 +1428,22 @@ window.createMeetTable = createMeetTable;
 window.buildTimeCell = buildTimeCell;
 window.selectRow = selectRow;
 window.toggleColumns = toggleColumns;
+window.updateRankingsColspan = updateRankingsColspan;
 window.toggleShadow = toggleShadow;
 window.initializeShadowToggle = initializeShadowToggle;
 window.toggleRankingsCheckbox = toggleRankingsCheckbox;
 window.toggleMotivationalCheckbox = toggleMotivationalCheckbox;
 window.toggleMeetCheckbox = toggleMeetCheckbox;
+window.toggleEventCountCheckbox = toggleEventCountCheckbox;
+window.toggleWZUSRankingsCheckbox = toggleWZUSRankingsCheckbox;
+window.togglePNWZUSRankingsCheckbox = togglePNWZUSRankingsCheckbox;
+window.toggleWZUSRankings = toggleWZUSRankings;
+window.togglePNWZUSRankings = togglePNWZUSRankings;
+window.calculateWZUSRankings = calculateWZUSRankings;
+window.calculatePNWZUSRankings = calculatePNWZUSRankings;
+window.buildPNWZUSPlaceholderCell = buildPNWZUSPlaceholderCell;
+window.toggleSilverGoldRankingsCheckbox = toggleSilverGoldRankingsCheckbox;
+window.toggleMoreColumns = toggleMoreColumns;
 window.toggleTop3Highlight = toggleTop3Highlight;
 window.updateCutsForAge = updateCutsForAge;
 window.getAgeFromCutsValue = getAgeFromCutsValue;

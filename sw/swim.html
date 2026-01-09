@@ -358,6 +358,20 @@ Last Updated: 2025
                                     <label for="show-mc">meet cuts</label>
                                 </span>
                             </span>
+                            <style id="show-event-count-style"></style>
+                            
+                            <!-- Event Count Toggle - Shows/hides event count column -->
+                            <span style="display: inline-block">
+                                <span class="checkbox-wrapper">
+                                    <input
+                                        type="checkbox"
+                                        id="show-event-count"
+                                        onchange="if(window.toggleColumns){window.toggleColumns('.event-count', this.checked);} document.getElementById('show-event-count-style').innerText = this.checked ? '' : '.event-count{display:none}'"
+                                        checked=""
+                                    />
+                                    <label for="show-event-count">event count</label>
+                                </span>
+                            </span>
                         </div>
                         
                         <!-- ========================================

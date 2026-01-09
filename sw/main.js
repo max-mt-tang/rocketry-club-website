@@ -171,7 +171,10 @@ function buildAdvancedSettings() {
 // ================================================================================
 
 async function rank(key) {
-    let data = await loadRank(key);
+    // Check if force refresh is requested (via URL parameter or hash)
+    const forceRefresh = window.location.hash.includes('refresh=true') || 
+                        new URLSearchParams(window.location.search).get('refresh') === 'true';
+    let data = await loadRank(key, forceRefresh);
     await showRank(data, key);
 }
 
@@ -458,15 +461,39 @@ async function showRankTable(data, key) {
 
     let idx = data.values.idx;
     let html = [];
+    
+    // Extract event from key to fetch Personal Best times
+    let [genderStr, ageKey, eventCode, zone, lsc, club] = decodeRankMapKey(key);
+    
+    // Get event name for display
+    let eventName = eventCode;
+    if (typeof _eventList !== 'undefined' && _eventList[eventCode]) {
+        eventName = _eventList[eventCode];
+    } else if (window.getEventName) {
+        eventName = window.getEventName(eventCode) || eventCode;
+    }
+    
+    // Format age group display
+    let ageDisplay = ageKey.replace('_', '-').replace('O', '+');
+    
+    // Get team name
+    let teamDisplay = club || 'All Teams';
+    if (club && window._clubDictinary && window._clubDictinary.loadClubName) {
+        // Club name might be a code, try to get full name
+        teamDisplay = club;
+    }
 
     // Modern table container with enhanced styling
     html.push('<div class="ranking-table-container">');
 
-    // Add table controls
+    // Add table controls with event/age/team info
     html.push(`
         <div class="table-controls">
             <div class="results-info">
-                <span class="results-count">Showing ${Math.min(data.values.length, 100)} of ${data.values.length} swimmers</span>
+                <span class="results-count">
+                    <strong>${eventName}</strong> · ${genderStr} ${ageDisplay} · ${teamDisplay} · 
+                    Showing ${Math.min(data.values.length, 100)} of ${data.values.length} swimmers
+                </span>
             </div>
             <div class="table-actions">
                 <button class="btn-secondary" onclick="exportRankings()">
@@ -478,7 +505,7 @@ async function showRankTable(data, key) {
 
     // Modern table with enhanced styling
     html.push('<div class="table-wrapper">');
-    html.push('<table class="ranking-table">');
+    html.push('<table class="ranking-table" id="ranking-detail-table">');
     html.push('<thead>');
     html.push('<tr>');
     html.push('<th class="rank-col">Rank</th>');
@@ -491,18 +518,195 @@ async function showRankTable(data, key) {
     html.push('</thead>');
     html.push('<tbody>');
 
+    // Fetch Personal Best times directly from API for all swimmers
+    // IMPORTANT: We do NOT filter by event code in the API call because that returns unreliable/outdated data.
+    // Instead, we fetch ALL events for each swimmer and find the best time for the specific event locally.
+    console.log(`[showRankTable] Fetching Personal Best times for ${data.values.length} swimmers for event ${eventCode}...`);
+    
+    // Collect all pkeys
+    let pkeys = [];
+    for (let i = 0; i < Math.min(data.values.length, 100); i++) {
+        let row = data.values[i];
+        if (row && row[idx.pkey]) {
+            pkeys.push(row[idx.pkey]);
+        }
+    }
+    
+    // Fetch Personal Best times for all swimmers in batches
+    let personalBestMap = new Map(); // Map<pkey, {time, date, timeInt}>
+    
+    // Fetch in batches of 10 to avoid overwhelming the API
+    const batchSize = 10;
+    for (let i = 0; i < pkeys.length; i += batchSize) {
+        let batch = pkeys.slice(i, i + batchSize);
+        let promises = batch.map(async (pkey) => {
+            try {
+                // Fetch ALL events for this swimmer (no event filter)
+                // This is more reliable than filtering by event code in the API
+                let bodyObj = {
+                    metadata: [
+                        {
+                            title: "time",
+                            dim: "[UsasSwimTime.SwimTimeFormatted]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "date",
+                            dim: "[SeasonCalendar.CalendarDate (Calendar)]",
+                            datatype: "datetime",
+                            level: "days",
+                        },
+                        {
+                            title: "event",
+                            dim: "[UsasSwimTime.SwimEventKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            title: "meet",
+                            dim: "[UsasSwimTime.MeetKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            dim: "[UsasSwimTime.PersonKey]",
+                            datatype: "numeric",
+                            filter: {
+                                equals: pkey,
+                            },
+                            panel: "scope",
+                        },
+                        // NO event filter here - fetch ALL events
+                    ],
+                    count: 5000,
+                };
+                
+                let events = await fetchSwimValues(bodyObj, "event");
+                if (events && events.length > 0 && events.idx) {
+                    let eventsIdx = events.idx;
+                    let bestTime = null;
+                    let bestDate = null;
+                    let bestTimeInt = Infinity;
+                    let bestMeet = null;
+                    
+                    // Find best time for the specific event locally
+                    for (let event of events) {
+                        if (event[eventsIdx.event] == eventCode) {
+                            let eventTimeInt = window.timeToInt(event[eventsIdx.time]);
+                            if (eventTimeInt < bestTimeInt) {
+                                bestTimeInt = eventTimeInt;
+                                bestTime = event[eventsIdx.time];
+                                bestDate = event[eventsIdx.date] ? event[eventsIdx.date].substring(0, 10) : null;
+                                bestMeet = event[eventsIdx.meet];
+                            }
+                        }
+                    }
+                    
+                    if (bestTime) {
+                        personalBestMap.set(pkey, {
+                            time: bestTime,
+                            date: bestDate,
+                            timeInt: bestTimeInt,
+                            meet: bestMeet
+                        });
+                    }
+                }
+            } catch (e) {
+                console.log(`Error fetching Personal Best for pkey ${pkey}:`, e);
+            }
+        });
+        
+        await Promise.all(promises);
+    }
+    
+    console.log(`[showRankTable] Fetched Personal Best times for ${personalBestMap.size} swimmers`);
+    
+    // Collect new meet IDs from Personal Best and load them into meetDict
+    let newMeetIds = new Set();
+    for (let [pkey, pb] of personalBestMap) {
+        if (pb.meet && (!data.meetDict || !data.meetDict.has(pb.meet))) {
+            newMeetIds.add(pb.meet);
+        }
+    }
+    
+    if (newMeetIds.size > 0 && window._meetDictinary) {
+        console.log(`[showRankTable] Loading ${newMeetIds.size} new meet names for Personal Best meets`);
+        let newMeetDict = await window._meetDictinary.loadMeets(newMeetIds);
+        // Merge into existing meetDict
+        if (!data.meetDict) {
+            data.meetDict = newMeetDict;
+        } else {
+            for (let [meetId, meetData] of newMeetDict) {
+                if (!data.meetDict.has(meetId)) {
+                    data.meetDict.set(meetId, meetData);
+                }
+            }
+        }
+    }
+    
+    // Build array of swimmer data using Personal Best times
+    let swimmerData = [];
     for (let i = 0; i < Math.min(data.values.length, 100); i++) {
         let row = data.values[i];
         if (!row) continue;
-
+        
+        let pkey = row[idx.pkey];
+        let rankingTime = row[idx.time] || '';
+        let rankingDate = row[idx.date] || '';
+        let rankingTimeInt = window.timeToInt ? window.timeToInt(rankingTime) : 0;
+        
+        // Use Personal Best time if available, otherwise use ranking time
+        let personalBest = personalBestMap.get(pkey);
+        let personalBestTime = personalBest ? personalBest.time : rankingTime;
+        let personalBestDate = personalBest ? personalBest.date : rankingDate;
+        let personalBestTimeInt = personalBest ? personalBest.timeInt : rankingTimeInt;
+        let personalBestMeet = (personalBest && personalBest.meet) ? personalBest.meet : row[idx.meet];
+        
+        // Fix duplicate name issue (e.g., "Ray Tang Tang" -> "Ray Tang")
+        let swimmerName = row[idx.name] || 'Unknown';
+        if (swimmerName && swimmerName !== 'Unknown') {
+            // Remove duplicate consecutive words
+            const words = swimmerName.split(/\s+/);
+            const dedupedWords = [];
+            for (let w of words) {
+                if (dedupedWords.length === 0 || w.toLowerCase() !== dedupedWords[dedupedWords.length - 1].toLowerCase()) {
+                    dedupedWords.push(w);
+                }
+            }
+            swimmerName = dedupedWords.join(' ');
+        }
+        
+        swimmerData.push({
+            row: row,
+            rank: i + 1,
+            pkey: pkey,
+            name: swimmerName,
+            time: personalBestTime,
+            date: personalBestDate,
+            timeInt: personalBestTimeInt,
+            club: row[idx.club] || '',
+            meet: personalBestMeet,
+            isUpdated: (personalBest && personalBestTimeInt < rankingTimeInt)
+        });
+    }
+    
+    // Sort by Personal Best time (fastest first)
+    swimmerData.sort((a, b) => a.timeInt - b.timeInt);
+    
+    // Get current swimmer's pkey to highlight their row
+    let currentSwimmerPkey = null;
+    if (window.refreshInsights && window.refreshInsights._data && window.refreshInsights._data.swimmer) {
+        currentSwimmerPkey = String(window.refreshInsights._data.swimmer.pkey);
+    }
+    
+    // Render table rows
+    for (let i = 0; i < swimmerData.length; i++) {
+        let swimmer = swimmerData[i];
         let rank = i + 1;
-        let rankClass = '';
-        if (rank === 1) rankClass = 'first-place';
-        else if (rank === 2) rankClass = 'second-place';
-        else if (rank === 3) rankClass = 'third-place';
-        else if (rank <= 10) rankClass = 'top-ten';
+        
+        // Check if this is the current swimmer
+        let isCurrentSwimmer = currentSwimmerPkey && String(swimmer.pkey) === currentSwimmerPkey;
+        let rowClass = isCurrentSwimmer ? 'ranking-row current-swimmer' : 'ranking-row';
 
-        html.push(`<tr class="ranking-row ${rankClass}" onclick="selectRankingRow(this)">`);
+        html.push(`<tr class="${rowClass}" onclick="selectRankingRow(this)">`);
 
         // Rank with simple numbers
         html.push('<td class="rank-cell">');
@@ -510,41 +714,46 @@ async function showRankTable(data, key) {
         html.push('</td>');
 
         // Swimmer name with clickable link
-        let swimmerName = row[idx.name] || 'Unknown';
-        let pkey = row[idx.pkey];
         html.push('<td class="name-cell">');
-        if (pkey) {
-            html.push(`<a href="#swimmer/${pkey}" class="swimmer-link">${swimmerName}</a>`);
+        if (swimmer.pkey) {
+            let nameDisplay = isCurrentSwimmer ? `<strong>${swimmer.name}</strong>` : swimmer.name;
+            html.push(`<a href="#swimmer/${swimmer.pkey}" class="swimmer-link">${nameDisplay}</a>`);
         } else {
-            html.push(`<span class="swimmer-name">${swimmerName}</span>`);
+            html.push(`<span class="swimmer-name">${swimmer.name}</span>`);
         }
         html.push('</td>');
 
-        // Time with enhanced formatting
-        let time = row[idx.time] || '';
-        html.push(`<td class="time-cell"><span class="time-value">${time}</span></td>`);
+        // Time with enhanced formatting - use Personal Best if available
+        let timeDisplay = swimmer.time || '';
+        let timeClass = swimmer.isUpdated ? 'time-value updated-time' : 'time-value';
+        html.push(`<td class="time-cell"><span class="${timeClass}" title="${swimmer.isUpdated ? 'Updated with Personal Best time' : ''}">${timeDisplay}</span></td>`);
 
-        // Date with better formatting
-        let date = row[idx.date] || '';
-        if (date) {
-            let formattedDate = window.formatDate ? window.formatDate(date) : date;
+        // Date with better formatting - use Personal Best date if available
+        let dateDisplay = swimmer.date || '';
+        if (dateDisplay) {
+            let formattedDate = window.formatDate ? window.formatDate(dateDisplay) : dateDisplay;
             html.push(`<td class="date-cell">${formattedDate}</td>`);
         } else {
             html.push('<td class="date-cell">-</td>');
         }
 
         // Club with hover tooltip
-        let club = row[idx.club] || '';
-        html.push(`<td class="club-cell"><span class="club-name" title="${club}">${club}</span></td>`);
+        html.push(`<td class="club-cell"><span class="club-name" title="${swimmer.club}">${swimmer.club}</span></td>`);
 
         // Meet with enhanced styling
+        // meetDict stores [date, meetName] arrays
         let meetName = 'Unknown';
-        if (data.meetDict && data.meetDict.get && row[idx.meet]) {
-            let meetData = data.meetDict.get(row[idx.meet]);
-            if (meetData && typeof meetData === 'object' && meetData.name) {
-                meetName = meetData.name;
-            } else if (meetData && meetData[data.meetDict.idx?.name]) {
-                meetName = meetData[data.meetDict.idx.name];
+        if (data.meetDict && data.meetDict.get && swimmer.meet) {
+            let meetData = data.meetDict.get(swimmer.meet);
+            if (meetData) {
+                // meetData is an array: [date, meetName]
+                if (Array.isArray(meetData) && meetData.length > 1) {
+                    meetName = meetData[1] || 'Unknown';
+                } else if (typeof meetData === 'string') {
+                    meetName = meetData;
+                } else if (meetData.name) {
+                    meetName = meetData.name;
+                }
             }
         }
         html.push(`<td class="meet-cell"><span class="meet-name" title="${meetName}">${meetName}</span></td>`);
@@ -565,7 +774,7 @@ async function showRankTable(data, key) {
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             overflow: hidden;
-            margin: 20px 0;
+            margin: 5px 0;
         }
 
         .table-controls {
@@ -584,7 +793,7 @@ async function showRankTable(data, key) {
 
         .results-count {
             color: #6c757d;
-            font-size: 0.9em;
+            font-size: 1.1em;
             font-weight: 500;
         }
 
@@ -623,24 +832,25 @@ async function showRankTable(data, key) {
 
         .ranking-table {
             border-collapse: collapse;
-            font-size: 1.2em;
+            font-size: 0.95em;
             table-layout: auto;
             width: auto;
         }
 
         .ranking-table thead th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 16px;
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px 12px;
             text-align: left;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            font-size: 1em;
+            font-size: 1.05em;
             position: sticky;
             top: 0;
             z-index: 10;
             white-space: nowrap;
+            border-bottom: 2px solid #dee2e6;
         }
 
         .ranking-table tbody tr {
@@ -658,13 +868,22 @@ async function showRankTable(data, key) {
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        .ranking-table tbody tr.current-swimmer {
+            background: #fff3cd !important;
+            border-left: 4px solid #ffc107;
+        }
+
+        .ranking-table tbody tr.current-swimmer:hover {
+            background: #ffe69c !important;
+        }
+
         .ranking-table tbody tr.selected {
             background: #2196f3 !important;
             color: white;
         }
 
         .ranking-table td {
-            padding: 10px 16px;
+            padding: 6px 10px;
             border-bottom: 1px solid #e9ecef;
             vertical-align: middle;
             text-align: left;
@@ -681,25 +900,6 @@ async function showRankTable(data, key) {
             font-weight: 700;
             color: #495057;
             font-size: 1.2em;
-        }
-
-        .first-place {
-            background: #fff3cd !important;
-            color: #856404;
-        }
-
-        .second-place {
-            background: #f8f9fa !important;
-            color: #495057;
-        }
-
-        .third-place {
-            background: #ffeaa7 !important;
-            color: #6c757d;
-        }
-
-        .top-ten {
-            background: #e8f5e8 !important;
         }
 
         .name-cell {
@@ -736,6 +936,18 @@ async function showRankTable(data, key) {
             background: #f1f3f4;
             border-radius: 4px;
             display: inline-block;
+        }
+        
+        .time-value.updated-time {
+            color: #0d6efd;
+            background: #e7f3ff;
+            font-weight: 800;
+        }
+        
+        .time-value.updated-time::after {
+            content: " ★";
+            font-size: 0.8em;
+            color: #ffc107;
         }
 
         .date-cell {
@@ -797,12 +1009,12 @@ async function showRankTable(data, key) {
             }
 
             .ranking-table thead th {
-                padding: 10px 12px;
-                font-size: 0.9em;
+                padding: 6px 8px;
+                font-size: 1.0em;
             }
 
             .ranking-table td {
-                padding: 8px 12px;
+                padding: 5px 8px;
             }
 
             .rank-cell {
@@ -849,149 +1061,77 @@ async function showRank(data, key) {
 
     let oldBrowser = !(navigator.userAgent.indexOf("Chrome/120.") < 0);
 
-    // Enhanced control panel with modern styling
+    // Control panel with dropdowns - compact inline layout
     html.push(`
-        <div class="ranking-controls-panel">
-            <div class="controls-header">
-                <h3 class="controls-title">
-                    <span class="filter-icon">🎯</span>
-                    Ranking Filters
-                </h3>
-                <div class="controls-description">
-                    Customize your view by selecting different criteria
-                </div>
-            </div>
-
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label class="control-label">Age Group:</label>
-                    <div class="control-input">
-                        ${createAgeGenderSelect(key, oldBrowser)}
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">Course:</label>
-                    <div class="control-input">
-                        ${createCourseSelect(key, oldBrowser)}
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">Event:</label>
-                    <div class="control-input">
-                        ${showEventButtons(key)}
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label">Team:</label>
-                    <div class="control-input">
-                        ${await buildClubSelect(key, oldBrowser)}
-                    </div>
-                </div>
-            </div>
+        <div class="ranking-controls-compact">
+            <span class="control-item"><label>Age:</label>${createAgeGenderSelect(key, oldBrowser)}</span>
+            <span class="control-item"><label>Course:</label>${createCourseSelect(key, oldBrowser)}</span>
+            <span class="control-item"><label>Event:</label>${showEventButtons(key)}</span>
+            <span class="control-item"><label>Team:</label>${await buildClubSelect(key, oldBrowser)}</span>
         </div>
     `);
 
-
-    html.push(await showRankTableTitle(data.values, key));
+    // Removed ranking-header div
 
     html.push(
-        '<div id="rank-table" class="top-margin">',
+        '<div id="rank-table">',
         await showRankTable(data, key),
         "</div>",
     );
 
-    // Enhanced hide 25 button
+    // Enhanced hide 25 button and refresh button
     html.push('<div class="page-controls">');
+    html.push('<button onclick="refreshRankings()" style="margin-right: 10px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">🔄 Refresh Rankings</button>');
     html.push(addHide25Botton());
     html.push('</div>');
 
     // Add comprehensive CSS for the enhanced controls
     html.push(`
         <style>
-        .ranking-controls-panel {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .controls-header {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 20px 24px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .controls-title {
-            margin: 0 0 8px 0;
-            color: #495057;
-            font-size: 1.3em;
-            font-weight: 600;
+        .ranking-controls-compact {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 5px 0;
+            margin-bottom: 5px;
+            width: 100%;
         }
 
-        .filter-icon, .swim-icon {
-            font-size: 1.1em;
+        .ranking-controls-compact .control-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .controls-description {
-            color: #6c757d;
-            font-size: 0.9em;
-            margin: 0;
-        }
-
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding: 24px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .control-label {
+        .ranking-controls-compact .control-item label {
             font-weight: 600;
             color: #495057;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .ranking-controls-compact select,
+        .ranking-controls-compact .drop-layout {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
             font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .control-input {
-            display: flex;
-            align-items: center;
-        }
-
-        .control-input select {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 0.95em;
             background: white;
             color: #495057;
-            transition: all 0.2s ease;
             cursor: pointer;
+            min-width: 80px;
         }
 
-        .control-input select:hover {
+        .ranking-controls-compact select:hover,
+        .ranking-controls-compact .drop-layout:hover {
             border-color: #667eea;
         }
 
-        .control-input select:focus {
+        .ranking-controls-compact select:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
         }
 
         .event-selection-panel {
@@ -1189,3 +1329,57 @@ if (!window.showGraph) {
 
 window.settings = settings;
 window.rank = rank;
+
+// Function to refresh rankings by clearing cache and reloading
+async function refreshRankings() {
+    const currentHash = window.location.hash;
+    const key = currentHash.replace('#rank/', '');
+    
+    // Show loading indicator
+    const refreshButton = document.querySelector('button[onclick="refreshRankings()"]');
+    const originalText = refreshButton ? refreshButton.textContent : '';
+    if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = '🔄 Refreshing...';
+    }
+    
+    try {
+        // Clear the cache for this ranking
+        localStorage.removeItem("rank/" + key);
+        
+        // Also clear related club caches
+        let [genderStr, ageKey, event, zone, lsc, club] = decodeRankMapKey(key);
+        if (club) {
+            let clubName = club;
+            if (club && club.length <= 4 && window._clubDictinary) {
+                clubName = await window._clubDictinary.loadClubName(lsc, club);
+            }
+            if (clubName) {
+                let clubCacheKey = "club/" + lsc + "_" + clubName + "_" + ageKey;
+                localStorage.removeItem(clubCacheKey);
+            }
+        }
+        
+        // Clear all rank/ caches to be thorough (they'll reload fresh)
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const cacheKey = localStorage.key(i);
+            if (cacheKey && cacheKey.startsWith('rank/')) {
+                localStorage.removeItem(cacheKey);
+            }
+        }
+        
+        // Reload the ranking page with force refresh
+        let data = await loadRank(key, true);
+        await showRank(data, key);
+    } catch (error) {
+        console.error('Error refreshing rankings:', error);
+        alert('Error refreshing rankings. Please try again.');
+    } finally {
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.textContent = originalText;
+        }
+    }
+}
+
+window.refreshRankings = refreshRankings;
