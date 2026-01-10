@@ -766,6 +766,8 @@ th[onclick]:hover {
   margin: 0 10px 0 0;
   padding: 4px 0 8px 0;
   border-radius: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
   border: none;
   background: transparent;
   backdrop-filter: none;
@@ -1006,6 +1008,8 @@ select.rd {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 1000;
   padding: 8px 5px;
+  width: max-content;
+  min-width: 100%;
 } 
 
 .row {
@@ -1015,12 +1019,17 @@ select.rd {
 .top-banner .row {
   margin-top: 3px;
   margin-bottom: 0;
+  width: max-content;
+  min-width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
 } 
 
 .row>* {
   margin: auto 2px;
   display: inline-block;
   vertical-align: top;
+  flex-shrink: 0;
 } 
 
 .container {
