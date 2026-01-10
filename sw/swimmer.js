@@ -1154,14 +1154,12 @@ async function loadClubSearch(value, all) {
     };
 
     if (!all) {
+        // Limit to 18 and under when not searching all
         bodyObj.metadata[1].filter = {
             to: 18,
         };
-    } else {
-        bodyObj.metadata[1].filter = {
-            from: 19,
-        };
     }
+    // When all=true, no age filter is applied - search all ages
 
     return await fetchSwimValues(bodyObj);
 }
@@ -1277,14 +1275,12 @@ async function loadSwimmerSearchByFirstAndLastName(firstName, lastName, all) {
     };
 
     if (!all) {
+        // Limit to 18 and under when not searching all
         bodyObj.metadata[1].filter = {
             to: 18,
         };
-    } else {
-        bodyObj.metadata[1].filter = {
-            from: 19,
-        };
     }
+    // When all=true, no age filter is applied - search all ages
 
     return await fetchSwimValues(bodyObj);
 }
