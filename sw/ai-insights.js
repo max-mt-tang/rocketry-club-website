@@ -152,11 +152,13 @@ function countPNS14UCuts(bestTimesOrData, gender) {
             }
         }
         console.log('[countPNS14UCuts] Found best times for events:', Object.keys(bestTimes));
-    } else if (bestTimesOrData.bestTimes) {
+    } else if (bestTimesOrData.allTimeBestTimes || bestTimesOrData.bestTimes) {
         // This is peer data with bestTimes property (keyed by event code)
-        // Need to convert event codes to event strings
+        // Prefer allTimeBestTimes for cut checking (covers entire career)
+        const timesToUse = bestTimesOrData.allTimeBestTimes || bestTimesOrData.bestTimes;
         const eventList = window._eventList || {};
-        for (const [eventCode, eventData] of Object.entries(bestTimesOrData.bestTimes)) {
+        console.log('[countPNS14UCuts] Processing peer data with', Object.keys(timesToUse).length, 'events');
+        for (const [eventCode, eventData] of Object.entries(timesToUse)) {
             let eventStr = eventList[eventCode];
             if (!eventStr && window.getEventName) {
                 eventStr = window.getEventName(eventCode);
@@ -164,6 +166,25 @@ function countPNS14UCuts(bestTimesOrData, gender) {
             if (eventStr && eventData && eventData.timeInt) {
                 bestTimes[eventStr] = eventData;
             }
+        }
+        console.log('[countPNS14UCuts] Converted to event strings:', Object.keys(bestTimes));
+    } else if (typeof bestTimesOrData === 'object' && Object.keys(bestTimesOrData).length > 0) {
+        // Raw bestTimes object passed directly (keyed by event code)
+        const eventList = window._eventList || {};
+        const firstKey = Object.keys(bestTimesOrData)[0];
+        // Check if keys look like event codes (numbers) vs event strings
+        if (!isNaN(parseInt(firstKey))) {
+            console.log('[countPNS14UCuts] Processing raw bestTimes object with', Object.keys(bestTimesOrData).length, 'events');
+            for (const [eventCode, eventData] of Object.entries(bestTimesOrData)) {
+                let eventStr = eventList[eventCode];
+                if (!eventStr && window.getEventName) {
+                    eventStr = window.getEventName(eventCode);
+                }
+                if (eventStr && eventData && eventData.timeInt) {
+                    bestTimes[eventStr] = eventData;
+                }
+            }
+            console.log('[countPNS14UCuts] Converted raw data to event strings:', Object.keys(bestTimes));
         }
     }
     
@@ -6989,7 +7010,7 @@ ${(() => {
     const peersWithSpeed = targetGroup.peers.map(p => {
         const pTimes = getAllPeerTimes(p.id);
         const peerData = peerSwimmerData[p.id];
-        const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+        const cuts = peerData ? countPNS14UCuts(peerData, genderStr) : { count: 0, events: [] };
         
         // Use 50 Free or 100 Free as speed indicator
         const speed50 = pTimes['50 Free SCY']?.timeInt || 99999;
@@ -7191,11 +7212,11 @@ ${(() => {
 ${targetGroup.peers.map(p => {
     const pTimes = getAllPeerTimes(p.id);
     const peerData = peerSwimmerData[p.id];
-    const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+    const cuts = peerData ? countPNS14UCuts(peerData, genderStr) : { count: 0, events: [] };
     const hasData = Object.keys(pTimes).length > 0;
     const cutsStr = cuts.count > 0 ? `**${cuts.count}** (${cuts.events.slice(0,2).join(', ')})` : '0';
     const peerGroup = getSwimmerGroup(p.name) || targetGroup.group;
-    return `| ${p.name} | ${p.age} | ${peerGroup} | ${p.id || 'N/A'} | ${cutsStr} | ${hasData ? '✅ Loaded' : '⏳ REFRESH'} |`;
+    return `| ${p.name} | ${p.age} | ${peerGroup} | ${p.id || 'N/A'} | ${cutsStr} | ${hasData ? '✅ Loaded' : '⏳ No data'} |`;
 }).join('\n')}
 
 ---
@@ -7207,7 +7228,7 @@ ${targetGroup.peers.map(p => {
     for (const peer of targetGroup.peers) {
         const pTimes = getAllPeerTimes(peer.id);
         const peerData = peerSwimmerData[peer.id];
-        const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+        const cuts = peerData ? countPNS14UCuts(peerData, genderStr) : { count: 0, events: [] };
         
         const timesArr = Object.entries(pTimes)
             .map(([event, data]) => ({ event, time: data.time }))
