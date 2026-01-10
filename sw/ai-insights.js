@@ -3256,8 +3256,7 @@ function renderInsights(insightsData, isRegenerating = false, swimmerData = null
     html.push('<h3 class="ai-insights-title">Get AI Analysis from <a href="https://chat.openai.com" target="_blank" onclick="copyAIPromptFromTextarea()" style="color: #10a37f; text-decoration: none;">ChatGPT</a> or <a href="https://gemini.google.com" target="_blank" onclick="copyAIPromptFromTextarea()" style="color: #4285f4; text-decoration: none;">Gemini</a></h3>');
     html.push('<div class="ai-insight-card" style="padding: 20px;">');
     html.push('<p style="margin-bottom: 15px; color: #495057; font-size: 14px;">Edit and customize this prompt, then copy and paste it into ChatGPT, Gemini, or Claude:</p>');
-    html.push('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">');
-    html.push('<span style="font-size: 12px; color: #6c757d;">💡 Tip: Click "Refresh" after rankings load, then edit if needed</span>');
+    html.push('<div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">');
     html.push('<div style="display: flex; gap: 8px;">');
     html.push('<button onclick="refreshAIPromptTextarea()" class="copy-ai-prompt-btn" style="padding: 8px 16px; background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🔄 Refresh</button>');
     html.push('<button onclick="copyAIPromptFromTextarea()" class="copy-ai-prompt-btn" style="padding: 8px 16px;">📋 Copy</button>');
@@ -6742,9 +6741,6 @@ D1 Recruiting Reference Times (approximate):
 # (THIS IS THE MOST IMPORTANT SECTION - FOCUS YOUR ANALYSIS HERE)
 
 ---
----
-
-**⚠️ IMPORTANT: Click the "🔄 Refresh" button above to load peer swimmer data before copying this prompt!**
 
 ${higherGroupComparison ? `
 ## 📋 EXECUTIVE SUMMARY - Generate This First!
