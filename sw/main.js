@@ -71,16 +71,13 @@ async function onSearchAll() {
     const desktopInput = document.getElementById("input");
     
     if (!desktopInput) {
-        console.error("Search input element not found");
         return;
     }
     
     // Get the current value and trim it
     const inputValue = desktopInput.value.trim();
-    console.log("onSearchAll: input value =", JSON.stringify(inputValue));
     
     if (!inputValue) {
-        console.log("onSearchAll: empty input, not searching");
         return;
     }
     

@@ -983,32 +983,27 @@ async function getFastRowByEvent(events) {
 // ================================================================================
 
 async function search(name, all) {
-    console.log("search() called with name:", JSON.stringify(name), "all:", all);
     if (!name) {
         window.location.replace("");
         return;
     }
 
     let values = await loadSearch(name, all);
-    console.log("search() got", values?.length || 0, "results");
     showSearch(values);
 }
 
 async function searchAll(params) {
-    console.log("searchAll() called with params:", JSON.stringify(params));
     return await search(params, true);
 }
 
 async function loadSearch(name, all) {
     let key = "search/" + name + (all ? "<ALL>" : "");
-    console.log("loadSearch() cache key:", key);
+    // Use 10 minute cache timeout for search results to avoid stale data
+    const searchCacheTimeout = 10 * 60 * 1000;
     return await LocalCache.func(key, async () => {
-        console.log("loadSearch() fetching fresh data for:", name);
         let values = await loadSwimmerSearch(name, all);
-        console.log("loadSwimmerSearch returned", values?.length || 0, "results");
         if (!values || values.length == 0) {
             values = await loadClubSearch(name, all);
-            console.log("loadClubSearch returned", values?.length || 0, "results");
         }
 
         if (!values || values.length <= 1) {
@@ -1016,12 +1011,11 @@ async function loadSearch(name, all) {
         }
 
         values = await filterSwimmers(values);
-        console.log("filterSwimmers returned", values?.length || 0, "results");
         if (values) {
             values.sort((a, b) => a[values.idx.age] - b[values.idx.age]);
         }
         return values;
-    });
+    }, searchCacheTimeout);
 }
 
 async function filterSwimmers(values) {
@@ -1060,45 +1054,12 @@ async function filterSwimmers(values) {
 }
 
 function showSearch(values) {
-    console.log("showSearch called with:", values);
-    console.log("values.length:", values?.length);
-    console.log("values.idx:", values?.idx);
-    console.log("First result structure:", values?.length > 0 ? values[0] : 'No results');
-
     if (!values || values.length == 0) {
         window.updateContent("No result found");
         return;
     }
 
-    if (values.length == 1) {
-        let pkey = null;
-
-        // Try to get pkey from idx mapping first
-        if (values.idx && values.idx.pkey !== undefined) {
-            pkey = values[0][values.idx.pkey];
-            console.log("Using idx mapping for pkey:", pkey);
-        } else {
-            console.log("Search result missing or invalid idx structure:", values.idx);
-            // Try fallback approaches
-            if (values[0]) {
-                // Try common index positions
-                pkey = values[0][4] || values[0].pkey || values[0][0];
-                console.log("Using fallback pkey detection:", pkey);
-                console.log("Available properties in first result:", Object.keys(values[0] || {}));
-            }
-        }
-
-        if (pkey) {
-            console.log("Navigating to swimmer with pkey:", pkey);
-            window.location.replace("#swimmer/" + encodeURIComponent(pkey));
-        } else {
-            console.error("Could not determine swimmer pkey from search result");
-            console.log("Full first result:", values[0]);
-            window.updateContent("Error: Could not determine swimmer ID from search result");
-        }
-        return;
-    }
-
+    // Always show search results table (don't auto-navigate even for 1 result)
     let html = [];
 
     html.push(
