@@ -877,14 +877,10 @@ th[onclick]:hover {
   margin-left: 0;
 }
 
-/* Hide mobile navigation elements on desktop */
+/* Hide unused mobile navigation elements */
 .mobile-menu-toggle,
-.mobile-dropdown {
-  display: none !important;
-}
-
-/* Ensure mobile button is hidden on desktop - stronger rule */
-button.mobile-menu-toggle {
+.mobile-dropdown,
+.mobile-nav-toggle {
   display: none !important;
 }
 
@@ -893,9 +889,6 @@ button.mobile-menu-toggle {
   margin: 10px 10px 10px 10px; /* No extra top margin needed since banner is not fixed */
 }
 
-@media only screen and (max-width: 768px) {
-  /* Top banner uses same layout as desktop, no special mobile styles needed */
-} 
 
 /* Swimmer information header bar
  * Displays swimmer name, age, club, etc. with professional styling
@@ -2243,136 +2236,5 @@ tbody tr:hover .full>.clickable {
  * MOBILE RESPONSIVE DESIGN
  * ======================================== */
 
-/* Mobile and tablet devices */
-@media only screen and (max-width: 768px) {
-
-  /* Prevent horizontal scroll on mobile - but allow table scrolling */
-  body {
-    max-width: 100vw;
-  }
-
-  /* Ensure top banner sections don't float on mobile and stack vertically */
-  .top-banner {
-    position: relative !important;
-    float: none !important;
-  }
-
-  .top-banner .row {
-    display: flex !important;
-    flex-direction: column !important;
-    flex-wrap: nowrap !important;
-    white-space: normal !important;
-    position: relative !important;
-    float: none !important;
-    width: 100% !important;
-    align-items: stretch !important;
-  }
-
-  .top-banner .row > * {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    float: none !important;
-    margin: 5px 0 !important;
-    flex: 0 0 auto !important;
-    vertical-align: top !important;
-  }
-
-  /* Override the desktop inline-block rule for all row children */
-  .row > * {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    float: none !important;
-  }
-
-  .top-banner .nav-group {
-    position: relative !important;
-    float: none !important;
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 5px 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  .my-favorites-group,
-  .bcst-nav-group,
-  .search-nav-group {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    display: block !important;
-    float: none !important;
-    margin: 5px 0 !important;
-    box-sizing: border-box !important;
-    flex: 0 0 auto !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 4px 0 8px 0 !important;
-  }
-
-  /* Override desktop inline-flex for mobile */
-  .nav-group {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    vertical-align: top !important;
-  }
-
-  .nav-group.my-favorites-group,
-  .nav-group.bcst-nav-group,
-  .nav-group.search-nav-group {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-
-  /* Hide mobile menu toggle buttons */
-  .mobile-menu-toggle,
-  button.mobile-menu-toggle,
-  .mobile-nav-toggle {
-    display: none !important;
-  }
-
-  /* Hide mobile dropdown menu */
-  .mobile-dropdown {
-    display: none !important;
-  }
-
-  /* Ensure content starts below navigation */
-  .container {
-    margin-top: 10px;
-  }
-
-  /* Allow tables to scroll horizontally on mobile */
-  table {
-    display: table;
-    width: 100%;
-    min-width: max-content;
-  }
-
-  /* Wrap tables in scrollable containers */
-  .view {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tabview {
-    overflow-x: visible;
-  }
-
-  /* Ensure table cells don't wrap */
-  td, th {
-    white-space: nowrap;
-  }
-}
-
-/* Extra small mobile devices */
-@media only screen and (max-width: 480px) {
-  /* Top banner uses same layout as desktop, no special mobile styles needed */
-}
+/* No mobile-specific styles - UI is the same on all devices */
 
