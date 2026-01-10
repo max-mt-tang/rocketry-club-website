@@ -42,7 +42,7 @@ Last Updated: 2025
         />
         
         <!-- External stylesheets and modular scripts -->
-        <link rel="stylesheet" href="styles.css?v=17" />
+        <link rel="stylesheet" href="styles.css?v=20" />
 
         <!-- Mobile menu toggle function -->
         <script>
@@ -71,15 +71,17 @@ Last Updated: 2025
         <script src="ui.js"></script>
 
         <!-- Feature modules -->
-        <script src="rankings.js"></script>
+        <script src="rankings.js?v=4"></script>
         <script src="tables.js"></script>
         <script src="graphs.js"></script>
-        <script src="swimmer.js"></script>
-        <script src="bcst-roster.js"></script>
-        <script src="ai-insights.js"></script>
+        <script src="swimmer.js?v=21"></script>
+        <script src="bcst-roster.js?v=6"></script>
+        <script src="bcst-schedule.js"></script>
+        <script src="ai-insights.js?v=33"></script>
+        <script src="compare.js?v=6"></script>
 
         <!-- Main application coordination -->
-        <script src="main.js"></script>
+        <script src="main.js?v=3"></script>
     </head>
 
     <!-- ========================================
@@ -96,13 +98,13 @@ Last Updated: 2025
                      QUICK ACCESS BUTTONS
                      ======================================== -->
                 <div class="nav-group my-favorites-group">
-                    <div class="nav-group-label">My Favorites</div>
+                    <div class="nav-group-label">Tang Brothers</div>
                     <div class="nav-group-buttons">
                         <!-- Max Tang - Quick access button (Swimmer ID: 1320806) -->
                         <button
                             onclick="searchMax()"
                             class="big max-btn"
-                            style="margin-right: 0px;"
+                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
                         >
                             Max Tang
                         </button>
@@ -111,12 +113,12 @@ Last Updated: 2025
                         <button
                             onclick="searchRay()"
                             class="big ray-btn"
+                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
                         >
                             Ray Tang
                         </button>
                     </div>
                 </div>
-
 
                 <!-- ========================================
                      BCST TEAM NAVIGATION
@@ -124,6 +126,25 @@ Last Updated: 2025
                 <div class="nav-group bcst-nav-group">
                     <div class="nav-group-label">Search BCST</div>
                     <div class="nav-group-buttons">
+                        <!-- Schedule button -->
+                        <button
+                            onclick="showBCSchedule()"
+                            class="big"
+                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
+                        >
+                            📅 Schedule
+                        </button>
+                        
+                        <!-- Member Directory link (GoMotion) -->
+                        <button
+                            onclick="window.open('https://www.gomotionapp.com/team/onsbcst/controller/cms/admin/index?s=tl#/member-search', '_blank')"
+                            class="big"
+                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
+                            title="Open GoMotion Member Directory (requires login)"
+                        >
+                            📋 Directory
+                        </button>
+                        
                         <!-- BCST Group selection dropdown -->
                         <select id="bcst-group-select" onchange="onGroupChange(this.value)" style="display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #0C2340; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px;">
                             <option value="">Group</option>
@@ -131,7 +152,7 @@ Last Updated: 2025
                             <option value="Senior 1">Senior 1</option>
                             <option value="Prep">Prep</option>
                             <option value="Senior 2">Senior 2</option>
-                            <option value="Performance">Performance</option>
+                            <option value="Senior Performance">Senior Performance</option>
                             <option value="National">National</option>
                             <option value="Regional">Regional</option>
                             <option value="Divisional">Divisional</option>
@@ -142,14 +163,14 @@ Last Updated: 2025
                         </select>
 
                         <!-- BCST Gender selection dropdown -->
-                        <select id="bcst-gender-select" onchange="onGenderChange(this.value)" disabled style="margin-left: 15px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 100px; cursor: not-allowed;">
+                        <select id="bcst-gender-select" onchange="onGenderChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 100px; cursor: not-allowed;">
                             <option value="">Gender</option>
                             <option value="Male" selected>Male</option>
                             <option value="Female">Female</option>
                         </select>
 
                         <!-- BCST Swimmer selection dropdown -->
-                        <select id="bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="margin-left: 15px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 180px; cursor: not-allowed;">
+                        <select id="bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px; cursor: not-allowed;">
                             <option value="">Swimmer</option>
                         </select>
                     </div>
@@ -159,24 +180,18 @@ Last Updated: 2025
                      SEARCH INTERFACE
                      ======================================== -->
                 <div class="nav-group search-nav-group">
-                    <div class="nav-group-label">Search Swimmers</div>
+                    <div class="nav-group-label">Search</div>
                     <div class="nav-group-buttons">
                         <!-- Text input for searching swimmers by name -->
                         <input
                             id="input"
-                            placeholder="Enter swimmer name..."
+                            placeholder="Swimmer"
                             class="big"
-                            onkeypress="if(event.key==='Enter')onSearch()"
-                            style="margin-right: 10px"
+                            onkeypress="if(event.key==='Enter')onSearchAll()"
                         />
 
-                        <!-- Search button for 18 & Under swimmers -->
-                        <button onclick="onSearch()" class="big search">Search</button>
-
-                        <!-- Search button for 19 & Over swimmers -->
-                        <button onclick="onSearchAll()" class="big search">
-                            18Up
-                        </button>
+                        <!-- Search button for all swimmers -->
+                        <button onclick="onSearchAll()" class="big search" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">Search</button>
                     </div>
                 </div>
             </div>
@@ -196,7 +211,7 @@ Last Updated: 2025
                             <option value="Senior 1">Senior 1</option>
                             <option value="Prep">Prep</option>
                             <option value="Senior 2">Senior 2</option>
-                            <option value="Performance">Performance</option>
+                            <option value="Senior Performance">Senior Performance</option>
                             <option value="National">National</option>
                             <option value="Regional">Regional</option>
                             <option value="Divisional">Divisional</option>
@@ -214,7 +229,7 @@ Last Updated: 2025
                         </select>
 
                         <!-- BCST Swimmer selection dropdown -->
-                        <select id="mobile-bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 180px; width: 100%; cursor: not-allowed;">
+                        <select id="mobile-bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px; width: 100%; cursor: not-allowed;">
                             <option value="">Swimmer</option>
                         </select>
                     </div>
@@ -222,22 +237,19 @@ Last Updated: 2025
 
                 <!-- Search Swimmers Section -->
                 <div class="mobile-dropdown-section">
-                    <div class="nav-group-label">Search Swimmers</div>
+                    <div class="nav-group-label">Search</div>
                     <div class="search-nav-group">
                         <!-- Text input for searching swimmers by name -->
                         <input
                             id="mobile-input"
-                            placeholder="Swimmer name..."
+                            placeholder="Swimmer"
                             class="big"
-                            onkeypress="if(event.key==='Enter')onSearch()"
+                            onkeypress="if(event.key==='Enter')onSearchAll()"
                             style="margin-bottom: 10px; width: 100%; box-sizing: border-box;"
                         />
 
-                        <!-- Search buttons -->
-                        <div style="display: flex; gap: 10px; width: 100%;">
-                            <button onclick="onSearch()" class="big search" style="flex: 1; height: 44px; padding: 12px;">Search</button>
-                            <button onclick="onSearchAll()" class="big search" style="flex: 1; height: 44px; padding: 12px;">18Up</button>
-                        </div>
+                        <!-- Search button -->
+                        <button onclick="onSearchAll()" class="big search" style="width: 100%; height: 44px; padding: 12px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">Search</button>
                     </div>
                 </div>
             </div>

@@ -810,7 +810,13 @@ function checkBCRankingsComplete() {
 
             if (label) {
                 label.style.color = '#0C2340';
-                label.textContent = 'show top 3';
+                label.textContent = 'Top3';
+            }
+            
+            // Auto toggle ON and show flash
+            toggle.checked = true;
+            if (window.toggleTop3Highlight) {
+                window.toggleTop3Highlight(true);
             }
         }
     }
@@ -911,7 +917,8 @@ async function loadRankDataByClub(key, forceRefresh = false) {
 
     // Check if swimmerList is valid
     if (!swimmerList || swimmerList.length === 0) {
-        return [];
+        swimmerList = [];
+        swimmerList.idx = { pkey: 0, age: 1 };
     }
 
     // Check if swimmerList has idx, if not it came from corrupted cache
@@ -922,10 +929,78 @@ async function loadRankDataByClub(key, forceRefresh = false) {
         // Try loading again (this will bypass cache)
         swimmerList = await loadClubAgeSwimmerList(lsc, clubName, ageKey, true);
         if (!swimmerList || !swimmerList.idx) {
-            return [];
+            swimmerList = [];
+            swimmerList.idx = { pkey: 0, age: 1 };
+        }
+    }
+    
+    // For BC rankings, also include swimmers from BCST roster who may have transferred
+    // Their times from previous clubs should still count for BC team rankings
+    let bcstRosterPkeys = [];
+    if (club === 'BC' && window.bcstRoster) {
+        // Ensure roster is loaded
+        if (!window.bcstRoster.isLoaded) {
+            console.log('[loadRankDataByClub] Loading BCST roster for BC rankings...');
+            try {
+                await window.bcstRoster.loadRoster();
+            } catch (e) {
+                console.error('[loadRankDataByClub] Failed to load BCST roster:', e);
+            }
+        }
+        
+        if (window.bcstRoster.isLoaded) {
+            let [fromAge, toAge] = decodeAgeKey(ageKey);
+            let genderFilter = genderStr === 'Male' ? 'Male' : 'Female';
+            
+            console.log(`[loadRankDataByClub] Checking BCST roster for ${genderFilter} ${fromAge}-${toAge}...`);
+            
+            // Get all BCST roster swimmers matching age and gender
+            let groups = window.bcstRoster.getGroupHierarchy();
+            let existingPkeys = new Set(swimmerList.map(row => String(row[swimmerList.idx.pkey])));
+            
+            for (let group of groups) {
+                let swimmers = window.bcstRoster.getSwimmers(group);
+                if (!swimmers) continue;
+                
+                for (let swimmer of swimmers) {
+                    if (swimmer.gender !== genderFilter) continue;
+                    if (swimmer.age < fromAge || swimmer.age > toAge) continue;
+                    if (!swimmer.id) continue;
+                    
+                    // Add to list if not already present
+                    if (!existingPkeys.has(String(swimmer.id))) {
+                        bcstRosterPkeys.push(swimmer.id);
+                        existingPkeys.add(String(swimmer.id));
+                        console.log(`[loadRankDataByClub] Adding BCST roster swimmer: ${swimmer.name} (${swimmer.id}) from ${group}`);
+                    }
+                }
+            }
+            
+            if (bcstRosterPkeys.length > 0) {
+                console.log(`[loadRankDataByClub] Added ${bcstRosterPkeys.length} BCST roster swimmers not in USA Swimming BC list`);
+            } else {
+                console.log(`[loadRankDataByClub] All BCST roster swimmers already in USA Swimming BC list`);
+            }
         }
     }
 
+
+    // Combine swimmer list pkeys with BCST roster pkeys
+    let allPkeys = swimmerList
+        .filter(row => row && row[swimmerList.idx.pkey])
+        .map((row) => row[swimmerList.idx.pkey]);
+    
+    // Add BCST roster pkeys
+    for (let pkey of bcstRosterPkeys) {
+        if (!allPkeys.includes(pkey) && !allPkeys.includes(String(pkey))) {
+            allPkeys.push(pkey);
+        }
+    }
+    
+    if (allPkeys.length === 0) {
+        console.log('[loadRankDataByClub] No swimmers to query');
+        return [];
+    }
 
     let bodyObj = {
         metadata: [
@@ -970,9 +1045,7 @@ async function loadRankDataByClub(key, forceRefresh = false) {
                 dim: "[UsasSwimTime.PersonKey]",
                 datatype: "numeric",
                 filter: {
-                    members: swimmerList
-                        .filter(row => row && row[swimmerList.idx.pkey])
-                        .map((row) => row[swimmerList.idx.pkey]),
+                    members: allPkeys,
                 },
             },
             {
@@ -1036,7 +1109,10 @@ async function loadRankDataByClub(key, forceRefresh = false) {
         });
     }
 
-    if (club) {
+    // For BC rankings, DON'T filter by club to include transferred swimmers' times
+    // For other clubs, still filter by club
+    // This is because BCST has many transferred swimmers whose times are recorded under previous clubs
+    if (club && club !== 'BC') {
         bodyObj.metadata.push({
             dim: "[OrgUnit.Level4Code]",
             datatype: "text",
@@ -1045,6 +1121,8 @@ async function loadRankDataByClub(key, forceRefresh = false) {
             },
             panel: "scope",
         });
+    } else if (club === 'BC') {
+        console.log(`[loadRankDataByClub] Skipping club filter for BC to include ALL times for BC swimmers (including transfers)`);
     }
 
     // Wait for fetchSwimValues to be available

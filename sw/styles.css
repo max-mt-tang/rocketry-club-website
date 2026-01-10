@@ -492,6 +492,33 @@ div[class*="select"][id*="bcst"],
   overflow-y: auto;
 }
 
+/* Style cuts-age-select to match BCST dropdowns */
+#cuts-age-select .select-text,
+div[id="cuts-age-select"] .select-text {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #0C2340 !important;
+  font-weight: 600 !important;
+  min-width: 100px;
+}
+
+#cuts-age-select .select-text span,
+div[id="cuts-age-select"] .select-text span {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+
+#cuts-age-select:hover .select-text {
+  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%) !important;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4) !important;
+}
+
 /* Ensure cuts age dropdown appears above everything - especially for Chrome mobile */
 #cuts-age-select .dropdown,
 #cuts-age-select + * .dropdown,
@@ -620,8 +647,7 @@ th[onclick]:hover {
 #input {
   border-radius: 6px;
   padding: 9px 12px;
-  width: 100%;
-  max-width: 180px;
+  width: 120px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: #ffffff;
   color: #0C2340;
@@ -724,19 +750,19 @@ th[onclick]:hover {
  * 6. LAYOUT & STRUCTURE
  * ======================================== */
 
-/* Navigation group containers for visual grouping */
+/* Navigation group containers - minimal styling, no borders */
 .nav-group {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
   vertical-align: middle;
   margin: 0 10px 0 0;
-  padding: 4px 12px 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 4px 0 8px 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
   position: relative;
   min-height: 60px;
   transition: all 0.3s ease;
@@ -744,11 +770,11 @@ th[onclick]:hover {
 
 /* Group labels */
 .nav-group-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #495057;
   text-shadow: none;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
   padding: 0;
@@ -759,7 +785,7 @@ th[onclick]:hover {
 
 /* Ensure My Favorites label uses same font size as others */
 .my-favorites-group .nav-group-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* Container for buttons within nav groups to keep them horizontal */
@@ -780,15 +806,75 @@ th[onclick]:hover {
   margin: 0 20px 0 10px;
 }
 
+/* Connect buttons in My Favorites group */
+.my-favorites-group .nav-group-buttons {
+  display: flex;
+  gap: 0;
+}
+
+.my-favorites-group .nav-group-buttons button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.my-favorites-group .nav-group-buttons button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
 /* BCST team navigation group */
 .bcst-nav-group {
   margin: 0 20px 0 10px;
 }
 
-/* Search navigation group */
+/* Connect buttons in BCST group */
+.bcst-nav-group .nav-group-buttons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.bcst-nav-group .nav-group-buttons > button:first-child {
+  border-radius: 6px 0 0 6px;
+  margin-right: 0 !important;
+}
+
+.bcst-nav-group .nav-group-buttons > button:nth-child(2) {
+  border-radius: 0 6px 6px 0;
+  margin-right: 0 !important;
+}
+
+.bcst-nav-group .nav-group-buttons > select {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Search navigation group - minimal styling, no border */
 .search-nav-group {
   margin-left: 20px;
-  min-width: 550px;
+  min-width: 200px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 4px 0 8px 0;
+}
+
+/* Group search input and button together visually */
+.search-nav-group .nav-group-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.search-nav-group input.big {
+  border-radius: 6px 0 0 6px;
+  border: 1px solid #dee2e6;
+  border-right: none;
+  margin-right: 0;
+}
+
+.search-nav-group button.big {
+  border-radius: 0 6px 6px 0;
+  margin-left: 0;
 }
 
 /* Hide mobile navigation elements on desktop */
@@ -813,73 +899,78 @@ button.mobile-menu-toggle {
 
 /* Swimmer information header bar
  * Displays swimmer name, age, club, etc. with professional styling
- * Positioned close to navigation for visual grouping */
+ * Compact single-line display */
 .header {
-  margin: 20px 0 15px 0;
-  font-size: 15px;
-  border-radius: 10px;
-  padding: 8px 18px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 249, 250, 0.98) 100%);
-  backdrop-filter: blur(15px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-  color: #212529;
-  font-weight: 600 !important;
-  font: 600 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-} 
-
-/* Professional styling for header spans */
-.header.match-size span,
-.match-size.header span {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  margin: 0 6px 0 0;
+  margin: 6px 0;
+  font-size: 17px;
   border-radius: 6px;
-  font-weight: 500 !important;
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-  background: transparent;
-  color: #495057 !important;
-  border: none;
-  box-shadow: none;
-  transition: all 0.2s ease;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border: 1px solid #e9ecef;
+} 
+
+/* Colorful swimmer info bar - override match-size flex layout */
+.swimmer-info-bar {
+  display: block !important;
   white-space: nowrap;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
 }
 
-/* Make swimmer name more prominent */
-.header.match-size span:first-child,
-.match-size.header span:first-child {
-  background: rgba(0, 123, 255, 0.08);
-  color: #007bff !important;
-  font-weight: 700 !important;
-  font-size: 15px !important;
-  padding: 5px 12px;
-  margin-right: 10px;
+.swimmer-info-bar span {
+  display: inline !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
 }
 
-/* Add subtle separators between items */
-.header.match-size span:not(:first-child)::before {
-  content: '';
-  display: inline-block;
-  width: 1px;
-  height: 14px;
-  background: #dee2e6;
-  margin-right: 10px;
-  vertical-align: middle;
+.swimmer-info-bar .swimmer-name {
+  font-weight: 700;
+  color: #007bff;
+}
+
+.swimmer-info-bar .swimmer-gender {
+  color: #6f42c1;
+  font-weight: 600;
+}
+
+.swimmer-info-bar .swimmer-age {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.swimmer-info-bar .swimmer-birthday {
+  color: #fd7e14;
+  font-weight: 500;
+}
+
+.swimmer-info-bar .swimmer-cut {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.swimmer-info-bar .swimmer-events {
+  color: #17a2b8;
+  font-weight: 500;
+}
+
+.swimmer-info-bar .swimmer-club {
+  color: #343a40;
+  font-weight: 600;
+}
+
+.swimmer-info-bar .separator {
+  color: #adb5bd;
+  margin: 0 5px !important;
 } 
 
-/* Top 3 BC ranking highlight styles */
-.top3-highlight {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
-  border: 2px solid #f39c12 !important;
-  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3) !important;
-} 
-
-.top3-highlight td {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
+/* Top 3 BC ranking highlight styles - only highlight specific cells */
+.top3-highlight td.cell-distance,
+.top3-highlight td.cell-time,
+.top3-highlight td.cell-date {
+  background-color: #fff3cd;
   font-weight: 700 !important;
 } 
 
@@ -1523,13 +1614,19 @@ tbody tr:hover .full>.clickable,
 .full>.clickable:hover:not(tbody tr:hover .full>.clickable),
 /* Removed generic hover - now using specific hover styles */
 .match-size button:hover,
-button.big:hover,
 .add-search button:hover,
 .dropdown .option:hover,
 .resize:hover,
 #adding-list tr:hover {
   background-color: #57E;
   color: #FFF;
+  text-decoration: none;
+}
+
+/* Consistent hover style for blue gradient buttons */
+button.big:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #003d80 100%) !important;
+  color: white !important;
   text-decoration: none;
 }
 
@@ -2210,6 +2307,10 @@ tbody tr:hover .full>.clickable {
     margin: 5px 0 !important;
     box-sizing: border-box !important;
     flex: 0 0 auto !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 4px 0 8px 0 !important;
   }
 
   /* Override desktop inline-flex for mobile */

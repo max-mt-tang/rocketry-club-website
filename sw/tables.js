@@ -148,38 +148,83 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
         '<div class="center-row" style="margin-top: -5px;">',
     ];
 
-    // Essential toggles (always visible)
+    // Add cuts age dropdown first - using native select to match BCST dropdowns
+    let ageOptions = [
+        ["10u", "10U"],
+        ["11-12", "11-12"],
+        ["13-14", "13-14"],
+        ["15-16", "15-16"],
+        ["17-18", "17-18"],
+        ["19o", "19O"],
+    ];
+
+    // Determine default age - always use swimmer's current age group
+    let defaultAgeValue;
+    let swimmerAge = data.swimmer.age;
+    if (swimmerAge <= 10) {
+        defaultAgeValue = "10U";
+    } else if (swimmerAge >= 11 && swimmerAge <= 12) {
+        defaultAgeValue = "11-12";
+    } else if (swimmerAge >= 13 && swimmerAge <= 14) {
+        defaultAgeValue = "13-14";
+    } else if (swimmerAge >= 15 && swimmerAge <= 16) {
+        defaultAgeValue = "15-16";
+    } else if (swimmerAge >= 17 && swimmerAge <= 18) {
+        defaultAgeValue = "17-18";
+    } else {
+        defaultAgeValue = "19O";
+    }
+
+    let selectOptions = ageOptions.map(([label, value]) => {
+        let selected = value === defaultAgeValue ? ' selected' : '';
+        return `<option value="${value}"${selected}>${label}</option>`;
+    }).join('');
+
+    html.push(
+        '<select id="cuts-age-select" onchange="updateCutsForAge(this.value)" style="margin-right: 15px; margin-top: -8px; display: inline-block; padding: 6px 10px; border: none; border-radius: 6px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #0C2340; font-weight: 600; font-size: 14px; line-height: 1.2; height: 28px; box-sizing: border-box; min-width: 70px; vertical-align: middle;">',
+        selectOptions,
+        '</select>',
+    );
+
+    // Top 3 BC ranking highlight toggle (always visible)
+    html.push(
+        '<span style="display:inline-block; margin-top: -8px; vertical-align: middle;"><span class="checkbox-wrapper">',
+        '<input type="checkbox" id="show-top3" onchange="window.toggleTop3Highlight(this.checked)" disabled>',
+        '<label for="show-top3" style="color: #999;">Top3 <span class="top3-spinner" style="display:inline-block;animation:spin 1s linear infinite;">⏳</span></label>',
+        '</span></span>',
+        '<style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>'
+    );
+
+    // Three dots menu for all other toggles
+    html.push(
+        '<span style="position: relative; display: inline-block; margin-top: -8px; vertical-align: middle;">',
+        '<span class="more-columns-toggle" onclick="window.toggleMoreColumns(event)" style="cursor: pointer; margin-left: 12px; padding: 4px 10px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 4px;">',
+        '⋯',
+        '</span>',
+        '<span class="more-columns-section" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; min-width: 150px; margin-top: 5px;">',
+        '<style>.more-columns-section .checkbox-wrapper { display: block; margin: 8px 0; white-space: nowrap; }</style>',
+    );
+
+    // All toggles inside three dots menu
     html.push(
         '<style id="show-rk-style"></style>',
         window.createCheckbox(
             "show-rk",
-            "rankings",
+            "Rankings",
             true,
             `window.toggleColumns('.rk', this.checked)`,
         ),
         '<style id="show-mc-style"></style>',
         window.createCheckbox(
             "show-mc",
-            "meet cuts",
+            "Meet Cuts",
             true,
             `window.toggleColumns('.mc', this.checked)`,
         ),
-    );
-
-    // "More columns" expandable section
-    html.push(
-        '<span class="more-columns-toggle" onclick="window.toggleMoreColumns()" style="cursor: pointer; margin-left: 12px; padding: 4px 8px; color: #555; font-size: 13px; font-weight: 500; user-select: none; background: #f0f0f0; border-radius: 4px;">',
-        '⚙️ more',
-        '</span>',
-        '<span class="more-columns-section" style="display: none;">',
-    );
-
-    // Hidden toggles in "More" section
-    html.push(
         '<style id="show-event-count-style"></style>',
         window.createCheckbox(
             "show-event-count",
-            "event count",
+            "Event Count",
             false,
             `window.toggleColumns('.event-count', this.checked)`,
         ),
@@ -197,7 +242,7 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
             '<style id="show-mt-style"></style>',
             window.createCheckbox(
                 "show-mt",
-                "motivation",
+                "Motivation",
                 false,
                 `window.toggleColumns('.mt', this.checked)`,
             ),
@@ -208,25 +253,18 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
         '<style id="show-silver-gold-style"></style>',
         window.createCheckbox(
             "show-silver-gold",
-            "silver/gold",
+            "Silver/Gold",
             false,
             `window.toggleColumns('.mc-silver, .mc-gold', this.checked)`,
         ),
         window.createCheckbox(
             "show-shadow",
-            "shadow",
+            "Shadow",
             false,
             `window.toggleShadow(this.checked)`,
         ),
         '</span>', // close more-columns-section
-    );
-
-    // Top 3 BC ranking highlight toggle (initially disabled)
-    html.push(
-        '<span style="display:inline-block"><span class="checkbox-wrapper">',
-        '<input type="checkbox" id="show-top3" onchange="window.toggleTop3Highlight(this.checked)" disabled>',
-        '<label for="show-top3" style="color: #999;">show top 3 (loading BC rankings...)</label>',
-        '</span></span>'
+        '</span>', // close wrapper span
     );
 
     // Initialize motivation times columns visibility based on checkbox state
@@ -237,67 +275,7 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
         console.log('Swimmer is 19 or over, no motivational times needed');
     }
 
-    // Add cuts age dropdown
-    let ageOptions = [
-        ["Current Age", "current"],
-        ["10 & Under", "10U"],
-        ["11-12", "11-12"],
-        ["13-14", "13-14"],
-        ["15-16", "15-16"],
-        ["17-18", "17-18"],
-        ["19 & Over", "19O"],
-    ];
-
-    // Determine default age - use stored cuts age if available, otherwise swimmer's current age
-    let defaultAgeValue;
-    if (data.cutsAge) {
-        // Use the cuts age that was set (when regenerating table)
-        defaultAgeValue = data.cutsAge;
-    } else {
-        // Check localStorage for previously selected cuts age
-        let storedCutsAge = localStorage.getItem("cutsAge");
-        if (storedCutsAge) {
-            defaultAgeValue = storedCutsAge;
-        } else {
-            // Fall back to swimmer's current age group
-            let swimmerAge = data.swimmer.age;
-            defaultAgeValue = "current";
-            if (swimmerAge <= 10) {
-                defaultAgeValue = "10U";
-            } else if (swimmerAge >= 11 && swimmerAge <= 12) {
-                defaultAgeValue = "11-12";
-            } else if (swimmerAge >= 13 && swimmerAge <= 14) {
-                defaultAgeValue = "13-14";
-            } else if (swimmerAge >= 15 && swimmerAge <= 16) {
-                defaultAgeValue = "15-16";
-            } else if (swimmerAge >= 17 && swimmerAge <= 18) {
-                defaultAgeValue = "17-18";
-            } else if (swimmerAge >= 19) {
-                defaultAgeValue = "19O";
-            }
-        }
-    }
-
-    let cutsAgeSelect = new Select(
-        "cuts-age-select",
-        ageOptions,
-        defaultAgeValue,
-        (value) => {
-            updateCutsForAge(value).catch(error => {
-                console.error("Error updating cuts for age:", error);
-            });
-        },
-    );
-    cutsAgeSelect.class = "";
-
-    html.push(
-        '<span style="display:inline-block;margin-left:15px;vertical-align:top;margin-top:-10px;line-height:1;">',
-        '<span style="margin-right:5px;vertical-align:middle;display:inline-block;font-size:13px;">cuts age:</span>',
-        '<span style="vertical-align:middle;display:inline-block;">',
-        cutsAgeSelect.render(true),
-        "</span>",
-        "</span></div>",
-    );
+    html.push('</div>'); // close center-row
 
     // Create separate tables for each course
     for (
@@ -359,14 +337,14 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
                     : 0;
 
             html.push(
-                '<td class="full">',
+                '<td class="full cell-distance">',
                 createClickableDiv(
                     dist,
                     `showGraph(null,{pkey:${data.swimmer.pkey},event:${event}})`,
                 ),
-                '</td><td onclick="selectRow(this)" style="cursor: pointer;">',
+                '</td><td class="cell-time" onclick="selectRow(this)" style="cursor: pointer;">',
                 time,
-                "</td><td>",
+                '</td><td class="cell-date">',
                 formatDate(date),
                 "</td><td class=\"event-count hide\">",
                 count,
@@ -1216,21 +1194,56 @@ function toggleSilverGoldRankingsCheckbox() {
     }
 }
 
-// Toggle the "More columns" expandable section
-function toggleMoreColumns() {
+// Toggle the "More columns" popup
+function toggleMoreColumns(event) {
+    if (event) event.stopPropagation();
     const toggleBtn = document.querySelector('.more-columns-toggle');
     const section = document.querySelector('.more-columns-section');
-    if (toggleBtn && section) {
+    if (section && toggleBtn) {
         const isHidden = section.style.display === 'none';
-        section.style.display = isHidden ? 'inline' : 'none';
-        toggleBtn.textContent = isHidden ? '◀ less' : '▶ more';
+        section.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+            toggleBtn.style.background = '#28a745';
+            toggleBtn.style.color = 'white';
+            toggleBtn.style.borderRadius = '50%';
+        } else {
+            toggleBtn.style.background = 'transparent';
+            toggleBtn.style.color = '#555';
+            toggleBtn.style.borderRadius = '4px';
+        }
     }
 }
 
+// Close popup when clicking outside
+function closeMoreColumnsPopup() {
+    const toggleBtn = document.querySelector('.more-columns-toggle');
+    const section = document.querySelector('.more-columns-section');
+    if (section && toggleBtn && section.style.display !== 'none') {
+        section.style.display = 'none';
+        toggleBtn.style.background = 'transparent';
+        toggleBtn.style.color = '#555';
+        toggleBtn.style.borderRadius = '4px';
+    }
+}
+
+// Add click listener to close popup when clicking outside
+document.addEventListener('click', function(event) {
+    const popup = document.querySelector('.more-columns-section');
+    const toggleBtn = document.querySelector('.more-columns-toggle');
+    if (popup && toggleBtn) {
+        if (!popup.contains(event.target) && !toggleBtn.contains(event.target)) {
+            closeMoreColumnsPopup();
+        }
+    }
+});
+
 function toggleTop3Highlight(checked) {
-    // Remove existing highlights
+    // Remove existing highlights and flash classes
     document.querySelectorAll(".top3-highlight").forEach((row) => {
         row.classList.remove("top3-highlight");
+    });
+    document.querySelectorAll(".top3-flash").forEach((cell) => {
+        cell.classList.remove("top3-flash");
     });
 
     if (checked) {
@@ -1309,6 +1322,32 @@ function toggleTop3Highlight(checked) {
             ranking.row.classList.add("top3-highlight");
             console.log(`Highlighted row ${ranking.rowIndex} with BC rank ${ranking.rank}`);
         });
+        
+        // JavaScript-based flash animation
+        const flashCells = [];
+        document.querySelectorAll('.top3-highlight').forEach(row => {
+            const cells = row.querySelectorAll('.cell-distance, .cell-time, .cell-date');
+            cells.forEach(cell => flashCells.push(cell));
+        });
+        
+        if (flashCells.length > 0) {
+            let flashCount = 0;
+            const maxFlashes = 8;
+            const flashInterval = setInterval(() => {
+                const isRed = flashCount % 2 === 0;
+                flashCells.forEach(cell => {
+                    cell.style.backgroundColor = isRed ? '#ff4444' : '#fff3cd';
+                });
+                flashCount++;
+                if (flashCount >= maxFlashes * 2) {
+                    clearInterval(flashInterval);
+                    // Reset to default highlight color
+                    flashCells.forEach(cell => {
+                        cell.style.backgroundColor = '#fff3cd';
+                    });
+                }
+            }, 200);
+        }
 
         if (top3.length > 0) {
             console.log(`Highlighted ${top3.length} rows with top BC rankings`);

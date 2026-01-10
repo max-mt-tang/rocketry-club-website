@@ -20,6 +20,250 @@
 let _generationInProgress = false;
 let _generationPromise = null;
 
+/**
+ * Known swimmer physical stats (height in cm, weight in lbs)
+ */
+const KNOWN_SWIMMER_STATS = {
+    '500281': { height: 173, weight: null, name: 'Ray Tang' },      // Ray Tang
+    '1320806': { height: 175, weight: 140, name: 'Max Tang' },      // Max Tang
+};
+
+/**
+ * Get known stats for a swimmer by pkey
+ */
+function getKnownSwimmerStats(pkey) {
+    return KNOWN_SWIMMER_STATS[String(pkey)] || null;
+}
+
+/**
+ * Get BCST group for a swimmer by name (for ranking display)
+ */
+function getSwimmerGroup(swimmerName) {
+    if (!window.bcstRoster || !window.bcstRoster.isLoaded) return '?';
+    
+    // Search through all groups
+    const groups = window.bcstRoster.getGroupHierarchy();
+    for (const group of groups) {
+        const swimmers = window.bcstRoster.getSwimmers(group);
+        if (swimmers && swimmers.some(s => s.name && s.name.toLowerCase().includes(swimmerName.toLowerCase().split(' ')[0]))) {
+            return group;
+        }
+    }
+    return '(not BCST)';
+}
+
+/**
+ * Convert event name to event code for ranking lookup
+ */
+function getEventCodeFromName(eventName) {
+    const eventMap = {
+        '50 Free': 1, '50 FR': 1,
+        '100 Free': 2, '100 FR': 2,
+        '200 Free': 3, '200 FR': 3,
+        '500 Free': 4, '500 FR': 4,
+        '1000 Free': 5, '1000 FR': 5,
+        '1650 Free': 6, '1650 FR': 6,
+        '100 IM': 7,
+        '200 IM': 8,
+        '400 IM': 9,
+        '50 Back': 10, '50 BK': 10,
+        '100 Back': 11, '100 BK': 11,
+        '200 Back': 12, '200 BK': 12,
+        '50 Breast': 13, '50 BR': 13,
+        '100 Breast': 14, '100 BR': 14,
+        '200 Breast': 15, '200 BR': 15,
+        '50 Fly': 16, '50 FL': 16,
+        '100 Fly': 17, '100 FL': 17,
+        '200 Fly': 18, '200 FL': 18,
+    };
+    
+    // Remove course suffix (SCY/LCM) and trim
+    const cleanName = eventName.replace(/\s*(SCY|LCM)\s*/gi, '').trim();
+    return eventMap[cleanName] || null;
+}
+
+/**
+ * Count PNS 14U cuts for a swimmer based on their best times
+ * @param {Object} bestTimesOrData - Either a Map of eventKey -> {time, timeInt} OR the full swimmer data with events
+ * @param {string} gender - 'Male' or 'Female'
+ * @returns {Object} {count, events} - number of cuts and list of events with cuts
+ */
+function countPNS14UCuts(bestTimesOrData, gender) {
+    if (!bestTimesOrData) {
+        console.log('[countPNS14UCuts] No data provided');
+        return { count: 0, events: [] };
+    }
+    
+    // Get meet standards using getMeetStandards (for age 14)
+    if (!window.getMeetStandards) {
+        console.log('[countPNS14UCuts] getMeetStandards not available');
+        return { count: 0, events: [] };
+    }
+    
+    const meetStandards = window.getMeetStandards(14); // PNS 14U is for 14 & under
+    const genderKey = gender === 'Female' ? 'F' : 'M';
+    
+    // Find the PNS_14u meet
+    let pns14uMeet = null;
+    for (const meet of meetStandards) {
+        if (meet.meet && meet.meet.includes('PNS_14u')) {
+            pns14uMeet = meet;
+            break;
+        }
+    }
+    
+    if (!pns14uMeet || !pns14uMeet[genderKey]) {
+        console.log('[countPNS14UCuts] No PNS_14u meet found for gender:', genderKey);
+        return { count: 0, events: [] };
+    }
+    
+    const standards = pns14uMeet[genderKey]; // Map of "50 BR SCY" -> [timeStr, timeInt]
+    console.log('[countPNS14UCuts] PNS 14U standards available:', Object.keys(standards).length, 'events');
+    
+    // Get best times per event (keyed by event string like "50 BR SCY")
+    let bestTimes = {};
+    
+    if (bestTimesOrData.events && Array.isArray(bestTimesOrData.events)) {
+        // This is full swimmer data - compute bestTimes from events
+        const idx = bestTimesOrData.events.idx;
+        if (!idx) {
+            console.log('[countPNS14UCuts] No idx on events array, cannot parse');
+            return { count: 0, events: [] };
+        }
+        
+        const eventList = window._eventList || {};
+        console.log('[countPNS14UCuts] Processing', bestTimesOrData.events.length, 'events with idx:', idx);
+        
+        for (const event of bestTimesOrData.events) {
+            const eventCode = event[idx.event];
+            const timeStr = event[idx.time];
+            const timeInt = window.timeToInt ? window.timeToInt(timeStr) : 0;
+            
+            // Try multiple ways to get event string
+            let eventStr = eventList[eventCode];
+            if (!eventStr && window.getEventName) {
+                eventStr = window.getEventName(eventCode);
+            }
+            
+            if (eventStr && timeInt > 0) {
+                if (!bestTimes[eventStr] || timeInt < bestTimes[eventStr].timeInt) {
+                    bestTimes[eventStr] = { time: timeStr, timeInt: timeInt };
+                }
+            }
+        }
+        console.log('[countPNS14UCuts] Found best times for events:', Object.keys(bestTimes));
+    } else if (bestTimesOrData.bestTimes) {
+        // This is peer data with bestTimes property (keyed by event code)
+        // Need to convert event codes to event strings
+        const eventList = window._eventList || {};
+        for (const [eventCode, eventData] of Object.entries(bestTimesOrData.bestTimes)) {
+            let eventStr = eventList[eventCode];
+            if (!eventStr && window.getEventName) {
+                eventStr = window.getEventName(eventCode);
+            }
+            if (eventStr && eventData && eventData.timeInt) {
+                bestTimes[eventStr] = eventData;
+            }
+        }
+    }
+    
+    const cutsAchieved = [];
+    
+    // Check each event against PNS 14U standards
+    for (const [eventStr, eventData] of Object.entries(bestTimes)) {
+        if (!eventData || !eventData.timeInt) continue;
+        
+        const cutData = standards[eventStr]; // [timeStr, timeInt]
+        if (cutData && Array.isArray(cutData) && cutData.length >= 2) {
+            const cutTimeInt = cutData[1];
+            console.log('[countPNS14UCuts] Checking', eventStr, ':', eventData.timeInt, 'vs cut:', cutTimeInt);
+            if (cutTimeInt > 0 && eventData.timeInt <= cutTimeInt) {
+                // Format event name nicely
+                const eventName = eventStr.replace(' SCY', '').replace(' LCM', ' LCM').replace('FR', 'Free').replace('BK', 'Back').replace('BR', 'Breast').replace('FL', 'Fly');
+                cutsAchieved.push(eventName);
+                console.log('[countPNS14UCuts] ✅ CUT ACHIEVED:', eventName);
+            }
+        }
+    }
+    
+    console.log('[countPNS14UCuts] Total cuts achieved:', cutsAchieved.length, cutsAchieved);
+    return { count: cutsAchieved.length, events: cutsAchieved };
+}
+
+/**
+ * Fetch best times for a peer swimmer (lighter weight than full loadSwimmerDetails)
+ * @param {string} pkey - Peer swimmer's pkey
+ * @returns {Object} Object with bestTimes map
+ */
+async function fetchPeerSwimmerBestTimes(pkey) {
+    try {
+        // Fetch events from API
+        let bodyObj = {
+            metadata: [
+                { title: "time", dim: "[UsasSwimTime.SwimTimeFormatted]", datatype: "text" },
+                { title: "date", dim: "[SeasonCalendar.CalendarDate (Calendar)]", datatype: "datetime", level: "days" },
+                { title: "event", dim: "[UsasSwimTime.SwimEventKey]", datatype: "numeric" },
+                { dim: "[UsasSwimTime.PersonKey]", datatype: "numeric", filter: { equals: pkey }, panel: "scope" },
+            ],
+            count: 500,
+        };
+        
+        let events = await window.fetchSwimValues(bodyObj, "event");
+        if (!events || events.length === 0) return null;
+        
+        // Keep all events with dates for recency filtering
+        // Also calculate best recent times (last 6 months)
+        const bestTimes = {};
+        const recentBestTimes = {};
+        const idx = events.idx;
+        
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const cutoffDate = sixMonthsAgo.toISOString().substring(0, 10);
+        
+        for (const row of events) {
+            const eventKey = row[idx.event];
+            const time = row[idx.time];
+            const date = row[idx.date];
+            
+            if (!time || !eventKey) continue;
+            
+            const timeInt = window.timeToInt ? window.timeToInt(time) : 0;
+            const dateStr = date ? date.substring(0, 10) : '';
+            
+            // All-time best
+            if (!bestTimes[eventKey] || timeInt < bestTimes[eventKey].timeInt) {
+                bestTimes[eventKey] = {
+                    time: time,
+                    timeInt: timeInt,
+                    date: dateStr
+                };
+            }
+            
+            // Recent best (last 6 months)
+            if (dateStr >= cutoffDate) {
+                if (!recentBestTimes[eventKey] || timeInt < recentBestTimes[eventKey].timeInt) {
+                    recentBestTimes[eventKey] = {
+                        time: time,
+                        timeInt: timeInt,
+                        date: dateStr
+                    };
+                }
+            }
+        }
+        
+        // Store raw events for detailed filtering later
+        return { 
+            bestTimes: recentBestTimes,  // Use recent best times as default
+            allTimeBestTimes: bestTimes,
+            events: events  // Keep raw events for custom filtering
+        };
+    } catch (e) {
+        console.log(`Error fetching peer ${pkey}:`, e);
+        return null;
+    }
+}
+
 async function generateInsights(data, athleteStats = {}) {
     if (!data || !data.events || !data.swimmer) {
         return { insights: [], recommendations: [] };
@@ -5747,7 +5991,7 @@ async function proceedWithRegeneration(height, weight) {
 /**
  * Generate a copyable AI prompt with swimmer data for ChatGPT/Gemini
  */
-function generateAIPrompt(data) {
+function generateAIPrompt(data, peerSwimmerDataOverride = null, rankingDetailsOverride = null) {
     if (!data || !data.events || !data.swimmer) {
         return "No swimmer data available.";
     }
@@ -6105,6 +6349,180 @@ function generateAIPrompt(data) {
         return text;
     }
     
+    // Get BCST group comparison data if available
+    let bcstGroupComparison = null;
+    let higherGroupComparison = null;
+    let currentSwimmerTop3Events = [];
+    let peerSwimmerData = {}; // Cache of peer swimmer data
+    try {
+        if (window.bcstRoster && window.bcstRoster.isLoaded) {
+            // Get higher group comparison (Prep, Senior 1, Senior Performance, etc.)
+            higherGroupComparison = window.bcstRoster.getHigherGroupSwimmers(
+                swimmer.pkey,
+                window.convertGenderCodeToString(swimmer.gender),
+                swimmer.age
+            );
+            
+            // Also keep the adjacent group comparison for basic info
+            bcstGroupComparison = window.bcstRoster.getComparisonSwimmers(
+                swimmer.pkey,
+                window.convertGenderCodeToString(swimmer.gender),
+                swimmer.age
+            );
+            
+            // Use override if provided (from async refresh), otherwise check cache only
+            if (peerSwimmerDataOverride) {
+                peerSwimmerData = peerSwimmerDataOverride;
+                console.log(`[AI Prompt] Using ${Object.keys(peerSwimmerData).length} peer swimmers from override`);
+            } else if (higherGroupComparison) {
+                // Only use cached data for initial render (not async)
+                const allPeers = [];
+                higherGroupComparison.higherGroups.forEach(g => allPeers.push(...g.peers));
+                allPeers.push(...(higherGroupComparison.sameGroupPeers || []));
+                
+                console.log(`[AI Prompt] Checking cache for ${allPeers.length} peer swimmers...`);
+                
+                for (const peer of allPeers) {
+                    if (!peer.id) continue;
+                    try {
+                        const cacheKey = "swimmer/" + peer.id;
+                        const cachedData = localStorage.getItem(cacheKey);
+                        if (cachedData) {
+                            const parsed = JSON.parse(cachedData);
+                            if (parsed && parsed.data && parsed.data.bestTimes) {
+                                peerSwimmerData[peer.id] = parsed.data;
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore cache errors
+                    }
+                }
+                console.log(`[AI Prompt] Found ${Object.keys(peerSwimmerData).length} peers in cache. Click Refresh to fetch missing data.`);
+            }
+        }
+        
+        // Extract current swimmer's top 3 events by BC ranking
+        const rankings = extractRankingsFromDOM();
+        if (rankings && rankings.length > 0) {
+            // Sort by BC rank (lowest = best)
+            const rankedEvents = rankings
+                .filter(r => r.bcRank && r.bcRank > 0)
+                .sort((a, b) => a.bcRank - b.bcRank)
+                .slice(0, 3);
+            
+            currentSwimmerTop3Events = rankedEvents.map(r => ({
+                event: r.event,
+                time: r.time,
+                bcRank: r.bcRank,
+                pnRank: r.pnRank || null,
+                zoneRank: r.zoneRank || null
+            }));
+        }
+    } catch (e) {
+        console.log('Could not get BCST group comparison:', e);
+    }
+    
+    // Helper function to get peer's best times (top 3 for summary)
+    const getPeerBestTimes = (peerId) => {
+        const data = peerSwimmerData[peerId];
+        if (!data || !data.bestTimes) return null;
+        
+        const times = [];
+        for (const [eventKey, eventData] of Object.entries(data.bestTimes)) {
+            if (eventData && eventData.time) {
+                const eventName = window.getEventName ? window.getEventName(eventKey) : eventKey;
+                times.push({
+                    event: eventName,
+                    eventKey: eventKey,
+                    time: eventData.time,
+                    bcRank: eventData.bcRank || null
+                });
+            }
+        }
+        // Sort by BC rank (best first)
+        return times.sort((a, b) => {
+            if (a.bcRank && b.bcRank) return a.bcRank - b.bcRank;
+            return 0;
+        }).slice(0, 3);
+    };
+    
+    // Helper function to get ALL peer times (for detailed comparison)
+    // Now filters to only include RECENT times (within last 6 months) if date available
+    const getAllPeerTimes = (peerId) => {
+        const data = peerSwimmerData[peerId];
+        if (!data) return {};
+        
+        const times = {};
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const cutoffDate = sixMonthsAgo.toISOString().substring(0, 10);
+        
+        // If we have full events data with dates, use recent times only
+        if (data.events && Array.isArray(data.events) && data.events.idx) {
+            const idx = data.events.idx;
+            const eventList = window._eventList || {};
+            
+            // Find best RECENT time for each event
+            for (const row of data.events) {
+                const eventCode = row[idx.event];
+                const timeStr = row[idx.time];
+                const dateStr = row[idx.date] ? row[idx.date].substring(0, 10) : null;
+                
+                // Only include times from last 6 months
+                if (dateStr && dateStr < cutoffDate) continue;
+                
+                const timeInt = window.timeToInt ? window.timeToInt(timeStr) : 0;
+                const eventName = eventList[eventCode] || (window.getEventName ? window.getEventName(eventCode) : null);
+                
+                if (eventName && timeInt > 0) {
+                    if (!times[eventName] || timeInt < times[eventName].timeInt) {
+                        times[eventName] = {
+                            time: timeStr,
+                            timeInt: timeInt,
+                            date: dateStr,
+                            bcRank: null
+                        };
+                    }
+                }
+            }
+        } else if (data.bestTimes) {
+            // Fallback to bestTimes but add date filter if available
+            for (const [eventKey, eventData] of Object.entries(data.bestTimes)) {
+                if (eventData && eventData.time) {
+                    // Check if this time is recent (if date is available)
+                    if (eventData.date && eventData.date < cutoffDate) continue;
+                    
+                    const eventName = window.getEventName ? window.getEventName(eventKey) : eventKey;
+                    times[eventName] = {
+                        time: eventData.time,
+                        timeInt: eventData.timeInt || parseFloat(eventData.time.replace(':', '')) * 100,
+                        date: eventData.date || null,
+                        bcRank: eventData.bcRank || null
+                    };
+                }
+            }
+        }
+        return times;
+    };
+    
+    // Helper to get current swimmer's times by event name
+    const getCurrentSwimmerTimes = () => {
+        const times = {};
+        if (bestTimes) {
+            for (const [eventKey, eventData] of Object.entries(bestTimes)) {
+                if (eventData && eventData.time) {
+                    const eventName = window.getEventName ? window.getEventName(eventKey) : eventKey;
+                    times[eventName] = {
+                        time: eventData.time,
+                        timeInt: eventData.timeInt || 0,
+                        bcRank: eventData.bcRank || null
+                    };
+                }
+            }
+        }
+        return times;
+    };
+    
     // Gender codes: 1 = Female, 2 = Male (handle both string and number)
     // Try to get gender from swimmer object first, then from events
     let genderVal = swimmer.gender;
@@ -6158,7 +6576,16 @@ function generateAIPrompt(data) {
 - Age: ${swimmer.age}
 - Approximate Grade: ${swimmer.age >= 18 ? 'College' : swimmer.age >= 17 ? '12th (Senior)' : swimmer.age >= 16 ? '11th (Junior)' : swimmer.age >= 15 ? '10th (Sophomore)' : swimmer.age >= 14 ? '9th (Freshman)' : swimmer.age >= 13 ? '8th' : swimmer.age >= 12 ? '7th' : swimmer.age >= 11 ? '6th' : swimmer.age >= 10 ? '5th' : swimmer.age + ' years old'}
 - Gender: ${genderStr}
-- Club: ${swimmer.clubName}
+${(() => {
+    const stats = getKnownSwimmerStats(swimmer.pkey);
+    if (stats) {
+        let str = '';
+        if (stats.height) str += `- Height: ${stats.height} cm (${(stats.height / 2.54).toFixed(1)} inches / ${Math.floor(stats.height / 30.48)}'${Math.round((stats.height % 30.48) / 2.54)}")\n`;
+        if (stats.weight) str += `- Weight: ${stats.weight} lbs (${(stats.weight * 0.453592).toFixed(1)} kg)\n`;
+        return str;
+    }
+    return '';
+})()}- Club: ${swimmer.clubName}
 - LSC: ${swimmer.lsc}
 - Years until College Recruiting: ${swimmer.age >= 16 ? 'NOW - recruiting age' : 16 - swimmer.age + ' years'}
 
@@ -6308,24 +6735,698 @@ D1 Recruiting Reference Times (approximate):
 - For returning swimmers: What's typical for comeback timeline? How long to return to previous level?
 - Competition frequency: Are they competing enough to improve?
 
-## 8. MOTIVATIONAL ASSESSMENT
+---
+---
+
+# ⭐ SECTION 8: BCST TRAINING GROUP ANALYSIS ⭐
+# (THIS IS THE MOST IMPORTANT SECTION - FOCUS YOUR ANALYSIS HERE)
+
+---
+---
+
+**⚠️ IMPORTANT: Click the "🔄 Refresh" button above to load peer swimmer data before copying this prompt!**
+
+${higherGroupComparison ? `
+## 📋 EXECUTIVE SUMMARY - Generate This First!
+
+**AI: Before diving into details, provide a clear VERDICT based on the data below:**
+
+1. **Current Status:** ${fullName} is in **${higherGroupComparison.currentGroup}** (${higherGroupComparison.ageGroup} ${genderStr})
+2. **Target Group:** ${higherGroupComparison.higherGroups[0]?.group || 'Next group up'}
+3. **Key Question:** Should ${fullName} move up to ${higherGroupComparison.higherGroups[0]?.group || 'the next group'}?
+
+**AI: After analyzing ALL the data below, provide:**
+- ✅ or ❌ **VERDICT:** Ready to move up / Not yet ready / Ready for trial practices
+- 📊 **EVIDENCE SUMMARY:** 2-3 bullet points with specific times/rankings supporting the verdict
+- 🎯 **RECOMMENDED ACTION:** Specific next step (move up now / trial practices / wait until X time achieved)
+- 📅 **TIMELINE:** When to reassess (e.g., "after next meet", "in 2 months", "end of season")
+
+**⚠️ IMPORTANT - INCLUDE THESE IN YOUR RESPONSE:**
+1. **RANKING TABLES** - Recreate the ranking tables showing ${fullName} vs ${higherGroupComparison.higherGroups[0]?.group || 'target group'} swimmers
+2. **COMPARISON TABLES** - Show event-by-event comparisons with actual times
+3. **GAP ANALYSIS TABLE** - Show time gaps between ${fullName} and bottom ${higherGroupComparison.higherGroups[0]?.group || 'target group'} swimmers
+
+---
+
+### 8.1 📍 Current Placement
+- **Current Group:** ${higherGroupComparison.currentGroup}
+- **Target Group:** ${higherGroupComparison.higherGroups[0]?.group || 'N/A'}
+- **Age Group:** ${higherGroupComparison.ageGroup} ${genderStr}
+- **Grade Level:** ${swimmer.age >= 18 ? 'College' : swimmer.age >= 17 ? '12th (Senior)' : swimmer.age >= 16 ? '11th (Junior)' : swimmer.age >= 15 ? '10th (Sophomore)' : swimmer.age >= 14 ? '9th (Freshman)' : swimmer.age >= 13 ? '8th' : swimmer.age >= 12 ? '7th' : swimmer.age >= 11 ? '6th' : swimmer.age + ' years old'}
+**Group Structure (by age):**
+
+**HIGH SCHOOL (9th grade+):**
+- National (elite) → Senior Performance (competitive) → Senior 1 (proven cuts) → Senior 2 (winding down ⚠️)
+
+**PRE-HIGH SCHOOL (8th grade & below):**
+- Prep (fastest, has PNS 14U cut) → Regional (high potential) → Champs (solid) → Divisional → Orange → Gold → Silver → Bronze
+
+**PROGRESSION PATHS (Important!):**
+
+**For 11-12 year olds:**
+- Champs → Regional → Prep (step-by-step progression, need to build toward PNS 14U cut)
+
+**For 13-14 year olds (before 9th grade):**
+- Option A: Champs → Prep (if fast enough, skip Regional)
+- Option B: Champs → Senior Performance at 9th grade (RARE - only very fast swimmers)
+- Option C: Champs → Senior 1 at 9th grade (MOST LIKELY path - need PNS Senior Champ cut)
+- ❌ Champs → Senior 2 is NOT a goal (those swimmers are winding down)
+
+**Note:** At age 13-14, there's limited time left in pre-HS track. Focus shifts to:
+1. Get PNS 14U cut → qualify for Prep (if time permits before 9th grade)
+2. Work toward PNS Senior Championship cut → enter Senior 1 at 9th grade
+
+---
+
+### 8.2 📊 ${fullName}'s COMPLETE Performance Data
+
+**ALL Events with Best Times and Rankings:**
+${(() => {
+    const myTimes = getCurrentSwimmerTimes();
+    const myTimesArr = Object.entries(myTimes)
+        .map(([event, data]) => ({ event, ...data }))
+        .sort((a, b) => (a.bcRank || 999) - (b.bcRank || 999));
+    
+    if (myTimesArr.length === 0) return '⚠️ Rankings not loaded - go to Personal Best tab first, then return here';
+    
+    return `| Event | Time | BC Rank |
+|-------|------|---------|
+${myTimesArr.map(e => `| ${e.event} | **${e.time}** | #${e.bcRank || '?'} |`).join('\n')}`;
+})()}
+
+**${fullName}'s PNS 14U Cuts:** ${(() => {
+    // Use the already-computed bestTimes from the prompt
+    const myTimes = getCurrentSwimmerTimes();
+    if (!window.getMeetStandards) {
+        return '*(Standards not loaded)*';
+    }
+    
+    const meetStandards = window.getMeetStandards(14);
+    const genderKey = genderStr === 'Female' ? 'F' : 'M';
+    
+    // Find PNS_14u meet
+    let pns14uMeet = meetStandards.find(m => m.meet && m.meet.includes('PNS_14u'));
+    if (!pns14uMeet || !pns14uMeet[genderKey]) {
+        return '*(PNS 14U standards not found)*';
+    }
+    
+    const standards = pns14uMeet[genderKey];
+    const cutsAchieved = [];
+    
+    for (const [eventName, eventData] of Object.entries(myTimes)) {
+        if (!eventData || !eventData.timeInt) continue;
+        
+        const cutData = standards[eventName];
+        if (cutData && Array.isArray(cutData) && cutData.length >= 2) {
+            const cutTimeInt = cutData[1];
+            if (cutTimeInt > 0 && eventData.timeInt <= cutTimeInt) {
+                const shortName = eventName.replace(' SCY', '').replace(' LCM', ' LCM')
+                    .replace('FR', 'Free').replace('BK', 'Back').replace('BR', 'Breast').replace('FL', 'Fly');
+                cutsAchieved.push(shortName);
+            }
+        }
+    }
+    
+    return cutsAchieved.length > 0 
+        ? `✅ **${cutsAchieved.length} cuts achieved** (${cutsAchieved.join(', ')})` 
+        : '❌ **0 cuts** - needs at least 1 PNS 14U cut for Prep consideration';
+})()}
+
+---
+
+### 8.2.1 📋 BC RANKING TABLES FOR ${fullName}'s TOP EVENTS
+
+**⚠️ AI: INCLUDE THESE RANKING TABLES IN YOUR RESPONSE - They show where ${fullName} stands among ALL swimmers in the age group!**
+
+${(() => {
+    const myTimes = getCurrentSwimmerTimes();
+    const myTimesArr = Object.entries(myTimes)
+        .map(([event, data]) => ({ event, ...data }))
+        .filter(e => e.bcRank && e.bcRank > 0)
+        .sort((a, b) => (a.bcRank || 999) - (b.bcRank || 999))
+        .slice(0, 5);  // Top 5 ranked events
+    
+    if (myTimesArr.length === 0) return '*(Rankings not loaded - go to Personal Best tab first)*';
+    
+    let tables = [];
+    for (const event of myTimesArr) {
+        // Try to get ranking data for this event
+        const rankings = extractRankingsFromDOM();
+        const eventRanking = rankings ? rankings.find(r => r.event === event.event) : null;
+        
+        tables.push(`#### ${event.event} - ${fullName} is **#${event.bcRank}**
+
+| Rank | Swimmer | Time | Group |
+|------|---------|------|-------|
+${(() => {
+    // Show top 5 + Ray's position + 2 around Ray
+    let rows = [];
+    
+    // We don't have full ranking data in the prompt, so show what we know
+    rows.push(`| **#${event.bcRank}** | **${fullName}** | **${event.time}** | **${higherGroupComparison?.currentGroup || 'Current'}** |`);
+    
+    // Add note about needing full ranking data
+    rows.push(`| ... | *(Full ranking table available in Personal Best tab)* | | |`);
+    
+    return rows.join('\n');
+})()}
+
+**Key insight:** ${fullName} ranks #${event.bcRank} in ${higherGroupComparison?.ageGroup || 'their age group'} ${genderStr} for this event.
+`);
+    }
+    
+    return tables.join('\n');
+})()}
+
+**AI Instructions for Ranking Tables:**
+1. When comparing to ${higherGroupComparison?.higherGroups[0]?.group || 'target group'}, show which ${higherGroupComparison?.higherGroups[0]?.group || 'target'} swimmers are in the ranking tables
+2. Highlight where ${fullName} would place among ${higherGroupComparison?.higherGroups[0]?.group || 'target'} swimmers specifically
+3. In your response, recreate these ranking tables with the ${higherGroupComparison?.higherGroups[0]?.group || 'target'} swimmers marked
+
+---
+
+### 8.3 📊 EVENT-BY-EVENT COMPARISON: ${fullName} vs ${higherGroupComparison.higherGroups[0]?.group || 'Next Group'}
+
+${(() => {
+    const myTimes = getCurrentSwimmerTimes();
+    const targetGroup = higherGroupComparison.higherGroups[0];
+    if (!targetGroup || !targetGroup.peers || targetGroup.peers.length === 0) {
+        return '*(No peers in target group to compare)*';
+    }
+    
+    // Collect all unique events from all swimmers
+    const allEvents = new Set(Object.keys(myTimes));
+    targetGroup.peers.forEach(p => {
+        const pTimes = getAllPeerTimes(p.id);
+        Object.keys(pTimes).forEach(e => allEvents.add(e));
+    });
+    
+    // Key events to prioritize (SCY focus)
+    const keyEvents = ['50 Free SCY', '100 Free SCY', '50 Breast SCY', '100 Breast SCY', '50 Fly SCY', '100 Fly SCY', '50 Back SCY', '100 Back SCY', '200 Free SCY', '200 IM SCY'];
+    const sortedEvents = [...allEvents].sort((a, b) => {
+        const aIdx = keyEvents.indexOf(a);
+        const bIdx = keyEvents.indexOf(b);
+        if (aIdx >= 0 && bIdx >= 0) return aIdx - bIdx;
+        if (aIdx >= 0) return -1;
+        if (bIdx >= 0) return 1;
+        return a.localeCompare(b);
+    });
+    
+    let tables = [];
+    for (const event of sortedEvents.slice(0, 10)) {  // Top 10 events
+        const myTime = myTimes[event];
+        if (!myTime) continue;
+        
+        // Get times from target group peers
+        const peerData = targetGroup.peers.map(p => {
+            const pTimes = getAllPeerTimes(p.id);
+            return { name: p.name, age: p.age, time: pTimes[event]?.time || '-', timeInt: pTimes[event]?.timeInt || 99999 };
+        }).filter(p => p.time !== '-').sort((a, b) => a.timeInt - b.timeInt);
+        
+        if (peerData.length === 0) continue;
+        
+        const fastest = peerData[0];
+        const slowest = peerData[peerData.length - 1];
+        const myTimeInt = myTime.timeInt || 99999;
+        
+        let status = '';
+        if (myTimeInt < fastest.timeInt) {
+            status = `✅ FASTER than all ${targetGroup.group} swimmers`;
+        } else if (myTimeInt <= slowest.timeInt) {
+            const position = peerData.filter(p => p.timeInt < myTimeInt).length + 1;
+            status = `📊 Would be #${position} of ${peerData.length} in ${targetGroup.group}`;
+        } else {
+            const gap = ((myTimeInt - slowest.timeInt) / 100).toFixed(2);
+            status = `📈 ${gap}s slower than slowest ${targetGroup.group} swimmer`;
+        }
+        
+        tables.push(`#### ${event}
+| Swimmer | Group | Time | Gap to ${fullName} |
+|---------|-------|------|-------------------|
+| **${fullName}** | ${higherGroupComparison.currentGroup} | **${myTime.time}** | - |
+${peerData.map(p => {
+    const gap = ((myTimeInt - p.timeInt) / 100).toFixed(2);
+    const gapStr = gap > 0 ? `+${gap}s` : `${gap}s`;
+    return `| ${p.name} | ${targetGroup.group} | ${p.time} | ${gapStr} |`;
+}).join('\n')}
+
+**Analysis:** ${status}
+`);
+    }
+    
+    return tables.length > 0 ? tables.join('\n') : '*(No comparable events found - click REFRESH to load peer data)*';
+})()}
+
+---
+
+### 8.3.1 🎯 BOTTOM 3 ${higherGroupComparison.higherGroups[0]?.group || 'Target Group'} SWIMMERS - Direct Comparison
+**These are the swimmers ${fullName} needs to match or beat to qualify for ${higherGroupComparison.higherGroups[0]?.group || 'target group'}:**
+
+${(() => {
+    const myTimes = getCurrentSwimmerTimes();
+    const targetGroup = higherGroupComparison.higherGroups[0];
+    if (!targetGroup || !targetGroup.peers || targetGroup.peers.length === 0) {
+        return '*(No peers in target group)*';
+    }
+    
+    // Calculate "overall speed" for each peer based on 50 Free or 100 Free
+    const peersWithSpeed = targetGroup.peers.map(p => {
+        const pTimes = getAllPeerTimes(p.id);
+        const peerData = peerSwimmerData[p.id];
+        const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+        
+        // Use 50 Free or 100 Free as speed indicator
+        const speed50 = pTimes['50 Free SCY']?.timeInt || 99999;
+        const speed100 = pTimes['100 Free SCY']?.timeInt || 99999;
+        const speedIndicator = Math.min(speed50, speed100 / 2); // Normalize 100 to 50 equivalent
+        
+        return {
+            ...p,
+            pTimes,
+            cuts,
+            speedIndicator,
+            hasData: Object.keys(pTimes).length > 0
+        };
+    }).filter(p => p.hasData);
+    
+    if (peersWithSpeed.length === 0) {
+        return '*(Click REFRESH to load peer data)*';
+    }
+    
+    // Sort by speed (slowest first = highest time)
+    peersWithSpeed.sort((a, b) => b.speedIndicator - a.speedIndicator);
+    
+    // Get bottom 3 (slowest)
+    const bottom3 = peersWithSpeed.slice(0, 3);
+    
+    // Key events for comparison
+    const keyEvents = ['50 Free SCY', '100 Free SCY', '50 Breast SCY', '100 Breast SCY', '50 Fly SCY', '50 Back SCY', '200 Free SCY', '200 IM SCY'];
+    
+    let output = `**🏊 THE ${targetGroup.group} "THRESHOLD" - Bottom 3 swimmers ${fullName} is compared against:**
+
+`;
+    
+    // For each bottom 3 swimmer, show detailed comparison
+    for (let i = 0; i < bottom3.length; i++) {
+        const peer = bottom3[i];
+        const cutsStr = peer.cuts.count > 0 
+            ? `**${peer.cuts.count} PNS 14U cuts** (${peer.cuts.events.join(', ')})` 
+            : '0 PNS 14U cuts';
+        
+        const peerGroup = getSwimmerGroup(peer.name) || targetGroup.group;
+        output += `#### ${i+1}. ${peer.name} (Age ${peer.age}, **${peerGroup}**) - ${cutsStr}
+| Event | ${peer.name} (${peerGroup}) | ${fullName} (${higherGroupComparison.currentGroup}) | Gap | ${fullName} Status |
+|-------|-------------|-------------|-----|-------------------|
+`;
+        
+        for (const event of keyEvents) {
+            const peerTime = peer.pTimes[event];
+            const myTime = myTimes[event];
+            
+            if (!peerTime && !myTime) continue;
+            
+            const peerTimeStr = peerTime ? peerTime.time : '-';
+            const myTimeStr = myTime ? myTime.time : '-';
+            
+            let gapStr = '-';
+            let statusStr = '-';
+            
+            if (peerTime && myTime) {
+                const gap = ((myTime.timeInt - peerTime.timeInt) / 100).toFixed(2);
+                if (gap < 0) {
+                    gapStr = `**${Math.abs(gap)}s faster**`;
+                    statusStr = '✅ FASTER';
+                } else if (gap == 0) {
+                    gapStr = 'TIED';
+                    statusStr = '🔄 TIED';
+                } else if (gap <= 1) {
+                    gapStr = `${gap}s behind`;
+                    statusStr = '📈 VERY CLOSE';
+                } else if (gap <= 3) {
+                    gapStr = `${gap}s behind`;
+                    statusStr = '📊 Close';
+                } else {
+                    gapStr = `${gap}s behind`;
+                    statusStr = '🎯 Gap to close';
+                }
+            } else if (myTime && !peerTime) {
+                statusStr = '✅ Has time (peer does not)';
+            }
+            
+            output += `| ${event} | ${peerTimeStr} | ${myTimeStr} | ${gapStr} | ${statusStr} |
+`;
+        }
+        
+        output += `
+`;
+    }
+    
+    // Summary
+    output += `---
+
+**📊 SUMMARY: ${fullName} vs Bottom 3 ${targetGroup.group} Swimmers**
+
+`;
+    
+    // Count how many events Ray is faster/close/behind for each peer
+    for (const peer of bottom3) {
+        let fasterCount = 0, closeCount = 0, behindCount = 0;
+        
+        for (const event of keyEvents) {
+            const peerTime = peer.pTimes[event];
+            const myTime = myTimes[event];
+            if (!peerTime || !myTime) continue;
+            
+            const gap = (myTime.timeInt - peerTime.timeInt) / 100;
+            if (gap < 0) fasterCount++;
+            else if (gap <= 1) closeCount++;
+            else behindCount++;
+        }
+        
+        const total = fasterCount + closeCount + behindCount;
+        if (total > 0) {
+            output += `- **vs ${peer.name}:** ✅ Faster in ${fasterCount} events | 📈 Within 1 sec in ${closeCount} events | 🎯 Behind in ${behindCount} events
+`;
+        }
+    }
+    
+    return output;
+})()}
+
+---
+
+### 8.4 📊 SAME GROUP (${higherGroupComparison.currentGroup}) - Full Data
+**Where does ${fullName} stand among ${higherGroupComparison.currentGroup} peers?**
+
+${(() => {
+    const sameGroupPeers = higherGroupComparison.sameGroupPeers || [];
+    if (sameGroupPeers.length === 0) return '*(No same-group peers for this age/gender)*';
+    
+    const myTimes = getCurrentSwimmerTimes();
+    const keyEvents = ['50 Free SCY', '100 Free SCY', '50 Breast SCY', '100 Breast SCY', '50 Fly SCY', '200 Free SCY', '200 IM SCY'];
+    
+    // First, show a roster of all same-group peers
+    let output = `**${higherGroupComparison.currentGroup} Peers (${higherGroupComparison.ageGroup} ${genderStr}): ${sameGroupPeers.length} swimmers**
+| Name | Age | Group | ID | Data Status |
+|------|-----|-------|-----|-------------|
+${sameGroupPeers.map(p => {
+    const pTimes = getAllPeerTimes(p.id);
+    const hasData = Object.keys(pTimes).length > 0;
+    const group = getSwimmerGroup(p.name) || higherGroupComparison.currentGroup;
+    return `| ${p.name} | ${p.age} | ${group} | ${p.id || 'N/A'} | ${hasData ? '✅ Loaded' : '⏳ Click REFRESH'} |`;
+}).join('\n')}
+
+`;
+    
+    // Build comparison for each key event
+    let tables = [];
+    for (const event of keyEvents) {
+        const myTime = myTimes[event];
+        if (!myTime) continue;
+        
+        const allSwimmers = [{ name: `**${fullName}**`, time: myTime.time, timeInt: myTime.timeInt || 99999, loaded: true, group: higherGroupComparison.currentGroup }];
+        
+        for (const peer of sameGroupPeers) {
+            const pTimes = getAllPeerTimes(peer.id);
+            const peerGroup = getSwimmerGroup(peer.name) || higherGroupComparison.currentGroup;
+            if (pTimes[event]) {
+                allSwimmers.push({ name: peer.name, time: pTimes[event].time, timeInt: pTimes[event].timeInt || 99999, loaded: true, group: peerGroup });
+            } else if (Object.keys(pTimes).length === 0) {
+                // Peer data not loaded - show placeholder
+                allSwimmers.push({ name: peer.name, time: '(not loaded)', timeInt: 99999, loaded: false, group: peerGroup });
+            }
+            // If peer has data but not for this event, they didn't swim it - don't include
+        }
+        
+        // Sort by time (unloaded at bottom)
+        allSwimmers.sort((a, b) => {
+            if (!a.loaded && b.loaded) return 1;
+            if (a.loaded && !b.loaded) return -1;
+            return a.timeInt - b.timeInt;
+        });
+        const loadedSwimmers = allSwimmers.filter(s => s.loaded);
+        const rank = loadedSwimmers.findIndex(s => s.name.includes(fullName)) + 1;
+        
+        tables.push(`**${event}:** (${fullName} is **#${rank}** of ${loadedSwimmers.length} with times)
+| Rank | Swimmer | Group | Time |
+|------|---------|-------|------|
+${allSwimmers.map((s, i) => `| ${s.loaded ? i+1 : '-'} | ${s.name} | ${s.group} | ${s.time} |`).join('\n')}
+`);
+    }
+    
+    return output + (tables.length > 0 ? tables.join('\n') : '*(No matching events - click REFRESH to load peer times)*');
+})()}
+
+---
+
+### 8.5 📊 ${higherGroupComparison.higherGroups[0]?.group || 'Target Group'} - Full Data
+**Complete data for ${higherGroupComparison.ageGroup} ${genderStr} swimmers in ${higherGroupComparison.higherGroups[0]?.group || 'target group'}:**
+
+${(() => {
+    const targetGroup = higherGroupComparison.higherGroups[0];
+    if (!targetGroup || !targetGroup.peers || targetGroup.peers.length === 0) {
+        return '*(No peers in target group)*';
+    }
+    
+    // First show roster summary
+    let output = `**${targetGroup.group} Roster (${higherGroupComparison.ageGroup} ${genderStr}): ${targetGroup.peers.length} swimmers**
+| Name | Age | Group | ID | PNS 14U Cuts | Data Status |
+|------|-----|-------|-----|--------------|-------------|
+${targetGroup.peers.map(p => {
+    const pTimes = getAllPeerTimes(p.id);
+    const peerData = peerSwimmerData[p.id];
+    const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+    const hasData = Object.keys(pTimes).length > 0;
+    const cutsStr = cuts.count > 0 ? `**${cuts.count}** (${cuts.events.slice(0,2).join(', ')})` : '0';
+    const peerGroup = getSwimmerGroup(p.name) || targetGroup.group;
+    return `| ${p.name} | ${p.age} | ${peerGroup} | ${p.id || 'N/A'} | ${cutsStr} | ${hasData ? '✅ Loaded' : '⏳ REFRESH'} |`;
+}).join('\n')}
+
+---
+
+**DETAILED TIMES FOR EACH ${targetGroup.group} SWIMMER:**
+`;
+    
+    let rows = [];
+    for (const peer of targetGroup.peers) {
+        const pTimes = getAllPeerTimes(peer.id);
+        const peerData = peerSwimmerData[peer.id];
+        const cuts = peerData && peerData.bestTimes ? countPNS14UCuts(peerData.bestTimes, genderStr) : { count: 0, events: [] };
+        
+        const timesArr = Object.entries(pTimes)
+            .map(([event, data]) => ({ event, time: data.time }))
+            .sort((a, b) => a.event.localeCompare(b.event));
+        
+        if (timesArr.length > 0) {
+            rows.push(`#### ${peer.name} (Age ${peer.age}) - PNS 14U Cuts: ${cuts.count > 0 ? `**${cuts.count}** (${cuts.events.join(', ')})` : '0'}
+| Event | Time |
+|-------|------|
+${timesArr.map(t => `| ${t.event} | ${t.time} |`).join('\n')}
+`);
+        } else {
+            rows.push(`#### ${peer.name} (Age ${peer.age})
+⏳ Click REFRESH to load times
+`);
+        }
+    }
+    
+    return output + rows.join('\n');
+})()}
+
+---
+
+### 8.6 📋 COMPREHENSIVE ANALYSIS REQUIRED
+
+**AI: Using ALL the data tables above, provide detailed analysis:**
+
+#### 8.6.1 SPRINT EVENTS ANALYSIS (50 Free, 50 Fly, 50 Back, 50 Breast)
+For each sprint event where ${fullName} has times:
+- How does ${fullName} compare to the SLOWEST ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmer?
+- How does ${fullName} compare to the MEDIAN ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmer?
+- Is ${fullName} being challenged in sprint sets in ${higherGroupComparison.currentGroup}?
+
+#### 8.6.2 AEROBIC/DISTANCE EVENTS ANALYSIS (100+ events)
+For 100 Free, 200 Free, 200 IM, etc.:
+- Can ${fullName} likely hold the intervals in ${higherGroupComparison.higherGroups[0]?.group || 'target group'}?
+- What's the aerobic gap that needs to be closed?
+- This is often the limiting factor for group moves - analyze carefully!
+
+#### 8.6.3 SPECIALTY STROKE ANALYSIS
+- What is ${fullName}'s strongest stroke based on BC rankings?
+- Could ${fullName} contribute to ${higherGroupComparison.higherGroups[0]?.group || 'target group'} in specialty stroke work?
+- This can be a "secret weapon" argument for moving up
+
+#### 8.6.4 PNS 14U CUTS COMPARISON
+Create a table:
+| Swimmer | Group | PNS 14U Cuts | Events |
+|---------|-------|--------------|--------|
+| ${fullName} | ${higherGroupComparison.currentGroup} | ? | ? |
+| (each ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmer) | ... | ... | ... |
+
+**Key Question:** Does ${fullName} have comparable or better cut achievements than the bottom ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmers?
+
+#### 8.6.5 TIME GAPS TO CLOSE
+For ${fullName}'s weakest events compared to ${higherGroupComparison.higherGroups[0]?.group || 'target group'}:
+| Event | ${fullName}'s Time | Slowest ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | Gap | Weeks to Close (at typical improvement rate) |
+|-------|-------------------|---------------------|-----|---------------------------------------------|
+
+---
+
+### 8.7 🎯 DEVELOPMENT PATH OPTIONS
+
+**Working with the coach to find the best path for ${fullName}:**
+
+#### Path A: Trial Practices (Collaborative Approach)
+- **Idea:** "${fullName} could try swimming with ${higherGroupComparison.higherGroups[0]?.group || 'the next group'} once a week to see if it's a good fit"
+- **Duration:** 2-4 weeks to evaluate
+- **Benefits:** Both swimmer and coach can assess readiness together
+- **Supporting data:** "${fullName} has BC rank #${currentSwimmerTop3Events[0]?.bcRank || '?'}, similar to some swimmers in ${higherGroupComparison.higherGroups[0]?.group || 'that group'}"
+
+#### Path B: Gradual Transition
+- **Idea:** "2-3 practices per week with ${higherGroupComparison.higherGroups[0]?.group || 'next group'}, while staying with ${higherGroupComparison.currentGroup}"
+- **Benefits:** More challenging training stimulus while maintaining current friendships
+- **Works well for:** Building confidence and endurance before full transition
+
+#### Path C: Goal-Setting with Coach
+- **Discussion:** "What specific times or achievements should ${fullName} work toward?"
+- **Outcome:** Clear, measurable goals agreed upon together
+- **Timeline:** "What's a realistic timeline to reassess?"
+- **Benefit:** Creates a roadmap and shared expectations
+
+---
+
+### 8.8 📝 COACH DISCUSSION GUIDE
+
+**AI: Help prepare a constructive conversation with the coach:**
+
+1. **Opening (appreciative tone):**
+   - "Thank you for coaching ${fullName}. I'd love to discuss their progress and next steps."
+
+2. **Share the data (collaborative):**
+   - "${fullName}'s BC ranking is #${currentSwimmerTop3Events[0]?.bcRank || '?'} in ${currentSwimmerTop3Events[0]?.event || 'their best event'}"
+   - "Comparing times with swimmers in ${higherGroupComparison.higherGroups[0]?.group || 'the next group'}..."
+   - "What do you see as ${fullName}'s strengths and areas to develop?"
+
+3. **Ask for guidance:**
+   - "What would you recommend as ${fullName}'s next development goals?"
+   - "Would a trial practice with ${higherGroupComparison.higherGroups[0]?.group || 'the next group'} be helpful to assess readiness?"
+   - "What milestones should we be working toward?"
+
+4. **Follow up:**
+   - Thank the coach for their time and insights
+   - Summarize agreed-upon goals and timeline
+   - Schedule a follow-up discussion
+
+---
+
+### 8.9 🏫 HIGH SCHOOL TRANSITION (For 8th Graders)
+
+**When entering 9th grade, Champs/Prep/Regional swimmers move to Senior groups:**
+
+| Senior Group | Goal / Profile | Reality | ${fullName}'s Status |
+|--------------|----------------|---------|----------------------|
+| **National** | GOAL: National/Junior National cuts, BC top 1-3 | ~50% don't have Winter Junior cuts yet - based on potential | [AI: evaluate] |
+| **Senior Performance** | GOAL: Sectional/Futures cuts, BC top 3-5 | Most don't have these cuts yet - based on commitment & potential | [AI: evaluate] |
+| **Senior 1** | Has at least ONE PNS Senior Championship cut, BC top 5-12 | Solid competitive swimmers with proven cuts | [AI: evaluate] |
+| ~~Senior 2~~ | No Senior Championship cuts | ⚠️ Swimmers winding down/ready to quit - NOT a goal | [Don't target] |
+
+**IMPORTANT:** Senior 2 is NOT a developmental group - it's for swimmers who are essentially done competing seriously. 
+**Goal should be Senior 1 minimum, ideally Senior Performance or National.**
+
+**AI: Based on ${fullName}'s current times and rankings:**
+1. Which Senior group (National/Performance/Senior 1) is realistic?
+2. What specific times/cuts are needed to reach that group?
+3. Is the trajectory pointing toward a serious competitive path or winding down?
+
+---
+---
+
+## ⭐⭐⭐ FINAL VERDICT: ${fullName.toUpperCase()} GROUP PLACEMENT ⭐⭐⭐
+
+**AI: This is the most important output. Based on ALL the data analyzed above, provide:**
+
+### 🏆 THE VERDICT
+
+| Question | Answer |
+|----------|--------|
+| **Should ${fullName} move to ${higherGroupComparison.higherGroups[0]?.group || 'next group'}?** | [YES / NO / TRIAL FIRST] |
+| **Confidence Level** | [HIGH / MEDIUM / LOW] based on data completeness |
+| **Timing** | [NOW / After next meet / End of season / Not yet] |
+
+### 📊 EVIDENCE SUMMARY (With Ranking Tables!)
+
+**AI: Create these tables to support your verdict:**
+
+#### Table 1: Sprint Events Ranking Comparison
+| Event | ${fullName}'s Rank | ${fullName}'s Time | Slowest ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | Gap | Verdict |
+|-------|-------------------|-------------------|----------------------|-----|---------|
+| 50 Free | #? | ?.?? | Name (?.??) | +/- ?.??s | ✅/❌ |
+| 50 Breast | #? | ?.?? | Name (?.??) | +/- ?.??s | ✅/❌ |
+| (add all sprint events) | | | | | |
+
+#### Table 2: Distance/Aerobic Events Ranking Comparison  
+| Event | ${fullName}'s Rank | ${fullName}'s Time | Slowest ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | Gap | Verdict |
+|-------|-------------------|-------------------|----------------------|-----|---------|
+| 100 Free | #? | ?.?? | Name (?.??) | +/- ?.??s | ✅/❌ |
+| 200 Free | #? | ?.?? | Name (?.??) | +/- ?.??s | ✅/❌ |
+| (add all distance events) | | | | | |
+
+#### Table 3: PNS 14U Cuts Comparison
+| Swimmer | Group | Total Cuts | Events with Cuts |
+|---------|-------|------------|------------------|
+| **${fullName}** | ${higherGroupComparison.currentGroup} | ? | (list events) |
+| (Bottom ${higherGroupComparison.higherGroups[0]?.group || 'Target'} #1) | ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | ? | (list events) |
+| (Bottom ${higherGroupComparison.higherGroups[0]?.group || 'Target'} #2) | ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | ? | (list events) |
+| (Bottom ${higherGroupComparison.higherGroups[0]?.group || 'Target'} #3) | ${higherGroupComparison.higherGroups[0]?.group || 'Target'} | ? | (list events) |
+
+### 📈 KEY FINDINGS
+
+1. **Sprint Comparison:** [Summarize - is ${fullName} faster/slower than bottom ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmers in sprints?]
+2. **Aerobic Gap:** [Summarize - can ${fullName} handle the intervals? What's the gap in 100+ events?]
+3. **Cut Status:** [Summarize - how do ${fullName}'s cuts compare to ${higherGroupComparison.higherGroups[0]?.group || 'target'} swimmers?]
+
+### 🎯 RECOMMENDED ACTION
+
+**Primary Recommendation:** [One clear action - move up / trial practices / stay and work on X / etc.]
+
+**Specific Next Steps:**
+1. [First action item with timeline]
+2. [Second action item]
+3. [Third action item]
+
+**Benchmarks for Success:**
+- By [date]: ${fullName} should achieve [specific time/cut]
+- By [date]: ${fullName} should be able to [specific capability]
+
+### 💬 ONE-LINE SUMMARY FOR COACH
+
+"Based on the data, ${fullName} [is ready for / would benefit from trial practices with / should continue developing in] ${higherGroupComparison.higherGroups[0]?.group || 'the next group'} because [ONE compelling reason with specific data point]."
+
+---
+---
+` : `
+(BCST roster not loaded - cannot provide group comparison data. 
+To enable this analysis, load the swimmer via BCST dropdown first.)
+`}
+
+## 9. MOTIVATIONAL ASSESSMENT
 - What makes this swimmer special based on their data?
 - Realistic encouragement based on actual progress
 - Key milestones to celebrate along the way
 - For returning swimmers: Celebrate the comeback, set realistic re-entry goals
 
-## 9. VISUALIZATIONS & TABLES (Generate diagrams, charts, and summary tables)
+## 10. VISUALIZATIONS & TABLES (Generate diagrams, charts, and summary tables)
 
-### 9.1 Event Strength Radar Chart
+### 10.1 Event Strength Radar Chart
 Create a visual showing relative strength across strokes (FR, BK, BR, FL, IM) using a text-based radar/spider chart or bar chart.
 
-### 9.2 Progress Timeline
+### 10.2 Progress Timeline
 Show a timeline visualization of:
 - Past progress (key milestones achieved)
 - Current position
 - Future goals with target dates
 
-### 9.3 Standards Gap Chart
+### 10.3 Standards Gap Chart
 Create a bar chart showing how close they are to each standard:
 \`\`\`
 Event     | Current | B | BB | A | AA | JO | FW
@@ -6334,17 +7435,17 @@ Event     | Current | B | BB | A | AA | JO | FW
 100 BR    | ██████████████████░░░  (90% to BB)
 \`\`\`
 
-### 9.4 Training Focus Pie Chart
+### 10.4 Training Focus Pie Chart
 Show recommended training time allocation:
 - Sprint work %
 - Distance/Endurance %
 - Technique %
 - Dryland %
 
-### 9.5 Development Trajectory Graph
+### 10.5 Development Trajectory Graph
 Show projected times over the next 2-3 years with milestones marked.
 
-### 9.6 Summary Tables (Markdown format)
+### 10.6 Summary Tables (Markdown format)
 
 **Table 1: Top Events Summary**
 | Event | Best Time | BC Rank | Standard Achieved | Next Target | Gap |
@@ -6535,8 +7636,138 @@ async function refreshAIPromptTextarea() {
             console.log(`[refreshAIPromptTextarea] Table ${i}: ${rankCells.length} rank cells, ${withNumbers.length} with numbers`);
         });
         
-        // Regenerate the prompt with latest data
-        const newPrompt = generateAIPrompt(data);
+        // NOW FETCH PEER SWIMMER DATA
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Loading') || btn.textContent.includes('Updated')) {
+                btn.innerHTML = '⏳ Fetching peers...';
+            }
+        });
+        
+        let peerSwimmerData = {};
+        try {
+            if (window.bcstRoster && window.bcstRoster.isLoaded) {
+                const higherGroupComparison = window.bcstRoster.getHigherGroupSwimmers(
+                    data.swimmer.pkey,
+                    window.convertGenderCodeToString(data.swimmer.gender),
+                    data.swimmer.age
+                );
+                
+                if (higherGroupComparison) {
+                    const allPeers = [];
+                    higherGroupComparison.higherGroups.forEach(g => allPeers.push(...g.peers));
+                    allPeers.push(...(higherGroupComparison.sameGroupPeers || []));
+                    
+                    console.log(`[refreshAIPromptTextarea] Fetching data for ${allPeers.length} peer swimmers...`);
+                    
+                    // Fetch in batches of 5 to avoid overwhelming API
+                    const batchSize = 5;
+                    for (let i = 0; i < allPeers.length; i += batchSize) {
+                        const batch = allPeers.slice(i, i + batchSize);
+                        const promises = batch.map(async (peer) => {
+                            if (!peer.id) return;
+                            
+                            try {
+                                // First check cache
+                                const cacheKey = "swimmer/" + peer.id;
+                                const cachedData = localStorage.getItem(cacheKey);
+                                if (cachedData) {
+                                    const parsed = JSON.parse(cachedData);
+                                    if (parsed && parsed.data && parsed.data.bestTimes) {
+                                        peerSwimmerData[peer.id] = parsed.data;
+                                        console.log(`[refreshAIPromptTextarea] Loaded ${peer.name} from cache`);
+                                        return;
+                                    }
+                                }
+                                
+                                // If not in cache, fetch from API
+                                console.log(`[refreshAIPromptTextarea] Fetching ${peer.name} (${peer.id}) from API...`);
+                                const peerData = await fetchPeerSwimmerBestTimes(peer.id);
+                                if (peerData) {
+                                    peerSwimmerData[peer.id] = peerData;
+                                }
+                            } catch (e) {
+                                console.log(`[refreshAIPromptTextarea] Error fetching ${peer.name}:`, e);
+                            }
+                        });
+                        await Promise.all(promises);
+                    }
+                    console.log(`[refreshAIPromptTextarea] Fetched data for ${Object.keys(peerSwimmerData).length} peers`);
+                }
+            }
+        } catch (e) {
+            console.log('[refreshAIPromptTextarea] Error fetching peer data:', e);
+        }
+        
+        // FETCH RANKING DATA for swimmer's top events
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Fetching') || btn.textContent.includes('Updated')) {
+                btn.innerHTML = '⏳ Loading rankings...';
+            }
+        });
+        
+        let rankingDetails = {};
+        try {
+            // Get swimmer's top events from the table
+            const rankings = extractRankingsFromDOM();
+            const topEvents = rankings
+                .filter(r => r.bcRank && r.bcRank > 0)
+                .sort((a, b) => a.bcRank - b.bcRank)
+                .slice(0, 3);
+            
+            console.log(`[refreshAIPromptTextarea] Fetching ranking details for ${topEvents.length} top events...`);
+            
+            for (const evt of topEvents) {
+                try {
+                    // Parse event to get ranking key
+                    const eventName = evt.event;
+                    const genderStr = window.convertGenderCodeToString(data.swimmer.gender);
+                    const age = data.swimmer.age;
+                    const ageGroup = age <= 10 ? "10U" : age <= 12 ? "11-12" : age <= 14 ? "13-14" : age <= 16 ? "15-16" : "17-18";
+                    
+                    // Determine course (SCY/LCM) from event name
+                    const course = eventName.includes('LCM') ? 'LCM' : 'SCY';
+                    const courseCode = course === 'LCM' ? '20' : '14';
+                    
+                    // Build ranking key
+                    const rankKey = `${genderStr}_${ageGroup}_${courseCode}_Western_PN_BC`;
+                    
+                    console.log(`[refreshAIPromptTextarea] Loading ranking: ${rankKey} for event: ${eventName}`);
+                    
+                    // Try to load ranking data
+                    if (window.loadRank) {
+                        const rankData = await window.loadRank(rankKey, true);
+                        if (rankData && rankData.length > 0) {
+                            // Get top 20 swimmers for this event
+                            const eventCode = getEventCodeFromName(eventName);
+                            const eventSwimmers = rankData
+                                .filter(r => {
+                                    const rowEventCode = r[rankData.idx?.event] || r[3];
+                                    return String(rowEventCode) === String(eventCode);
+                                })
+                                .slice(0, 20)
+                                .map((r, i) => ({
+                                    rank: i + 1,
+                                    name: r[rankData.idx?.name] || r[1] || 'Unknown',
+                                    time: r[rankData.idx?.time] || r[2] || '?',
+                                    club: r[rankData.idx?.club] || r[5] || ''
+                                }));
+                            
+                            if (eventSwimmers.length > 0) {
+                                rankingDetails[eventName] = eventSwimmers;
+                                console.log(`[refreshAIPromptTextarea] Got ${eventSwimmers.length} swimmers for ${eventName}`);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log(`[refreshAIPromptTextarea] Error fetching ranking for ${evt.event}:`, e);
+                }
+            }
+        } catch (e) {
+            console.log('[refreshAIPromptTextarea] Error fetching ranking details:', e);
+        }
+        
+        // Regenerate the prompt with latest data, peer data, AND ranking details
+        const newPrompt = generateAIPrompt(data, peerSwimmerData, rankingDetails);
         textarea.value = newPrompt;
         
         // Show feedback

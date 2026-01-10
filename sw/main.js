@@ -491,8 +491,13 @@ async function showRankTable(data, key) {
         <div class="table-controls">
             <div class="results-info">
                 <span class="results-count">
-                    <strong>${eventName}</strong> · ${genderStr} ${ageDisplay} · ${teamDisplay} · 
-                    Showing ${Math.min(data.values.length, 100)} of ${data.values.length} swimmers
+                    <span style="color: #007bff; font-weight: 700;">${eventName}</span>
+                    <span style="color: #6c757d;"> · </span>
+                    <span style="color: #6f42c1; font-weight: 600;">${genderStr} ${ageDisplay}</span>
+                    <span style="color: #6c757d;"> · </span>
+                    <span style="color: #28a745; font-weight: 600;">${teamDisplay}</span>
+                    <span style="color: #6c757d;"> · </span>
+                    <span style="color: #17a2b8;">Showing ${Math.min(data.values.length, 100)} of ${data.values.length} swimmers</span>
                 </span>
             </div>
             <div class="table-actions">
@@ -510,6 +515,8 @@ async function showRankTable(data, key) {
     html.push('<tr>');
     html.push('<th class="rank-col">Rank</th>');
     html.push('<th class="name-col">Swimmer</th>');
+    html.push('<th class="age-col">Age</th>');
+    html.push('<th class="group-col">Group</th>');
     html.push('<th class="time-col">Time</th>');
     html.push('<th class="date-col">Date</th>');
     html.push('<th class="club-col">Club</th>');
@@ -674,11 +681,18 @@ async function showRankTable(data, key) {
             swimmerName = dedupedWords.join(' ');
         }
         
+        // Get age - try idx.age first, then BCST roster, then Personal Best data
+        let swimmerAge = '';
+        if (idx.age !== undefined && row[idx.age]) {
+            swimmerAge = row[idx.age];
+        }
+        
         swimmerData.push({
             row: row,
             rank: i + 1,
             pkey: pkey,
             name: swimmerName,
+            age: swimmerAge,
             time: personalBestTime,
             date: personalBestDate,
             timeInt: personalBestTimeInt,
@@ -722,6 +736,72 @@ async function showRankTable(data, key) {
             html.push(`<span class="swimmer-name">${swimmer.name}</span>`);
         }
         html.push('</td>');
+
+        // Age - try from data, then BCST roster
+        let displayAge = swimmer.age || '';
+        if (!displayAge && window.bcstRoster && window.bcstRoster.isLoaded && swimmer.pkey) {
+            const groups = window.bcstRoster.getGroupHierarchy();
+            for (const group of groups) {
+                const swimmers = window.bcstRoster.getSwimmers(group);
+                if (swimmers) {
+                    const found = swimmers.find(s => s.id && String(s.id) === String(swimmer.pkey));
+                    if (found && found.age) {
+                        displayAge = found.age;
+                        break;
+                    }
+                }
+            }
+        }
+        html.push(`<td class="age-cell">${displayAge || '-'}</td>`);
+
+        // Group (BCST training group) - lookup by pkey for accuracy
+        let swimmerGroup = '-';
+        if (window.bcstRoster && window.bcstRoster.isLoaded && swimmer.pkey) {
+            // First try to find by pkey (most accurate)
+            const groups = window.bcstRoster.getGroupHierarchy();
+            let foundByPkey = false;
+            for (const group of groups) {
+                const swimmers = window.bcstRoster.getSwimmers(group);
+                if (swimmers && swimmers.some(s => s.id && String(s.id) === String(swimmer.pkey))) {
+                    swimmerGroup = group;
+                    foundByPkey = true;
+                    break;
+                }
+            }
+            // Fallback: try exact full name match if pkey didn't match
+            if (!foundByPkey && swimmer.name) {
+                const normalizedName = swimmer.name.toLowerCase().trim();
+                for (const group of groups) {
+                    const swimmers = window.bcstRoster.getSwimmers(group);
+                    if (swimmers && swimmers.some(s => s.name && s.name.toLowerCase().trim() === normalizedName)) {
+                        swimmerGroup = group;
+                        break;
+                    }
+                }
+            }
+        }
+        // Color code groups based on level
+        const groupColors = {
+            'National': { bg: '#1a1a2e', color: '#ffd700' },
+            'Senior Performance': { bg: '#6f42c1', color: '#fff' },
+            'Senior 1': { bg: '#0d6efd', color: '#fff' },
+            'Senior 2': { bg: '#6c757d', color: '#fff' },
+            'Prep': { bg: '#198754', color: '#fff' },
+            'Regional': { bg: '#20c997', color: '#000' },
+            'Champs': { bg: '#fd7e14', color: '#000' },
+            'Divisional': { bg: '#ffc107', color: '#000' },
+            'Orange': { bg: '#ff6b35', color: '#fff' },
+            'Gold 1': { bg: '#e6c200', color: '#000' },
+            'Gold 2': { bg: '#ccad00', color: '#000' },
+            'Silver': { bg: '#adb5bd', color: '#000' },
+            'Bronze': { bg: '#cd7f32', color: '#fff' }
+        };
+        let groupStyle = '';
+        if (swimmerGroup !== '-' && groupColors[swimmerGroup]) {
+            const gc = groupColors[swimmerGroup];
+            groupStyle = `background-color: ${gc.bg}; color: ${gc.color}; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.85em;`;
+        }
+        html.push(`<td class="group-cell"><span style="${groupStyle}">${swimmerGroup}</span></td>`);
 
         // Time with enhanced formatting - use Personal Best if available
         let timeDisplay = swimmer.time || '';
@@ -792,7 +872,7 @@ async function showRankTable(data, key) {
         }
 
         .results-count {
-            color: #6c757d;
+            color: #212529;
             font-size: 1.1em;
             font-weight: 500;
         }
@@ -1383,3 +1463,226 @@ async function refreshRankings() {
 }
 
 window.refreshRankings = refreshRankings;
+
+// ================================================================================
+// BC SWIM TEAM SCHEDULE RENDERING
+// (Schedule data is loaded from bcst-schedule.js)
+// ================================================================================
+
+function renderBCScheduleTab() {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayAbbr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    let html = [];
+    
+    html.push(`
+        <div class="bc-schedule-container">
+            <h2 style="margin-bottom: 5px; color: #0C2340;">🏊 BC Swim Team Training Schedule</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.95em;">
+                <strong>${BC_TRAINING_SCHEDULE.season}</strong> | ${BC_TRAINING_SCHEDULE.note}
+            </p>
+            
+            <div class="schedule-tabs" style="margin-bottom: 15px;">
+                <button class="schedule-tab-btn active" onclick="switchScheduleView('swim')">🏊 Swim Practice</button>
+                <button class="schedule-tab-btn" onclick="switchScheduleView('dryland')">💪 Dryland</button>
+            </div>
+            
+            <div id="swim-schedule-view">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 120px;">Group</th>
+                            ${dayAbbr.map(d => `<th>${d}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+    `);
+    
+    const highlightedGroups = window.BC_HIGHLIGHTED_GROUPS || ['Senior 1', 'Champs'];
+    
+    for (let group of BC_TRAINING_SCHEDULE.groups) {
+        const isHighlighted = highlightedGroups.includes(group.name);
+        html.push(`<tr class="${isHighlighted ? 'highlighted-group' : ''}">`);
+        html.push(`<td class="group-name">${group.name}</td>`);
+        for (let day of days) {
+            let times = group.schedule[day] || [];
+            let cellContent = times.length > 0 ? times.join('<br>') : '-';
+            let hasRec = times.some(t => t.includes('(R)'));
+            html.push(`<td class="${hasRec ? 'rec-pool' : ''}">${cellContent}</td>`);
+        }
+        html.push('</tr>');
+    }
+    
+    html.push(`
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="dryland-schedule-view" style="display: none;">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 120px;">Group</th>
+                            ${dayAbbr.map(d => `<th>${d}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+    `);
+    
+    for (let group of BC_TRAINING_SCHEDULE.groups) {
+        if (!group.dryland) continue;
+        const isHighlighted = highlightedGroups.includes(group.name);
+        html.push(`<tr class="${isHighlighted ? 'highlighted-group' : ''}">`);
+        html.push(`<td class="group-name">${group.name}</td>`);
+        for (let day of days) {
+            let times = group.dryland[day] || [];
+            let cellContent = times.length > 0 ? times.join('<br>') : '-';
+            html.push(`<td>${cellContent}</td>`);
+        }
+        html.push('</tr>');
+    }
+    
+    html.push(`
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <style>
+            .bc-schedule-container {
+                padding: 20px;
+                max-width: 100%;
+                overflow-x: auto;
+            }
+            
+            .schedule-tabs {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .schedule-tab-btn {
+                padding: 10px 20px;
+                border: none;
+                border-radius: 8px;
+                background: #e9ecef;
+                color: #495057;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .schedule-tab-btn.active {
+                background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+                color: white;
+            }
+            
+            .schedule-tab-btn:hover:not(.active) {
+                background: #cce5ff;
+                color: #004085;
+            }
+            
+            .schedule-table {
+                width: 100%;
+                border-collapse: collapse;
+                background-color: #ffffff;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+            
+            .schedule-table th {
+                padding: 12px 10px;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                font-weight: 600;
+                text-align: center;
+                font-size: 13px;
+                background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+                color: white;
+            }
+            
+            .schedule-table td {
+                padding: 10px 8px;
+                text-align: center;
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                vertical-align: top;
+                font-size: 14px;
+            }
+            
+            .schedule-table tbody tr:nth-child(even) {
+                background: #f8f9fa;
+            }
+            
+            .schedule-table tbody tr:hover {
+                background: #e3f2fd;
+            }
+            
+            .schedule-table .group-name {
+                font-weight: 600;
+                text-align: left;
+                background: #f1f3f4;
+                color: #0C2340;
+                font-size: 14px;
+            }
+            
+            .schedule-table .rec-pool {
+                background: #fff3cd;
+            }
+            
+            .schedule-table tr.highlighted-group {
+                background: #d4edda !important;
+                border-left: 4px solid #28a745;
+            }
+            
+            .schedule-table tr.highlighted-group td {
+                background: #d4edda !important;
+            }
+            
+            .schedule-table tr.highlighted-group .group-name {
+                background: #c3e6cb !important;
+                font-weight: 700;
+                color: #155724;
+            }
+            
+            .schedule-table tr.highlighted-group:hover td {
+                background: #b8daff !important;
+            }
+        </style>
+    `);
+    
+    return html.join('');
+}
+
+function switchScheduleView(view) {
+    const swimView = document.getElementById('swim-schedule-view');
+    const drylandView = document.getElementById('dryland-schedule-view');
+    const buttons = document.querySelectorAll('.schedule-tab-btn');
+    
+    if (view === 'swim') {
+        swimView.style.display = 'block';
+        drylandView.style.display = 'none';
+        buttons[0].classList.add('active');
+        buttons[1].classList.remove('active');
+    } else {
+        swimView.style.display = 'none';
+        drylandView.style.display = 'block';
+        buttons[0].classList.remove('active');
+        buttons[1].classList.add('active');
+    }
+}
+
+function showBCSchedule() {
+    const content = renderBCScheduleTab();
+    updateContent(content);
+    window.location.hash = 'schedule';
+}
+
+// URL route handler for #schedule
+function schedule() {
+    const content = renderBCScheduleTab();
+    updateContent(content);
+}
+
+window.showBCSchedule = showBCSchedule;
+window.switchScheduleView = switchScheduleView;
+window.renderBCScheduleTab = renderBCScheduleTab;
+window.schedule = schedule;

@@ -121,21 +121,23 @@ async function loadSwimmerDetails(pkey) {
  * @returns {Object} Processed swimmer data with birthday, gender, meet dictionary, etc.
  */
 async function processSwimmerData(data) {
-    if (!data.events || !data.events.idx) {
-        console.log("Events data missing idx property:", data.events);
-        return data;
-    }
-    let idx = data.events.idx;
-    let meets = new Set(data.events.map((e) => e[idx.meet]));
+    try {
+        if (!data.events || !data.events.idx) {
+            return data;
+        }
+        let idx = data.events.idx;
+        let meets = new Set(data.events.map((e) => e[idx.meet]));
 
     // Wait for _meetDictinary to be available
+    let waitCount = 0;
     while (!window._meetDictinary) {
-        console.log(`🏊 WAITING: _meetDictinary not yet available in processSwimmerData, waiting 100ms...`);
         await new Promise(resolve => setTimeout(resolve, 100));
+        if (waitCount++ > 50) {
+            return data;
+        }
     }
 
     data.meetDict = await _meetDictinary.loadMeets(meets);
-
     data.swimmer.birthday = _birthdayDictionary.calculate(
         data.swimmer.pkey,
         data.events,
@@ -181,6 +183,10 @@ async function processSwimmerData(data) {
     }
 
     return data;
+    } catch (err) {
+        console.error("==== processSwimmerData ERROR ====", err);
+        return data;
+    }
 }
 
 async function loadEvents(pkey) {
@@ -388,7 +394,7 @@ async function displaySwimmerDetails(data) {
     let html = [];
 
     // build title
-    html.push(createDetailsPageTitle(data));
+    html.push(await createDetailsPageTitle(data));
     if (data.events.length == 0) {
         console.log("No events found, events length:", data.events.length);
         html.push("<div>No events found</div>");
@@ -488,6 +494,12 @@ async function displaySwimmerDetails(data) {
     );
     tabView.addTab("<p>Age Best</p>", ageBestTable);
     tabView.addTab("<p>Meets</p>", meetTable);
+    
+    // Add Compare tab
+    if (window.createCompareTab) {
+        const compareTabContent = window.createCompareTab(data);
+        tabView.addTab("<p>Compare</p>", compareTabContent);
+    }
     
     // Add AI Insights tab
     if (window.generateInsights && window.renderInsights) {
@@ -717,9 +729,93 @@ function getAlias(firstName, lastName) {
     return alias;
 }
 
-function createDetailsPageTitle(data) {
-    let html = [];
+/**
+ * Get the highest achieved meet cut for a swimmer
+ * Returns a string like "Futures: 100 BR" or "PNS 14U: 50 BR" or null if no cuts achieved
+ */
+function getHighestAchievedCut(data) {
+    try {
+        if (!data.events || !window.getMeetStandards || !window._eventList) {
+            return null;
+        }
+        
+        // Try to get idx, or use default positions
+        const idx = data.events.idx || { time: 0, event: 6 }; // Default positions based on API structure
+        
+        const swimmerAge = data.swimmer.age || 13;
+        const genderStr = window.convertGenderCodeToString(data.swimmer.gender);
+        const meetStandards = window.getMeetStandards(swimmerAge);
+        
+        if (!meetStandards || meetStandards.length === 0 || !genderStr) {
+            return null;
+        }
+        
+        // Cut hierarchy from highest to lowest
+        const cutHierarchy = ["Futures", "SprSec", "SumSec", "WZone", "PNS_sc", "PNS_14u", "NWReg"];
+        const cutDisplayNames = {
+            "Futures": "Futures",
+            "SprSec": "Sectionals",
+            "SumSec": "Sectionals",
+            "WZone": "Zones",
+            "PNS_sc": "PNS Senior",
+            "PNS_14u": "PNS 14U",
+            "NWReg": "NW Regionals"
+        };
+        
+        // Get best times per event
+        const bestTimes = {};
+        for (const event of data.events) {
+            const eventCode = event[idx.event];
+            const timeStr = event[idx.time];
+            const timeInt = window.timeToInt ? window.timeToInt(timeStr) : 0;
+            const eventStr = window._eventList[eventCode];
+            
+            if (eventStr && timeInt > 0) {
+                if (!bestTimes[eventStr] || timeInt < bestTimes[eventStr].time) {
+                    bestTimes[eventStr] = { time: timeInt, timeStr: timeStr };
+                }
+            }
+        }
+        
+        // Check each cut level from highest to lowest
+        for (const cutShort of cutHierarchy) {
+            const std = meetStandards.find(s => s.short === cutShort);
+            if (!std) continue;
+            
+            const genderMap = std[genderStr];
+            if (!genderMap) continue;
+            
+            for (const [eventStr, bestTime] of Object.entries(bestTimes)) {
+                let stdData;
+                if (typeof genderMap.get === 'function') {
+                    stdData = genderMap.get(eventStr);
+                } else if (genderMap[eventStr]) {
+                    stdData = genderMap[eventStr];
+                }
+                
+                if (!stdData) continue;
+                
+                const stdTimeInt = Array.isArray(stdData) ? stdData[1] : stdData;
+                if (!stdTimeInt || stdTimeInt <= 0) continue;
+                
+                if (bestTime.time <= stdTimeInt) {
+                    const shortEvent = eventStr.replace(" SCY", "").replace(" LCM", "").replace(" SCM", "");
+                    const displayName = cutDisplayNames[cutShort] || cutShort;
+                    return `${displayName}: ${shortEvent}`;
+                }
+            }
+        }
+        
+        return null;
+    } catch (e) {
+        console.error("getHighestAchievedCut error:", e);
+        return null;
+    }
+}
 
+async function createDetailsPageTitle(data) {
+    let html = [];
+    
     /**
      * Handle swimmer name display - simplified approach
      * Take first word from firstName + last word from lastName
@@ -745,21 +841,81 @@ function createDetailsPageTitle(data) {
             (data.swimmer.lastName || "");
     }
 
-    html.push(
-        '<div class="match-size header"><span>',
-        displayName,
-        "</span><span>",
-        window.convertGenderCodeToString(data.swimmer.gender),
-        "</span><span>",
-        data.swimmer.age,
-        "</span><span>",
-        data.swimmer.clubName,
-        "</span><span>Birthday: ",
-        (window.BirthdayDictionary ? BirthdayDictionary.format(data.swimmer.birthday) : (data.swimmer.birthday ? data.swimmer.birthday.join(' - ') : '')),
-        "</span><span>Total Event: ",
-        data.events.length,
-        "</span></div>",
-    );
+    let genderStr = window.convertGenderCodeToString(data.swimmer.gender);
+    
+    // Get birthday from cache
+    let birthdayStr = "";
+    let birthday = await window._birthdayDictionary.load(data.swimmer.pkey);
+    
+    if (birthday && Array.isArray(birthday) && birthday.length >= 2) {
+        let [left, right] = birthday;
+        
+        // Convert to YYYY-MM-DD string
+        if (typeof left === 'string') left = left.substring(0, 10);
+        if (typeof right === 'string') right = right.substring(0, 10);
+        
+        // Format as readable (YYYY/M/D)
+        let leftDisplay = left.replace(/-0/g, "-").replace(/-/g, "/");
+        let rightDisplay = right.replace(/-0/g, "-").replace(/-/g, "/");
+        
+        if (leftDisplay === rightDisplay) {
+            birthdayStr = leftDisplay;
+        } else if (left.substring(0, 4) === right.substring(0, 4)) {
+            // Same year - show month range like "2012/3/15 - 9/28"
+            birthdayStr = leftDisplay + " - " + rightDisplay.substring(5);
+        } else {
+            birthdayStr = leftDisplay + " - " + rightDisplay;
+        }
+    }
+    
+    // Fallback to year estimate
+    if (!birthdayStr && data.swimmer.age) {
+        birthdayStr = (new Date().getFullYear() - data.swimmer.age) + "";
+    }
+    
+    // Format birthday more naturally (e.g., "Mar 2012" instead of "2012/3/4 - 3/29")
+    let birthDisplay = "";
+    if (birthdayStr) {
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        // Extract year and approximate month from birthdayStr
+        const parts = birthdayStr.split("/");
+        if (parts.length >= 2) {
+            const year = parts[0];
+            const month = parseInt(parts[1]) - 1;
+            if (month >= 0 && month < 12) {
+                birthDisplay = months[month] + " " + year;
+            } else {
+                birthDisplay = year;
+            }
+        } else {
+            birthDisplay = birthdayStr;
+        }
+    }
+    
+    // Shorten club name
+    let clubShort = data.swimmer.clubName;
+    if (clubShort && clubShort.includes("Bellevue Club")) {
+        clubShort = "BC Swim Team";
+    }
+    
+    // Get highest achieved cut
+    let highestCut = getHighestAchievedCut(data);
+    
+    let infoHtml = '<div class="match-size header swimmer-info-bar">' +
+        '<span class="swimmer-name">' + displayName + '</span>' +
+        '<span class="separator">·</span>' +
+        '<span class="swimmer-gender">' + genderStr + '</span>' +
+        '<span class="separator">·</span>' +
+        '<span class="swimmer-age">Age ' + data.swimmer.age + '</span>' +
+        (birthDisplay ? '<span class="separator">·</span><span class="swimmer-birthday">Born ~' + birthDisplay + '</span>' : '') +
+        (highestCut ? '<span class="separator">·</span><span class="swimmer-cut">' + highestCut + '</span>' : '') +
+        '<span class="separator">·</span>' +
+        '<span class="swimmer-events">' + data.events.length + ' events</span>' +
+        '<span class="separator">·</span>' +
+        '<span class="swimmer-club">' + clubShort + '</span>' +
+        '</div>';
+    
+    html.push(infoHtml);
 
     return html.join("");
 }
@@ -1142,4 +1298,6 @@ window.swimmer = swimmer;
 window.search = search;
 window.searchAll = searchAll;
 window.toggle25 = toggle25;
+window.loadEvents = loadEvents;
+window.loadSwimerInfo = loadSwimerInfo;
 console.log("swimmer.js: Functions exported - search:", typeof window.search);
