@@ -19,6 +19,15 @@
  * 1. BASE STYLES & TYPOGRAPHY
  * ======================================== */
 
+/* Allow body to expand for wide content */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-width: 100%;
+  width: max-content;
+  min-width: 100vw;
+}
+
 /* Center alignment for headings and center class */
 h1, h2, h3, .center {
   text-align: center;
@@ -997,9 +1006,6 @@ select.rd {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 1000;
   padding: 8px 5px;
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
 } 
 
 .row {
@@ -1009,15 +1015,12 @@ select.rd {
 .top-banner .row {
   margin-top: 3px;
   margin-bottom: 0;
-  white-space: nowrap;
-  min-width: max-content;
 } 
 
 .row>* {
   margin: auto 2px;
   display: inline-block;
   vertical-align: top;
-  white-space: normal;
 } 
 
 .container {
