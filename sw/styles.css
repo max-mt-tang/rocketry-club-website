@@ -847,7 +847,6 @@ th[onclick]:hover {
 /* Search navigation group - minimal styling, no border */
 .search-nav-group {
   margin-left: 20px;
-  min-width: 200px;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -998,6 +997,9 @@ select.rd {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   z-index: 1000;
   padding: 8px 5px;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 } 
 
 .row {
@@ -1007,12 +1009,15 @@ select.rd {
 .top-banner .row {
   margin-top: 3px;
   margin-bottom: 0;
+  white-space: nowrap;
+  min-width: max-content;
 } 
 
 .row>* {
   margin: auto 2px;
   display: inline-block;
   vertical-align: top;
+  white-space: normal;
 } 
 
 .container {
