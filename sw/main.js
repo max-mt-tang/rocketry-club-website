@@ -67,20 +67,27 @@ async function onSearch() {
 }
 
 async function onSearchAll() {
-    // Get the search input value
+    // Get the search input value from both desktop and mobile inputs
     const desktopInput = document.getElementById("input");
-    
-    if (!desktopInput) {
-        return;
+    const mobileInput = document.getElementById("mobile-input");
+
+    let inputValue = null;
+
+    // Check both desktop and mobile inputs
+    if (desktopInput && desktopInput.value) {
+        inputValue = desktopInput.value.trim();
+    } else if (mobileInput && mobileInput.value) {
+        inputValue = mobileInput.value.trim();
+    } else if (desktopInput) {
+        inputValue = desktopInput.value.trim();
+    } else if (mobileInput) {
+        inputValue = mobileInput.value.trim();
     }
-    
-    // Get the current value and trim it
-    const inputValue = desktopInput.value.trim();
-    
+
     if (!inputValue) {
         return;
     }
-    
+
     go("searchAll", inputValue);
 }
 
