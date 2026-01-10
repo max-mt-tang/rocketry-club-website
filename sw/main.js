@@ -67,26 +67,24 @@ async function onSearch() {
 }
 
 async function onSearchAll() {
-    // Try to get input element (check both desktop and mobile inputs)
-    let inputValue = null;
+    // Get the search input value
     const desktopInput = document.getElementById("input");
-    const mobileInput = document.getElementById("mobile-input");
     
-    if (desktopInput && desktopInput.value) {
-        inputValue = desktopInput.value;
-    } else if (mobileInput && mobileInput.value) {
-        inputValue = mobileInput.value;
-    } else if (desktopInput) {
-        inputValue = desktopInput.value;
-    } else if (mobileInput) {
-        inputValue = mobileInput.value;
+    if (!desktopInput) {
+        console.error("Search input element not found");
+        return;
     }
-
-    if (inputValue !== null) {
-        go("searchAll", inputValue);
-    } else {
-        console.error("Input element not found for searchAll");
+    
+    // Get the current value and trim it
+    const inputValue = desktopInput.value.trim();
+    console.log("onSearchAll: input value =", JSON.stringify(inputValue));
+    
+    if (!inputValue) {
+        console.log("onSearchAll: empty input, not searching");
+        return;
     }
+    
+    go("searchAll", inputValue);
 }
 
 function searchRay() {

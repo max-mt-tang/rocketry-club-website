@@ -983,25 +983,32 @@ async function getFastRowByEvent(events) {
 // ================================================================================
 
 async function search(name, all) {
+    console.log("search() called with name:", JSON.stringify(name), "all:", all);
     if (!name) {
         window.location.replace("");
         return;
     }
 
     let values = await loadSearch(name, all);
+    console.log("search() got", values?.length || 0, "results");
     showSearch(values);
 }
 
 async function searchAll(params) {
+    console.log("searchAll() called with params:", JSON.stringify(params));
     return await search(params, true);
 }
 
 async function loadSearch(name, all) {
     let key = "search/" + name + (all ? "<ALL>" : "");
+    console.log("loadSearch() cache key:", key);
     return await LocalCache.func(key, async () => {
+        console.log("loadSearch() fetching fresh data for:", name);
         let values = await loadSwimmerSearch(name, all);
+        console.log("loadSwimmerSearch returned", values?.length || 0, "results");
         if (!values || values.length == 0) {
             values = await loadClubSearch(name, all);
+            console.log("loadClubSearch returned", values?.length || 0, "results");
         }
 
         if (!values || values.length <= 1) {
@@ -1009,6 +1016,7 @@ async function loadSearch(name, all) {
         }
 
         values = await filterSwimmers(values);
+        console.log("filterSwimmers returned", values?.length || 0, "results");
         if (values) {
             values.sort((a, b) => a[values.idx.age] - b[values.idx.age]);
         }
