@@ -752,10 +752,8 @@ th[onclick]:hover {
 
 /* Navigation group containers - minimal styling, no borders */
 .nav-group {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  vertical-align: middle;
+  display: inline-block;
+  vertical-align: top;
   margin: 0 10px 0 0;
   padding: 4px 0 8px 0;
   border-radius: 0;
@@ -764,8 +762,7 @@ th[onclick]:hover {
   backdrop-filter: none;
   box-shadow: none;
   position: relative;
-  min-height: 60px;
-  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 /* Group labels */
@@ -1006,23 +1003,22 @@ select.rd {
 .row {
   white-space: nowrap;
   margin-bottom: 20px;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: flex-start;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 } 
 
 .top-banner .row {
   margin-top: 3px;
   margin-bottom: 0;
+  white-space: nowrap !important;
 } 
 
 .row>* {
   margin: auto 2px;
-  display: inline-block;
-  flex-shrink: 0;
+  display: inline-block !important;
+  vertical-align: top;
+  white-space: normal;
 } 
 
 .container {
