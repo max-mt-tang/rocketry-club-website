@@ -1603,19 +1603,74 @@ canvas {
 } 
 
 /* search table */
+#search-table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 20px;
+}
+
+#search-table thead th {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(0, 86, 179, 0.3) !important;
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#search-table thead th:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%) !important;
+}
+
+#search-table tbody tr {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#search-table tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+#search-table tbody tr:nth-child(even) {
+  background-color: rgba(248, 249, 250, 0.8);
+}
+
+#search-table tbody tr:hover {
+  background-color: rgba(227, 242, 253, 0.5) !important;
+  transform: scale(1.001);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.08);
+}
+
+#search-table tbody td {
+  padding: 10px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+#search-table tbody td.left {
+  text-align: left;
+}
+
 #search-table .th:hover {
   background-color: #0000;
   color: #000;
   cursor: default;
 } 
 
-#search-table tr {
-  cursor: pointer;
-} 
-
 .select-text:hover,
 #datepicker:hover,
-#search-table tr:hover,
+/* Removed #search-table tr:hover - now using more specific #search-table tbody tr:hover */
 /* clibable table cell - exclude from table rows to prevent white text */
 tbody tr:hover .full>.clickable,
 .full>.clickable:hover:not(tbody tr:hover .full>.clickable),

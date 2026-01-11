@@ -1071,7 +1071,7 @@ async function search(name, all) {
     }
 
     let values = await loadSearch(name, all);
-    showSearch(values);
+    showSearch(values, name);
 }
 
 async function searchAll(params) {
@@ -1148,27 +1148,159 @@ async function filterSwimmers(values) {
     }
 }
 
-function showSearch(values) {
+async function fetchGendersForSwimmers(pkeys) {
+    // Fetch gender from events for multiple swimmers at once
+    if (!pkeys || pkeys.length === 0) return new Map();
+    
+    const genderMap = new Map();
+    
+    // Fetch in batches to avoid overwhelming the API
+    const batchSize = 20;
+    for (let i = 0; i < pkeys.length; i += batchSize) {
+        const batch = pkeys.slice(i, i + batchSize);
+        
+        try {
+            const bodyObj = {
+                metadata: [
+                    {
+                        title: "pkey",
+                        dim: "[UsasSwimTime.PersonKey]",
+                        datatype: "numeric",
+                    },
+                    {
+                        title: "gender",
+                        dim: "[UsasSwimTime.EventCompetitionCategoryKey]",
+                        datatype: "numeric",
+                    },
+                    {
+                        dim: "[UsasSwimTime.PersonKey]",
+                        datatype: "numeric",
+                        filter: {
+                            members: batch,
+                        },
+                        panel: "scope",
+                    },
+                ],
+                count: batch.length * 10, // Get multiple events per swimmer
+            };
+            
+            const events = await fetchSwimValues(bodyObj, "event");
+            if (events && events.length > 0 && events.idx) {
+                const idx = events.idx;
+                for (const event of events) {
+                    const pkey = event[idx.pkey];
+                    const genderCode = event[idx.gender];
+                    
+                    // Only set if not already set (use first event found)
+                    if (!genderMap.has(pkey) && genderCode !== undefined && genderCode !== null) {
+                        // Gender codes: 1 = Female (F), 2 = Male (M)
+                        let genderStr = '';
+                        if (genderCode === 1 || genderCode === '1') {
+                            genderStr = 'F';
+                        } else if (genderCode === 2 || genderCode === '2') {
+                            genderStr = 'M';
+                        }
+                        if (genderStr) {
+                            genderMap.set(pkey, genderStr);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching genders for batch:', error);
+        }
+    }
+    
+    return genderMap;
+}
+
+async function showSearch(values, searchQuery = '') {
     if (!values || values.length == 0) {
         window.updateContent("No result found");
         return;
+    }
+
+    // Sort results: exact name matches first, then by age
+    const idx = values.idx || { name: 0, age: 1, clubName: 2, lsc: 3, pkey: 4, gender: 5 };
+    if (searchQuery) {
+        const queryLower = searchQuery.toLowerCase().trim();
+        values.sort((a, b) => {
+            const nameA = (a[idx.name] || '').toLowerCase();
+            const nameB = (b[idx.name] || '').toLowerCase();
+            
+            // Check for exact match
+            const exactA = nameA === queryLower;
+            const exactB = nameB === queryLower;
+            
+            if (exactA && !exactB) return -1;
+            if (!exactA && exactB) return 1;
+            
+            // If both or neither are exact matches, sort by age
+            return a[idx.age] - b[idx.age];
+        });
     }
 
     // Always show search results table (don't auto-navigate even for 1 result)
     let html = [];
 
     html.push(
-        '<table class="fill top-margin" id="search-table"><tbody><tr class="th"><th></th><th>Name</th><th>Age</th><th>Club</th><th>LSC</th></tr>',
+        '<table class="fill top-margin" id="search-table"><thead><tr class="th">',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(0)">#</th>',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(1)">Name ↕</th>',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(2)">Age ↕</th>',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(3)">Gender ↕</th>',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(4)">Club ↕</th>',
+        '<th style="cursor: pointer;" onclick="sortSearchTable(5)">LSC ↕</th>',
+        '</tr></thead><tbody id="search-table-body">',
     );
+    
+    // Collect all pkeys to fetch genders
+    const pkeys = [];
+    for (const row of values) {
+        const pkey = row[idx.pkey];
+        if (pkey) pkeys.push(pkey);
+    }
+    
+    // Fetch genders from events
+    const genderMap = await fetchGendersForSwimmers(pkeys);
+    console.log('Fetched genders for', genderMap.size, 'swimmers');
+    
     let index = 0;
-    for (let [name, age, club, lsc, pkey] of values) {
+    for (let row of values) {
+        const name = row[idx.name] || '';
+        const age = row[idx.age] || '';
+        const pkey = row[idx.pkey];
+        
+        // Get gender from map (fetched from events)
+        let gender = genderMap.get(pkey) || '';
+        
+        // Fallback: try to get from row if available
+        if (!gender && idx.gender !== undefined && idx.gender !== null && row[idx.gender] !== undefined && row[idx.gender] !== null && row[idx.gender] !== '') {
+            const genderCode = row[idx.gender];
+            if (genderCode === 1 || genderCode === '1') {
+                gender = 'F';
+            } else if (genderCode === 2 || genderCode === '2') {
+                gender = 'M';
+            } else if (genderCode === 'F' || genderCode === 'f' || genderCode === 'Female') {
+                gender = 'F';
+            } else if (genderCode === 'M' || genderCode === 'm' || genderCode === 'Male') {
+                gender = 'M';
+            }
+        }
+        
+        const club = row[idx.clubName] || '';
+        const lsc = row[idx.lsc] || '';
+        
         html.push(
-            `<tr onclick="go('swimmer', ${pkey})"><td>`,
+            `<tr onclick="go('swimmer', ${pkey})" data-index="${index}" data-name="${(name || '').toLowerCase()}" data-age="${age || 0}" data-gender="${(gender || '').toLowerCase()}" data-club="${(club || '').toLowerCase()}" data-lsc="${(lsc || '').toLowerCase()}">`,
+            '<td>',
             ++index,
             '</td><td class="left">',
             name,
             "</td><td>",
             age,
+            "</td><td>",
+            gender || '-',
             '</td><td class="left">',
             club,
             "</td><td>",
@@ -1177,8 +1309,87 @@ function showSearch(values) {
         );
     }
     html.push("</tbody></table>");
+    
+    // Store original values for sorting
+    window._searchTableData = values;
+    window._searchTableIdx = idx;
 
     window.updateContent(html.join(""));
+}
+
+// Sort function for search table
+function sortSearchTable(columnIndex) {
+    const table = document.getElementById("search-table");
+    const tbody = document.getElementById("search-table-body");
+    if (!table || !tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const currentSort = table.dataset.sortColumn;
+    const currentOrder = table.dataset.sortOrder || 'asc';
+    
+    // Determine new sort order
+    let newOrder = 'asc';
+    if (currentSort == columnIndex && currentOrder == 'asc') {
+        newOrder = 'desc';
+    }
+    
+    // Update table sort state
+    table.dataset.sortColumn = columnIndex;
+    table.dataset.sortOrder = newOrder;
+    
+    // Sort rows
+    rows.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(columnIndex) {
+            case 0: // Index
+                aVal = parseInt(a.dataset.index) || 0;
+                bVal = parseInt(b.dataset.index) || 0;
+                break;
+            case 1: // Name
+                aVal = a.dataset.name || '';
+                bVal = b.dataset.name || '';
+                break;
+            case 2: // Age
+                aVal = parseInt(a.dataset.age) || 0;
+                bVal = parseInt(b.dataset.age) || 0;
+                break;
+            case 3: // Gender
+                aVal = a.dataset.gender || '';
+                bVal = b.dataset.gender || '';
+                break;
+            case 4: // Club
+                aVal = a.dataset.club || '';
+                bVal = b.dataset.club || '';
+                break;
+            case 5: // LSC
+                aVal = a.dataset.lsc || '';
+                bVal = b.dataset.lsc || '';
+                break;
+            default:
+                return 0;
+        }
+        
+        if (typeof aVal === 'string') {
+            return newOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        } else {
+            return newOrder === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+    });
+    
+    // Clear and re-append sorted rows
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // Update header arrows
+    const headers = table.querySelectorAll('th');
+    headers.forEach((th, i) => {
+        if (i === columnIndex) {
+            th.textContent = th.textContent.replace(/ ↕| ↑| ↓/g, '') + (newOrder === 'asc' ? ' ↑' : ' ↓');
+        } else {
+            th.textContent = th.textContent.replace(/ ↕| ↑| ↓/g, '') + ' ↕';
+        }
+    });
 }
 
 async function loadClubSearch(value, all) {
@@ -1212,6 +1423,11 @@ async function loadClubSearch(value, all) {
                 title: "pkey",
                 dim: "[Persons.PersonKey]",
                 datatype: "numeric",
+            },
+            {
+                title: "gender",
+                dim: "[Persons.Gender]",
+                datatype: "text",
             },
         ],
         count: 5000,
@@ -1263,6 +1479,12 @@ async function loadSwimmerSearch(value, all) {
     // Ensure we have a valid idx mapping
     if (idx) {
         values.idx = idx;
+        // Ensure gender is in the idx mapping (might be missing if API doesn't return it)
+        if (idx.gender === undefined && idx.Gender === undefined) {
+            console.log("loadSwimmerSearch: Gender field not found in API response idx");
+            // Try to find gender field by checking field names
+            // The API might return it with a different key
+        }
     } else {
         console.log("loadSwimmerSearch: No valid idx found, creating fallback");
         // Create fallback idx mapping based on expected search result structure
@@ -1271,7 +1493,8 @@ async function loadSwimmerSearch(value, all) {
             age: 1,
             clubName: 2,
             lsc: 3,
-            pkey: 4
+            pkey: 4,
+            gender: undefined // Will be undefined if not in API response
         };
     }
 
@@ -1362,4 +1585,5 @@ window.loadEvents = loadEvents;
 window.loadSwimerInfo = loadSwimerInfo;
 window.loadSearch = loadSearch;
 window.loadSwimmerDetails = loadSwimmerDetails;
+window.sortSearchTable = sortSearchTable;
 console.log("swimmer.js: Functions exported - search:", typeof window.search);
