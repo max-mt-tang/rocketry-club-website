@@ -1240,8 +1240,203 @@ async function showSearch(values, searchQuery = '') {
         });
     }
 
+    // Calculate age group counts by gender
+    const ageGroupCounts = {
+        '10U': { total: 0, M: 0, F: 0 },
+        '11-12': { total: 0, M: 0, F: 0 },
+        '13-14': { total: 0, M: 0, F: 0 },
+        '15-16': { total: 0, M: 0, F: 0 },
+        '17-18': { total: 0, M: 0, F: 0 },
+        '19O': { total: 0, M: 0, F: 0 }
+    };
+    
+    // Collect all pkeys to fetch genders first
+    const pkeys = [];
+    for (const row of values) {
+        const pkey = row[idx.pkey];
+        if (pkey) pkeys.push(pkey);
+    }
+    
+    // Fetch genders from events
+    const genderMap = await fetchGendersForSwimmers(pkeys);
+    
+    // Calculate counts
+    for (const row of values) {
+        const age = row[idx.age];
+        const pkey = row[idx.pkey];
+        
+        // Get gender from map or row
+        let gender = genderMap.get(pkey) || '';
+        if (!gender && idx.gender !== undefined && idx.gender !== null && row[idx.gender] !== undefined && row[idx.gender] !== null && row[idx.gender] !== '') {
+            const genderCode = row[idx.gender];
+            if (genderCode === 1 || genderCode === '1') {
+                gender = 'F';
+            } else if (genderCode === 2 || genderCode === '2') {
+                gender = 'M';
+            } else if (genderCode === 'F' || genderCode === 'f' || genderCode === 'Female') {
+                gender = 'F';
+            } else if (genderCode === 'M' || genderCode === 'm' || genderCode === 'Male') {
+                gender = 'M';
+            }
+        }
+        
+        if (age !== undefined && age !== null) {
+            let ageGroup = null;
+            if (age <= 10) {
+                ageGroup = '10U';
+            } else if (age >= 11 && age <= 12) {
+                ageGroup = '11-12';
+            } else if (age >= 13 && age <= 14) {
+                ageGroup = '13-14';
+            } else if (age >= 15 && age <= 16) {
+                ageGroup = '15-16';
+            } else if (age >= 17 && age <= 18) {
+                ageGroup = '17-18';
+            } else if (age >= 19) {
+                ageGroup = '19O';
+            }
+            
+            if (ageGroup) {
+                ageGroupCounts[ageGroup].total++;
+                if (gender === 'M' || gender === 'm' || gender === 'Male') {
+                    ageGroupCounts[ageGroup].M++;
+                } else if (gender === 'F' || gender === 'f' || gender === 'Female') {
+                    ageGroupCounts[ageGroup].F++;
+                }
+            }
+        }
+    }
+
     // Always show search results table (don't auto-navigate even for 1 result)
     let html = [];
+    
+    // Add age group counts summary above the table
+    const ageGroupSummary = [];
+    for (const [group, counts] of Object.entries(ageGroupCounts)) {
+        if (counts.total > 0) {
+            const genderBreakdown = [];
+            if (counts.M > 0) genderBreakdown.push(`M: ${counts.M}`);
+            if (counts.F > 0) genderBreakdown.push(`F: ${counts.F}`);
+            const breakdown = genderBreakdown.length > 0 ? ` (${genderBreakdown.join(', ')})` : '';
+            ageGroupSummary.push(`${group}: ${counts.total}${breakdown}`);
+        }
+    }
+    
+    // Calculate total by gender
+    let totalM = 0, totalF = 0;
+    for (const counts of Object.values(ageGroupCounts)) {
+        totalM += counts.M;
+        totalF += counts.F;
+    }
+    
+    if (ageGroupSummary.length > 0) {
+        // Find max count for scaling the chart
+        const maxCount = Math.max(...Object.values(ageGroupCounts).map(c => c.total), values.length);
+        
+        html.push('<div style="margin-bottom: 15px;">');
+        html.push('<div style="font-weight: 700; color: #333; margin-bottom: 8px; font-size: 15px; padding: 0 2px;">Age Groups Breakdown</div>');
+        
+        // Add bar chart
+        html.push('<div style="margin-bottom: 15px; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">');
+        html.push('<div style="font-weight: 600; color: #495057; margin-bottom: 15px; font-size: 14px;">Distribution by Age Group</div>');
+        html.push('<div style="display: flex; align-items: flex-end; justify-content: space-around; min-height: 250px; gap: 8px; padding: 0 0 10px 0; border-bottom: 2px solid #e9ecef;">');
+        
+        // Calculate the actual max bar height needed (use 98% of available space for tallest bar)
+        const chartMaxHeight = 250; // Shorter container
+        const barMaxHeight = chartMaxHeight * 0.98; // Use 98% of chart height for tallest bar (taller bars)
+        // Find max of male or female counts for scaling
+        const maxGenderCount = Math.max(
+            ...Object.values(ageGroupCounts).map(c => Math.max(c.M || 0, c.F || 0)),
+            totalM,
+            totalF
+        );
+        
+        for (const [group, counts] of Object.entries(ageGroupCounts)) {
+            if (counts.total > 0) {
+                html.push('<div style="flex: 1; display: flex; flex-direction: column; align-items: center; max-width: 120px;">');
+                html.push(`<div style="width: 100%; height: ${chartMaxHeight}px; display: flex; flex-direction: row; align-items: flex-end; justify-content: center; gap: 4px; position: relative; border-left: 1px solid #e9ecef; padding-left: 4px;">`);
+                
+                // Side-by-side bars: Male (blue) and Female (red)
+                // Calculate heights based on max gender count, not total
+                const maleHeight = counts.M > 0 ? (counts.M / maxGenderCount) * barMaxHeight : 0;
+                const femaleHeight = counts.F > 0 ? (counts.F / maxGenderCount) * barMaxHeight : 0;
+                
+                // Male bar (blue) - left side
+                if (counts.M > 0 && maleHeight > 0) {
+                    html.push(`<div style="flex: 1; position: relative; min-width: 20px;">`);
+                    // Label on top of bar
+                    html.push(`<div style="position: absolute; bottom: ${maleHeight + 4}px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: #007bff; white-space: nowrap; text-shadow: 0 1px 2px rgba(255,255,255,0.9); z-index: 10; pointer-events: none;">${counts.M}</div>`);
+                    html.push(`<div style="height: ${maleHeight}px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 4px 4px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="Male: ${counts.M}"></div>`);
+                    html.push('</div>');
+                } else {
+                    html.push('<div style="flex: 1; min-width: 20px;"></div>');
+                }
+                
+                // Female bar (red) - right side
+                if (counts.F > 0 && femaleHeight > 0) {
+                    html.push(`<div style="flex: 1; position: relative; min-width: 20px;">`);
+                    // Label on top of bar
+                    html.push(`<div style="position: absolute; bottom: ${femaleHeight + 4}px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: #dc3545; white-space: nowrap; text-shadow: 0 1px 2px rgba(255,255,255,0.9); z-index: 10; pointer-events: none;">${counts.F}</div>`);
+                    html.push(`<div style="height: ${femaleHeight}px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 4px 4px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="Female: ${counts.F}"></div>`);
+                    html.push('</div>');
+                } else {
+                    html.push('<div style="flex: 1; min-width: 20px;"></div>');
+                }
+                
+                html.push('</div>');
+                html.push(`<div style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #495057; text-align: center;">${group}</div>`);
+                html.push(`<div style="margin-top: 4px; font-size: 11px; color: #6c757d; text-align: center;">${counts.total}</div>`);
+                html.push('</div>');
+            }
+        }
+        
+        html.push('</div>');
+        html.push('<div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 12px;">');
+        html.push('<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 16px; height: 16px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 3px;"></div><span style="color: #495057;">Male</span></div>');
+        html.push('<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 16px; height: 16px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 3px;"></div><span style="color: #495057;">Female</span></div>');
+        html.push('</div>');
+        html.push('</div>');
+        
+        html.push('<table class="fill top-margin" id="age-groups-table" style="border-collapse: collapse; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">');
+        html.push('<thead><tr class="th">');
+        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: left; font-size: 13px; letter-spacing: 0.3px;">Age Group</th>');
+        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: right; font-size: 13px; letter-spacing: 0.3px;">Total</th>');
+        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: left; font-size: 13px; letter-spacing: 0.3px;">Gender</th>');
+        html.push('</tr></thead><tbody>');
+        
+        // Display each age group in a table row with 3 columns
+        let rowIndex = 0;
+        for (const [group, counts] of Object.entries(ageGroupCounts)) {
+            if (counts.total > 0) {
+                const genderBreakdown = [];
+                if (counts.M > 0) genderBreakdown.push(`<span style="color: #007bff; font-weight: 600;">M: ${counts.M}</span>`);
+                if (counts.F > 0) genderBreakdown.push(`<span style="color: #dc3545; font-weight: 600;">F: ${counts.F}</span>`);
+                const breakdown = genderBreakdown.length > 0 ? genderBreakdown.join(', ') : '-';
+                
+                const bgColor = rowIndex % 2 === 0 ? 'rgba(255, 255, 255, 1)' : 'rgba(248, 249, 250, 0.8)';
+                html.push(`<tr style="transition: all 0.2s ease; background-color: ${bgColor};">`);
+                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: left; font-weight: 600; color: #495057;">${group}</td>`);
+                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: right; font-weight: 600; color: #333;">${counts.total}</td>`);
+                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: left; color: #333;">${breakdown}</td>`);
+                html.push('</tr>');
+                rowIndex++;
+            }
+        }
+        
+        // Display total row
+        const totalBreakdown = [];
+        if (totalM > 0) totalBreakdown.push(`<span style="color: #007bff; font-weight: 600;">M: ${totalM}</span>`);
+        if (totalF > 0) totalBreakdown.push(`<span style="color: #dc3545; font-weight: 600;">F: ${totalF}</span>`);
+        html.push(`<tr style="background-color: rgba(227, 242, 253, 0.3) !important; border-top: 2px solid rgba(0, 123, 255, 0.2);">`);
+        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">Total</td>`);
+        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333; text-align: right;">${values.length}</td>`);
+        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">${totalBreakdown.length > 0 ? totalBreakdown.join(', ') : '-'}</td>`);
+        html.push('</tr>');
+        
+        html.push('</tbody>');
+        html.push('</table>');
+        html.push('</div>');
+    }
 
     html.push(
         '<table class="fill top-margin" id="search-table"><thead><tr class="th">',
@@ -1254,15 +1449,7 @@ async function showSearch(values, searchQuery = '') {
         '</tr></thead><tbody id="search-table-body">',
     );
     
-    // Collect all pkeys to fetch genders
-    const pkeys = [];
-    for (const row of values) {
-        const pkey = row[idx.pkey];
-        if (pkey) pkeys.push(pkey);
-    }
-    
-    // Fetch genders from events
-    const genderMap = await fetchGendersForSwimmers(pkeys);
+    // Gender map already fetched above for age group counts
     console.log('Fetched genders for', genderMap.size, 'swimmers');
     
     let index = 0;
@@ -1392,7 +1579,477 @@ function sortSearchTable(columnIndex) {
     });
 }
 
+// Efficient team search using the same approach as rankings
+// This uses the proven loadClubAgeSwimmerList pattern from rankings.js
+async function searchTeamByClubName(teamName) {
+    const searchTerm = teamName.toLowerCase().trim();
+    
+    // Strategy 1: Direct search with name variations
+    const nameVariations = [
+        teamName, // Original search term
+        teamName.replace(/ swim team/i, '').trim(),
+        teamName.replace(/ club/i, '').trim(),
+        teamName.replace(/ aquatic/i, '').trim(),
+    ].filter(v => v);
+    
+    // Try LSCs in order of likelihood (PN = Pacific Northwest, then try all)
+    const lscsToTry = ['PN', null, 'WA', 'CA', 'OR']; // null = try without LSC filter
+    
+    const [from, to] = [0, 100]; // Age range 0-100 for all ages
+    
+    // Try direct search first
+    for (const nameVariation of nameVariations) {
+        for (const lsc of lscsToTry) {
+            try {
+                const description = lsc ? `LSC ${lsc}` : 'all LSCs';
+                console.log(`[Strategy 1] Trying to find team "${nameVariation}" in ${description}...`);
+                
+                // Use the EXACT same structure as loadClubAgeSwimmerList (proven to work)
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "pkey",
+                            dim: "[Persons.PersonKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            title: "age",
+                            dim: "[Persons.Age]",
+                            datatype: "numeric",
+                            filter: {
+                                from: from,
+                                to: to,
+                            },
+                        },
+                        {
+                            title: "name",
+                            dim: "[Persons.FullName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "clubName",
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "lsc",
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "gender",
+                            dim: "[Persons.Gender]",
+                            datatype: "text",
+                        },
+                        {
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                            filter: {
+                                contains: nameVariation,
+                            },
+                            panel: "scope",
+                        },
+                    ],
+                    count: 5000,
+                };
+                
+                // Add LSC filter only if specified (same as loadClubAgeSwimmerList)
+                if (lsc) {
+                    bodyObj.metadata.push({
+                        dim: "[Persons.LscCode]",
+                        datatype: "text",
+                        filter: {
+                            equals: lsc,
+                        },
+                        panel: "scope",
+                    });
+                }
+                
+                const swimmerList = await fetchSwimValues(bodyObj);
+                
+                if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                    console.log(`✅ Found ${swimmerList.length} swimmers for team "${nameVariation}" in ${description}`);
+                    
+                    // Log sample club names to verify we got the right team
+                    if (swimmerList.length > 0) {
+                        const sampleClubs = new Set();
+                        const sampleLSCs = new Set();
+                        for (let i = 0; i < Math.min(10, swimmerList.length); i++) {
+                            const club = swimmerList[i][swimmerList.idx.clubName];
+                            const lscCode = swimmerList[i][swimmerList.idx.lsc];
+                            if (club) sampleClubs.add(club);
+                            if (lscCode) sampleLSCs.add(lscCode);
+                        }
+                        console.log('Sample club names found:', Array.from(sampleClubs));
+                        console.log('Sample LSC codes found:', Array.from(sampleLSCs));
+                    }
+                    
+                    return swimmerList;
+                }
+            } catch (error) {
+                console.error(`Error searching ${description} with "${nameVariation}":`, error);
+                continue;
+            }
+        }
+    }
+    
+    // Strategy 2: Search through club dictionary to find matching club names
+    console.log(`[Strategy 2] Searching club dictionary for teams matching "${searchTerm}"...`);
+    const lscsForDictionary = ['PN', 'WA', 'CA', 'OR', 'AZ', 'CO', 'UT', 'NV'];
+    const matchingClubNames = [];
+    
+    for (const lsc of lscsForDictionary) {
+        try {
+            // Wait for club dictionary to be available
+            while (!window._clubDictinary) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            const clubMap = await window._clubDictinary.loadClubMap(lsc);
+            if (clubMap && clubMap.size > 0) {
+                for (const [code, name] of clubMap) {
+                    if (name && name.toLowerCase().includes(searchTerm)) {
+                        matchingClubNames.push({ name, code, lsc });
+                        console.log(`Found matching club: "${name}" (${code}) in LSC ${lsc}`);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error loading club dictionary for LSC ${lsc}:`, error);
+        }
+    }
+    
+    // If we found matching clubs, search for swimmers using those exact club names
+    if (matchingClubNames.length > 0) {
+        console.log(`[Strategy 2] Found ${matchingClubNames.length} matching clubs, searching for swimmers...`);
+        
+        // Group by LSC to search efficiently
+        const clubsByLSC = {};
+        for (const club of matchingClubNames) {
+            if (!clubsByLSC[club.lsc]) {
+                clubsByLSC[club.lsc] = [];
+            }
+            clubsByLSC[club.lsc].push(club.name);
+        }
+        
+        // Search for each LSC
+        for (const [lsc, clubNames] of Object.entries(clubsByLSC)) {
+            try {
+                console.log(`Searching for ${clubNames.length} clubs in LSC ${lsc}...`);
+                
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "pkey",
+                            dim: "[Persons.PersonKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            title: "age",
+                            dim: "[Persons.Age]",
+                            datatype: "numeric",
+                            filter: { from: from, to: to },
+                        },
+                        {
+                            title: "name",
+                            dim: "[Persons.FullName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "clubName",
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "lsc",
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "gender",
+                            dim: "[Persons.Gender]",
+                            datatype: "text",
+                        },
+                        {
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                            filter: {
+                                members: clubNames, // Use "members" for exact match
+                            },
+                            panel: "scope",
+                        },
+                        {
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                            filter: {
+                                equals: lsc,
+                            },
+                            panel: "scope",
+                        },
+                    ],
+                    count: 5000,
+                };
+                
+                const swimmerList = await fetchSwimValues(bodyObj);
+                
+                if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                    console.log(`✅ Found ${swimmerList.length} swimmers using club dictionary search`);
+                    
+                    // Log sample club names
+                    const sampleClubs = new Set();
+                    for (let i = 0; i < Math.min(10, swimmerList.length); i++) {
+                        const club = swimmerList[i][swimmerList.idx.clubName];
+                        if (club) sampleClubs.add(club);
+                    }
+                    console.log('Sample club names found:', Array.from(sampleClubs));
+                    
+                    return swimmerList;
+                }
+            } catch (error) {
+                console.error(`Error searching LSC ${lsc} with club dictionary:`, error);
+                continue;
+            }
+        }
+    }
+    
+    console.log('❌ All search strategies failed');
+    return null;
+}
+
+// Fetch full person details for a list of pkeys
+async function fetchPersonDetailsForPkeys(pkeys) {
+    if (!pkeys || pkeys.length === 0) return null;
+    
+    const batchSize = 50;
+    const allSwimmers = [];
+    let idx = null;
+    
+    for (let i = 0; i < pkeys.length; i += batchSize) {
+        const batch = pkeys.slice(i, i + batchSize);
+        try {
+            const bodyObj = {
+                metadata: [
+                    {
+                        title: "name",
+                        dim: "[Persons.FullName]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "age",
+                        dim: "[Persons.Age]",
+                        datatype: "numeric",
+                        sort: "asc",
+                    },
+                    {
+                        title: "clubName",
+                        dim: "[Persons.ClubName]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "lsc",
+                        dim: "[Persons.LscCode]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "pkey",
+                        dim: "[Persons.PersonKey]",
+                        datatype: "numeric",
+                    },
+                    {
+                        title: "gender",
+                        dim: "[Persons.Gender]",
+                        datatype: "text",
+                    },
+                    {
+                        dim: "[Persons.PersonKey]",
+                        datatype: "numeric",
+                        filter: {
+                            members: batch,
+                        },
+                        panel: "scope",
+                    },
+                ],
+                count: batch.length,
+            };
+            
+            const persons = await fetchSwimValues(bodyObj);
+            if (persons && persons.length > 0) {
+                if (!idx && persons.idx) {
+                    idx = persons.idx;
+                }
+                allSwimmers.push(...persons);
+            }
+        } catch (error) {
+            console.error('Error fetching person details for batch:', error);
+        }
+    }
+    
+    if (allSwimmers.length > 0) {
+        allSwimmers.idx = idx || {};
+        return allSwimmers;
+    }
+    
+    return null;
+}
+
+// Search for team by looking through events data (fallback method)
+async function searchTeamByEvents(teamName) {
+    const searchVariations = [
+        teamName,
+        teamName.toLowerCase(),
+        teamName.toUpperCase(),
+    ];
+    
+    // Add Bellevue variations
+    if (teamName.toLowerCase().includes('bc') || teamName.toLowerCase().includes('bellevue')) {
+        searchVariations.push('Bellevue Club Swim Team');
+        searchVariations.push('Bellevue Club');
+        searchVariations.push('Bellevue');
+    }
+    
+    let allPkeys = new Set();
+    let idx = null;
+    
+    for (const variation of searchVariations) {
+        try {
+            console.log('Trying events search with variation:', variation);
+            const bodyObj = {
+                metadata: [
+                    {
+                        title: "pkey",
+                        dim: "[UsasSwimTime.PersonKey]",
+                        datatype: "numeric",
+                    },
+                    {
+                        title: "clubName",
+                        dim: "[OrgUnit.Level4Name]",
+                        datatype: "text",
+                    },
+                    {
+                        dim: "[OrgUnit.Level4Name]",
+                        datatype: "text",
+                        filter: {
+                            contains: variation,
+                        },
+                        panel: "scope",
+                    },
+                ],
+                count: 5000,
+            };
+            
+            console.log('Events search API call:', JSON.stringify(bodyObj, null, 2));
+            const events = await fetchSwimValues(bodyObj, "event");
+            console.log('Events search returned:', events ? events.length : 0, 'events');
+            
+            if (events && events.length > 0) {
+                if (!idx && events.idx) {
+                    idx = events.idx;
+                }
+                // Log sample club names to see what we're getting
+                if (events[0] && events.idx && events.idx.clubName !== undefined) {
+                    const sampleClubNames = new Set();
+                    for (let i = 0; i < Math.min(10, events.length); i++) {
+                        const clubName = events[i][events.idx.clubName];
+                        if (clubName) sampleClubNames.add(clubName);
+                    }
+                    console.log('Sample club names found:', Array.from(sampleClubNames));
+                }
+                
+                for (const event of events) {
+                    if (event[events.idx.pkey]) {
+                        allPkeys.add(event[events.idx.pkey]);
+                    }
+                }
+                console.log('Events search with "' + variation + '" found', events.length, 'events for', allPkeys.size, 'unique swimmers');
+                if (allPkeys.size > 0) break; // Found results, stop trying variations
+            } else {
+                console.log('No events found for variation:', variation);
+            }
+        } catch (error) {
+            console.error('Error searching events with variation', variation, ':', error);
+            continue;
+        }
+    }
+    
+    if (allPkeys.size === 0) {
+        return null;
+    }
+    
+    // Now fetch person details for these pkeys
+    const pkeyArray = Array.from(allPkeys);
+    const batchSize = 50;
+    const allSwimmers = [];
+    
+    for (let i = 0; i < pkeyArray.length; i += batchSize) {
+        const batch = pkeyArray.slice(i, i + batchSize);
+        try {
+            const bodyObj = {
+                metadata: [
+                    {
+                        title: "name",
+                        dim: "[Persons.FullName]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "age",
+                        dim: "[Persons.Age]",
+                        datatype: "numeric",
+                        sort: "asc",
+                    },
+                    {
+                        title: "clubName",
+                        dim: "[Persons.ClubName]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "lsc",
+                        dim: "[Persons.LscCode]",
+                        datatype: "text",
+                    },
+                    {
+                        title: "pkey",
+                        dim: "[Persons.PersonKey]",
+                        datatype: "numeric",
+                    },
+                    {
+                        title: "gender",
+                        dim: "[Persons.Gender]",
+                        datatype: "text",
+                    },
+                    {
+                        dim: "[Persons.PersonKey]",
+                        datatype: "numeric",
+                        filter: {
+                            members: batch,
+                        },
+                        panel: "scope",
+                    },
+                ],
+                count: batch.length,
+            };
+            
+            const persons = await fetchSwimValues(bodyObj);
+            if (persons && persons.length > 0) {
+                if (!idx && persons.idx) {
+                    idx = persons.idx;
+                }
+                allSwimmers.push(...persons);
+            }
+        } catch (error) {
+            console.error('Error fetching person details for batch:', error);
+        }
+    }
+    
+    if (allSwimmers.length > 0) {
+        allSwimmers.idx = idx || {};
+        return allSwimmers;
+    }
+    
+    return null;
+}
+
 async function loadClubSearch(value, all) {
+    // Try both Persons.ClubName and a more flexible approach
     let bodyObj = {
         metadata: [
             {
@@ -1410,9 +2067,6 @@ async function loadClubSearch(value, all) {
                 title: "clubName",
                 dim: "[Persons.ClubName]",
                 datatype: "text",
-                filter: {
-                    contains: value,
-                },
             },
             {
                 title: "lsc",
@@ -1429,6 +2083,14 @@ async function loadClubSearch(value, all) {
                 dim: "[Persons.Gender]",
                 datatype: "text",
             },
+            {
+                dim: "[Persons.ClubName]",
+                datatype: "text",
+                filter: {
+                    contains: value,
+                },
+                panel: "scope",
+            },
         ],
         count: 5000,
     };
@@ -1441,7 +2103,17 @@ async function loadClubSearch(value, all) {
     }
     // When all=true, no age filter is applied - search all ages
 
-    return await fetchSwimValues(bodyObj);
+    console.log('loadClubSearch API call:', JSON.stringify(bodyObj, null, 2));
+    const result = await fetchSwimValues(bodyObj);
+    console.log('loadClubSearch returned:', result ? result.length : 0, 'results');
+    if (result && result.length > 0 && result.idx) {
+        console.log('Sample result:', {
+            name: result[0][result.idx.name],
+            clubName: result[0][result.idx.clubName],
+            age: result[0][result.idx.age]
+        });
+    }
+    return result;
 }
 
 async function loadSwimmerSearch(value, all) {
@@ -1576,6 +2248,972 @@ async function loadSwimmerSearchByFirstAndLastName(firstName, lastName, all) {
 // GLOBAL EXPORTS
 // ================================================================================
 
+// Toggle team search menu
+function toggleTeamSearchMenu(event) {
+    if (event) event.stopPropagation();
+    const toggleBtn = document.querySelector('.team-search-toggle');
+    const menu = document.querySelector('.team-search-menu');
+    if (menu && toggleBtn) {
+        const isHidden = menu.style.display === 'none';
+        menu.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+            toggleBtn.style.background = '#28a745';
+            toggleBtn.style.color = 'white';
+            toggleBtn.style.borderRadius = '50%';
+            // Focus on input when menu opens
+            setTimeout(() => {
+                const input = document.getElementById('team-search-input');
+                if (input) input.focus();
+            }, 100);
+        } else {
+            toggleBtn.style.background = 'transparent';
+            toggleBtn.style.color = '#555';
+            toggleBtn.style.borderRadius = '4px';
+        }
+    }
+}
+
+// Close team search menu when clicking outside
+document.addEventListener('click', function(event) {
+    const menu = document.querySelector('.team-search-menu');
+    const toggleBtn = document.querySelector('.team-search-toggle');
+    if (menu && toggleBtn && !menu.contains(event.target) && !toggleBtn.contains(event.target)) {
+        menu.style.display = 'none';
+        toggleBtn.style.background = 'transparent';
+        toggleBtn.style.color = '#555';
+        toggleBtn.style.borderRadius = '4px';
+    }
+});
+
+// Search by team name
+// Search for teams matching a keyword (returns list of teams, not swimmers)
+async function searchTeams(teamKeyword) {
+    const searchTerm = teamKeyword.toLowerCase().trim();
+    const matchingTeams = [];
+    const seenTeams = new Set(); // Track unique teams by "lsc:clubName"
+    
+    // Strategy: Search through club dictionary for matching club names
+    const lscsForDictionary = ['PN', 'WA', 'CA', 'OR', 'AZ', 'CO', 'UT', 'NV', 'TX', 'FL', 'NY', 'IL'];
+    
+    for (const lsc of lscsForDictionary) {
+        try {
+            // Wait for club dictionary to be available
+            while (!window._clubDictinary) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            const clubMap = await window._clubDictinary.loadClubMap(lsc);
+            if (clubMap && clubMap.size > 0) {
+                for (const [code, name] of clubMap) {
+                    if (name && name.toLowerCase().includes(searchTerm)) {
+                        const teamKey = `${lsc}:${name}`;
+                        if (!seenTeams.has(teamKey)) {
+                            matchingTeams.push({ name, code, lsc });
+                            seenTeams.add(teamKey);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error loading club dictionary for LSC ${lsc}:`, error);
+        }
+    }
+    
+    // Also try direct API search to find teams
+    const nameVariations = [
+        teamKeyword,
+        teamKeyword.replace(/ swim team/i, '').trim(),
+        teamKeyword.replace(/ club/i, '').trim(),
+        teamKeyword.replace(/ aquatic/i, '').trim(),
+    ].filter(v => v);
+    
+    const lscsToTry = ['PN', null, 'WA', 'CA', 'OR'];
+    
+    for (const nameVariation of nameVariations) {
+        for (const lsc of lscsToTry) {
+            try {
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "clubName",
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "lsc",
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                        },
+                        {
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                            filter: {
+                                contains: nameVariation,
+                            },
+                            panel: "scope",
+                        },
+                    ],
+                    count: 1000,
+                };
+                
+                if (lsc) {
+                    bodyObj.metadata.push({
+                        dim: "[Persons.LscCode]",
+                        datatype: "text",
+                        filter: {
+                            equals: lsc,
+                        },
+                        panel: "scope",
+                    });
+                }
+                
+                const results = await fetchSwimValues(bodyObj);
+                if (results && results.length > 0 && results.idx) {
+                    const idx = results.idx;
+                    for (const row of results) {
+                        const clubName = row[idx.clubName];
+                        const lscCode = row[idx.lsc];
+                        if (clubName && lscCode) {
+                            const teamKey = `${lscCode}:${clubName}`;
+                            if (!seenTeams.has(teamKey)) {
+                                matchingTeams.push({ name: clubName, code: null, lsc: lscCode });
+                                seenTeams.add(teamKey);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error(`Error searching for teams:`, error);
+                continue;
+            }
+        }
+    }
+    
+    return matchingTeams;
+}
+
+// Show team search results in a table (similar to showSearch)
+async function showTeamSearch(teams, searchQuery = '') {
+    if (!teams || teams.length === 0) {
+        window.updateContent("No teams found matching: " + (searchQuery || 'your search'));
+        return;
+    }
+    
+    // Sort results: exact name matches first, then by LSC, then by name
+    if (searchQuery) {
+        const queryLower = searchQuery.toLowerCase().trim();
+        teams.sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            
+            // Check for exact match
+            const exactA = nameA === queryLower;
+            const exactB = nameB === queryLower;
+            
+            if (exactA && !exactB) return -1;
+            if (!exactA && exactB) return 1;
+            
+            // Then sort by LSC, then by name
+            if (a.lsc !== b.lsc) {
+                return (a.lsc || '').localeCompare(b.lsc || '');
+            }
+            return nameA.localeCompare(nameB);
+        });
+    }
+    
+    let html = [];
+    
+    html.push(
+        '<table class="fill top-margin" id="team-search-table"><thead><tr class="th">',
+        '<th style="cursor: pointer;" onclick="event.stopPropagation(); sortTeamSearchTable(0)"># ↕</th>',
+        '<th style="cursor: pointer;" onclick="event.stopPropagation(); sortTeamSearchTable(1)">Team Name ↕</th>',
+        '<th style="cursor: pointer;" onclick="event.stopPropagation(); sortTeamSearchTable(2)">LSC ↕</th>',
+        '<th style="cursor: pointer;" onclick="event.stopPropagation(); sortTeamSearchTable(3)">Code ↕</th>',
+        '</tr></thead><tbody id="team-search-table-body">',
+    );
+    
+    let index = 0;
+    for (const team of teams) {
+        const teamName = team.name || '';
+        const lsc = team.lsc || '';
+        const code = team.code || '-';
+        
+        // Escape single quotes properly for onclick handler
+        const escapedTeamName = teamName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedLsc = (lsc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedCode = (code || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
+        // Store team data in data attributes for use in selectTeam
+        html.push(
+            `<tr onclick="if(typeof window.selectTeam === 'function') { window.selectTeam('${escapedTeamName}', '${escapedLsc}', '${escapedCode}'); } else { console.error('selectTeam function not available'); }" style="cursor: pointer;" data-index="${index}" data-name="${(teamName || '').toLowerCase()}" data-lsc="${(lsc || '').toLowerCase()}" data-code="${(code || '').toLowerCase()}" data-team-name="${escapedTeamName}">`,
+            '<td>',
+            ++index,
+            '</td><td class="left">',
+            teamName,
+            "</td><td>",
+            lsc,
+            "</td><td>",
+            code,
+            "</td></tr>",
+        );
+    }
+    html.push("</tbody></table>");
+    
+    // Store original values for sorting
+    window._teamSearchTableData = teams;
+    
+    window.updateContent(html.join(""));
+    
+    // Also attach event listeners programmatically as a backup
+    setTimeout(() => {
+        const tbody = document.getElementById("team-search-table-body");
+        if (tbody) {
+            const rows = tbody.querySelectorAll("tr");
+            rows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    // Don't trigger if clicking on a sortable header
+                    if (e.target.tagName === 'TH') return;
+                    
+                    const teamName = row.dataset.teamName || '';
+                    const lsc = row.dataset.lsc || '';
+                    const code = row.dataset.code || '';
+                    
+                    if (teamName && typeof window.selectTeam === 'function') {
+                        window.selectTeam(teamName, lsc, code === '-' ? '' : code);
+                    } else {
+                        console.error('selectTeam function not available or teamName missing');
+                    }
+                });
+            });
+        }
+    }, 100);
+}
+
+// Sort function for team search table
+function sortTeamSearchTable(columnIndex) {
+    const table = document.getElementById("team-search-table");
+    const tbody = document.getElementById("team-search-table-body");
+    if (!table || !tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const currentSort = table.dataset.sortColumn;
+    const currentOrder = table.dataset.sortOrder || 'asc';
+    
+    // Determine new sort order
+    let newOrder = 'asc';
+    if (currentSort == columnIndex && currentOrder == 'asc') {
+        newOrder = 'desc';
+    }
+    
+    // Update table sort state
+    table.dataset.sortColumn = columnIndex;
+    table.dataset.sortOrder = newOrder;
+    
+    // Sort rows
+    rows.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch(columnIndex) {
+            case 0: // Index
+                aVal = parseInt(a.dataset.index) || 0;
+                bVal = parseInt(b.dataset.index) || 0;
+                break;
+            case 1: // Team Name
+                aVal = a.dataset.name || '';
+                bVal = b.dataset.name || '';
+                break;
+            case 2: // LSC
+                aVal = a.dataset.lsc || '';
+                bVal = b.dataset.lsc || '';
+                break;
+            case 3: // Code
+                aVal = a.dataset.code || '';
+                bVal = b.dataset.code || '';
+                break;
+            default:
+                return 0;
+        }
+        
+        if (typeof aVal === 'string') {
+            return newOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        } else {
+            return newOrder === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+    });
+    
+    // Clear and re-append sorted rows
+    tbody.innerHTML = '';
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // Update header arrows
+    const headers = table.querySelectorAll('th');
+    headers.forEach((th, i) => {
+        if (i === columnIndex) {
+            th.textContent = th.textContent.replace(/ ↕| ↑| ↓/g, '') + (newOrder === 'asc' ? ' ↑' : ' ↓');
+        } else {
+            th.textContent = th.textContent.replace(/ ↕| ↑| ↓/g, '') + ' ↕';
+        }
+    });
+}
+
+// Select a team and show its swimmers
+async function selectTeam(teamName, lsc, clubCode) {
+    // Normalize LSC code to uppercase (e.g., "pn" -> "PN") early
+    if (lsc) {
+        lsc = lsc.toUpperCase();
+    }
+    
+    // Check cache first (1 hour timeout)
+    const cacheKey = `team/${lsc}/${clubCode || 'none'}/${teamName}`;
+    const cacheTimeout = 60 * 60; // 1 hour in seconds
+    const cachedResult = await LocalCache.get(cacheKey, cacheTimeout);
+    
+    if (cachedResult) {
+        console.log(`[selectTeam] Using cached results for "${teamName}"`);
+        await showSearch(cachedResult, teamName);
+        return;
+    }
+    
+    let debugInfo = [];
+    debugInfo.push(`<div style="padding: 20px; font-family: monospace; background: #f5f5f5; border-radius: 8px; margin: 10px 0;">`);
+    debugInfo.push(`<h3 style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 20px;">⏳</span> Loading swimmers for: ${teamName}</h3>`);
+    debugInfo.push(`<p><strong>LSC:</strong> ${lsc || 'none'}</p>`);
+    debugInfo.push(`<p><strong>Club Code:</strong> ${clubCode || 'none'}</p>`);
+    debugInfo.push(`<hr>`);
+    
+    window.updateContent(debugInfo.join('') + '<p>Starting search...</p></div>');
+    
+    try {
+        if (!lsc) {
+            window.updateContent(debugInfo.join('') + '<p style="color: red;">❌ Error: LSC code is required to load swimmers. Please try searching again.</p></div>');
+            return;
+        }
+        
+        console.log(`[selectTeam] Starting search for team: "${teamName}", LSC: ${lsc}, Code: ${clubCode || 'none'}`);
+        debugInfo.push(`<p>✓ LSC code found: ${lsc}</p>`);
+        
+        let actualClubName = null;
+        let allSwimmers = [];
+        let idx = null;
+        
+        // Strategy: If we have a club code, use it directly (same as rankings do)
+        if (clubCode && clubCode !== '-') {
+            try {
+                debugInfo.push(`<p>Looking up club name for code "${clubCode}"...</p>`);
+                window.updateContent(debugInfo.join('') + '<p>Loading club dictionary...</p></div>');
+                
+                while (!window._clubDictinary) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // Try both uppercase and lowercase versions of club code
+                const codeVariations = [clubCode.toUpperCase(), clubCode];
+                if (clubCode.toLowerCase() !== clubCode.toUpperCase()) {
+                    codeVariations.push(clubCode.toLowerCase());
+                }
+                
+                for (const codeVar of codeVariations) {
+                    actualClubName = await window._clubDictinary.loadClubName(lsc, codeVar);
+                    if (actualClubName) {
+                        console.log(`[selectTeam] ✅ Found club name from code "${codeVar}": "${actualClubName}"`);
+                        debugInfo.push(`<p style="color: green;">✓ Found club name from code "${codeVar}": <strong>${actualClubName}</strong></p>`);
+                        break;
+                    }
+                }
+                
+                if (actualClubName) {
+                    // Normalize club name - remove "Swim Team" suffix if present
+                    // Database likely stores "Bellevue Club" not "Bellevue Club Swim Team"
+                    const normalizedName = actualClubName.replace(/ swim team$/i, '').trim();
+                    if (normalizedName !== actualClubName) {
+                        debugInfo.push(`<p>Normalizing club name: <strong>"${actualClubName}"</strong> → <strong>"${normalizedName}"</strong></p>`);
+                        actualClubName = normalizedName;
+                    }
+                } else {
+                    console.log(`[selectTeam] ⚠️ No club name found for code "${clubCode}" (tried: ${codeVariations.join(', ')})`);
+                    debugInfo.push(`<p style="color: orange;">⚠️ No club name found for code "${clubCode}" (tried: ${codeVariations.join(', ')})</p>`);
+                }
+            } catch (error) {
+                console.error(`[selectTeam] Error loading club name for code "${clubCode}":`, error);
+                debugInfo.push(`<p style="color: red;">❌ Error loading club name: ${error.message}</p>`);
+            }
+        }
+        
+        // If we have a club name (from code lookup), use loadClubAgeSwimmerList for all age groups
+        // This is exactly what rankings do and it works!
+        if (actualClubName) {
+            debugInfo.push(`<hr><h4>Using loadClubAgeSwimmerList (same as rankings)</h4>`);
+            debugInfo.push(`<p>Club name: <strong>"${actualClubName}"</strong></p>`);
+            debugInfo.push(`<p>Loading swimmers for all age groups...</p>`);
+            window.updateContent(debugInfo.join('') + '<p>Loading swimmers...</p></div>');
+            
+            // Age groups to check (same as rankings)
+            const ageGroups = ['10U', '11-12', '13-14', '15-16', '17-18', '19O'];
+            
+            // Try club name variations (rankings use "Bellevue Club" successfully)
+            const clubNameVariations = [];
+            if (actualClubName.toLowerCase().includes('bellevue')) {
+                clubNameVariations.push('Bellevue Club'); // Rankings use this successfully - try first
+            }
+            clubNameVariations.push(actualClubName); // Then try normalized name
+            // Remove duplicates
+            const uniqueVariations = [...new Set(clubNameVariations)];
+            
+            // Check if loadClubAgeSwimmerList is available (from rankings.js)
+            if (typeof loadClubAgeSwimmerList === 'function') {
+                debugInfo.push(`<p>✓ loadClubAgeSwimmerList function found</p>`);
+                
+                for (const ageKey of ageGroups) {
+                    let swimmerList = null;
+                    
+                    // Try each club name variation
+                    for (const clubNameVar of uniqueVariations) {
+                        try {
+                            debugInfo.push(`<p>Loading age group: <strong>${ageKey}</strong> with club name: <strong>"${clubNameVar}"</strong>...</p>`);
+                            window.updateContent(debugInfo.join('') + `<p>Loading ${ageKey}...</p></div>`);
+                            
+                            // Try with forceRefresh=false first (use cache)
+                            swimmerList = await loadClubAgeSwimmerList(lsc, clubNameVar, ageKey, false);
+                            
+                            // Debug: log what we got
+                            console.log(`[selectTeam] loadClubAgeSwimmerList("${lsc}", "${clubNameVar}", "${ageKey}", false) returned:`, {
+                                hasResult: !!swimmerList,
+                                isArray: Array.isArray(swimmerList),
+                                length: swimmerList?.length || 0,
+                                hasIdx: !!swimmerList?.idx,
+                                idxKeys: swimmerList?.idx ? Object.keys(swimmerList.idx) : 'no idx'
+                            });
+                            
+                            // Check if result is valid (has idx)
+                            if (swimmerList && !swimmerList.idx) {
+                                debugInfo.push(`<p style="color: orange;">⚠️ Corrupted cache detected, clearing...</p>`);
+                                // Clear corrupted cache
+                                const cacheKey = "club/" + lsc + "_" + clubNameVar + "_" + ageKey;
+                                localStorage.removeItem(cacheKey);
+                                // Retry with forceRefresh=true
+                                swimmerList = await loadClubAgeSwimmerList(lsc, clubNameVar, ageKey, true);
+                                console.log(`[selectTeam] After cache clear, retry returned:`, {
+                                    hasResult: !!swimmerList,
+                                    length: swimmerList?.length || 0,
+                                    hasIdx: !!swimmerList?.idx
+                                });
+                            }
+                            
+                            // If still no results, try clearing cache and retrying
+                            if (!swimmerList || swimmerList.length === 0) {
+                                debugInfo.push(`<p>Trying with cache cleared and forceRefresh...</p>`);
+                                const cacheKey = "club/" + lsc + "_" + clubNameVar + "_" + ageKey;
+                                localStorage.removeItem(cacheKey);
+                                swimmerList = await loadClubAgeSwimmerList(lsc, clubNameVar, ageKey, true);
+                                console.log(`[selectTeam] After forceRefresh, returned:`, {
+                                    hasResult: !!swimmerList,
+                                    length: swimmerList?.length || 0,
+                                    hasIdx: !!swimmerList?.idx
+                                });
+                            }
+                        
+                            if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                                debugInfo.push(`<p style="color: green;">✓ Found ${swimmerList.length} swimmers in ${ageKey} with "${clubNameVar}"</p>`);
+                                break; // Found swimmers, stop trying variations
+                            } else {
+                                debugInfo.push(`<p style="color: gray;">No swimmers in ${ageKey} with "${clubNameVar}"</p>`);
+                            }
+                        } catch (error) {
+                            console.error(`[selectTeam] Error loading age ${ageKey} with "${clubNameVar}":`, error);
+                            debugInfo.push(`<p style="color: red;">❌ Error loading ${ageKey} with "${clubNameVar}": ${error.message}</p>`);
+                            continue; // Try next variation
+                        }
+                    }
+                    
+                    // If we found swimmers, merge them
+                    if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                        // Merge swimmers, ensuring unique pkeys
+                        const existingPkeys = new Set(allSwimmers.map(s => s[idx ? idx.pkey : 0]));
+                        for (const row of swimmerList) {
+                            const pkey = row[swimmerList.idx.pkey];
+                            if (!existingPkeys.has(pkey)) {
+                                // Add all fields we need
+                                const newRow = [
+                                    row[swimmerList.idx.pkey], // pkey
+                                    row[swimmerList.idx.age],  // age
+                                    null, // name (will fetch later)
+                                    actualClubName, // clubName (use normalized name)
+                                    lsc, // lsc
+                                    null, // gender (will fetch later)
+                                ];
+                                allSwimmers.push(newRow);
+                                existingPkeys.add(pkey);
+                            }
+                        }
+                        if (!idx) { // Set idx from the first successful call
+                            idx = {
+                                pkey: 0,
+                                age: 1,
+                                name: 2,
+                                clubName: 3,
+                                lsc: 4,
+                                gender: 5
+                            };
+                        }
+                    }
+                }
+            } else {
+                // Fallback: wait for it to be available
+                debugInfo.push(`<p>Waiting for loadClubAgeSwimmerList function...</p>`);
+                let attempts = 0;
+                while (typeof loadClubAgeSwimmerList !== 'function' && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                if (typeof loadClubAgeSwimmerList === 'function') {
+                    debugInfo.push(`<p>✓ loadClubAgeSwimmerList function now available</p>`);
+                    // Retry the above logic
+                    // (For simplicity, we'll just show an error message)
+                    debugInfo.push(`<p style="color: orange;">Please refresh and try again</p>`);
+                } else {
+                    debugInfo.push(`<p style="color: red;">❌ loadClubAgeSwimmerList not available</p>`);
+                }
+            }
+        }
+        
+        // If we didn't get swimmers from club code approach, fall back to name search
+        if (allSwimmers.length === 0) {
+            debugInfo.push(`<hr><h4>Fallback: Searching by team name</h4>`);
+            window.updateContent(debugInfo.join('') + '<p>Trying fallback approach...</p></div>');
+            
+            // Try team name variations
+            const nameVariations = [];
+            if (actualClubName) {
+                nameVariations.push(actualClubName);
+            }
+            nameVariations.push(
+                teamName.replace(/ swim team$/i, '').trim(),
+                teamName.replace(/ club swim team$/i, ' club').trim(),
+                teamName,
+            );
+            const uniqueVariations = [...new Set(nameVariations.filter(v => v))];
+            
+            debugInfo.push(`<p>Trying name variations:</p><ul>`);
+            uniqueVariations.forEach(v => debugInfo.push(`<li>"${v}"</li>`));
+            debugInfo.push(`</ul>`);
+            
+            for (const nameVariation of uniqueVariations) {
+                debugInfo.push(`<p>Trying: <strong>"${nameVariation}"</strong>...</p>`);
+                window.updateContent(debugInfo.join('') + '<p>Searching...</p></div>');
+                
+                try {
+                    const swimmers = await loadClubSearch(nameVariation, true);
+                    if (swimmers && swimmers.length > 0 && swimmers.idx) {
+                        const beforeFilter = swimmers.length;
+                        debugInfo.push(`<p style="color: green;">✓ Found ${beforeFilter} swimmers (before LSC filter)</p>`);
+                        
+                        if (lsc) {
+                            const idx = swimmers.idx;
+                            allSwimmers = swimmers.filter(row => row[idx.lsc] === lsc);
+                            debugInfo.push(`<p>Filtered by LSC "${lsc}": ${allSwimmers.length} swimmers remain</p>`);
+                            idx = swimmers.idx;
+                        } else {
+                            allSwimmers = swimmers;
+                            idx = swimmers.idx;
+                        }
+                        
+                        if (allSwimmers.length > 0) {
+                            debugInfo.push(`<p style="color: green; font-size: 18px;"><strong>✅ SUCCESS! Found ${allSwimmers.length} swimmers</strong></p>`);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    debugInfo.push(`<p style="color: red;">❌ Error: ${error.message}</p>`);
+                }
+            }
+        }
+        
+        if (allSwimmers.length === 0) {
+            console.error(`[selectTeam] ❌ All strategies failed`);
+            debugInfo.push(`<hr><h3 style="color: red;">❌ No Swimmers Found</h3>`);
+            debugInfo.push(`<p style="color: red;"><strong>No swimmers found for team: ${teamName}</strong></p>`);
+            if (clubCode && clubCode !== '-') {
+                debugInfo.push(`<p>Tried using club code "${clubCode}" → "${actualClubName || 'not found'}"</p>`);
+            }
+            debugInfo.push(`<p>Check the browser console for more details.</p>`);
+            window.updateContent(debugInfo.join('') + '</div>');
+            return;
+        }
+        
+        console.log(`[selectTeam] ✅ Successfully found ${allSwimmers.length} swimmers for "${teamName}"`);
+        debugInfo.push(`<hr><h3 style="color: green;">✅ Successfully Found ${allSwimmers.length} Swimmers!</h3>`);
+        debugInfo.push(`<p>Fetching swimmer names and gender information...</p>`);
+        window.updateContent(debugInfo.join('') + '<p>Loading swimmer details...</p></div>');
+        
+        // Set idx if not already set
+        if (!idx) {
+            idx = { pkey: 0, age: 1, name: 2, clubName: 3, lsc: 4, gender: 5 };
+        }
+        allSwimmers.idx = idx;
+        
+        // Fetch names and genders for all found swimmers (in parallel for better performance)
+        const pkeys = allSwimmers.map(row => row[idx.pkey]);
+        
+        debugInfo.push(`<p>Fetching details for ${pkeys.length} swimmers...</p>`);
+        window.updateContent(debugInfo.join('') + '<p>Fetching swimmer details...</p></div>');
+        
+        // Fetch names and genders in parallel
+        const [nameMap, genderMap] = await Promise.all([
+            fetchNamesForSwimmers(pkeys),
+            fetchGendersForSwimmers(pkeys)
+        ]);
+        
+        debugInfo.push(`<p style="color: green;">✓ Fetched names and genders</p>`);
+        window.updateContent(debugInfo.join('') + '<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Preparing results...</p></div>');
+        
+        // Update swimmers with names and genders
+        const updatedSwimmers = allSwimmers.map(row => {
+            const pkey = row[idx.pkey];
+            const newRow = [...row];
+            newRow[idx.name] = nameMap.get(pkey) || '';
+            newRow[idx.gender] = genderMap.get(pkey) || '';
+            return newRow;
+        });
+        updatedSwimmers.idx = idx;
+        
+        // Cache the results for 1 hour
+        await LocalCache.set(cacheKey, updatedSwimmers);
+        console.log(`[selectTeam] Cached results for "${teamName}" (${updatedSwimmers.length} swimmers)`);
+        
+        // Display results using showSearch
+        await showSearch(updatedSwimmers, teamName);
+        
+    } catch (error) {
+        console.error('Error loading swimmers for team:', error);
+        debugInfo.push(`<hr><h3 style="color: red;">❌ Error</h3>`);
+        debugInfo.push(`<p style="color: red;">${error.message}</p>`);
+        debugInfo.push(`<pre style="background: #fff; padding: 10px; overflow: auto;">${error.stack}</pre>`);
+        window.updateContent(debugInfo.join('') + '</div>');
+    }
+}
+
+// Helper function to fetch names for swimmers
+async function fetchNamesForSwimmers(pkeys) {
+    const nameMap = new Map();
+    const batchSize = 500; // Increased batch size for better performance
+    
+    // Process batches in parallel (up to 3 at a time to avoid overwhelming the API)
+    const maxConcurrent = 3;
+    for (let i = 0; i < pkeys.length; i += batchSize * maxConcurrent) {
+        const batches = [];
+        for (let j = 0; j < maxConcurrent && (i + j * batchSize) < pkeys.length; j++) {
+            const batch = pkeys.slice(i + j * batchSize, i + (j + 1) * batchSize);
+            if (batch.length > 0) {
+                batches.push(batch);
+            }
+        }
+        
+        // Process batches in parallel
+        await Promise.all(batches.map(async (batch) => {
+            try {
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "pkey",
+                            dim: "[Persons.PersonKey]",
+                            datatype: "numeric",
+                            filter: {
+                                members: batch,
+                            },
+                        },
+                        {
+                            title: "name",
+                            dim: "[Persons.FullName]",
+                            datatype: "text",
+                        },
+                    ],
+                    count: batch.length,
+                };
+                
+                const results = await fetchSwimValues(bodyObj);
+                if (results && results.length > 0 && results.idx) {
+                    const idx = results.idx;
+                    for (const row of results) {
+                        nameMap.set(row[idx.pkey], row[idx.name]);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching names for batch:', error);
+            }
+        }));
+    }
+    
+    return nameMap;
+}
+
+async function searchByTeam() {
+    const input = document.getElementById('team-search-input');
+    if (!input) return;
+    
+    let teamKeyword = input.value.trim();
+    if (!teamKeyword) {
+        alert('Please enter a team name');
+        return;
+    }
+    
+    // Close the menu
+    const menu = document.querySelector('.team-search-menu');
+    const toggleBtn = document.querySelector('.team-search-toggle');
+    if (menu && toggleBtn) {
+        menu.style.display = 'none';
+        toggleBtn.style.background = 'transparent';
+        toggleBtn.style.color = '#555';
+        toggleBtn.style.borderRadius = '4px';
+    }
+    
+    // Show loading message
+    window.updateContent('Searching for teams matching "' + teamKeyword + '"...');
+    
+    try {
+        const teams = await searchTeams(teamKeyword);
+        await showTeamSearch(teams, teamKeyword);
+    } catch (error) {
+        console.error('Error searching for teams:', error);
+        window.updateContent('Error searching for teams. Please try again. Error: ' + error.message);
+    }
+}
+
+// Keep the old searchTeamByClubName function for when a team is selected
+async function searchTeamByClubName(teamName) {
+    const searchTerm = teamName.toLowerCase().trim();
+    
+    // Strategy 1: Direct search with name variations
+    const nameVariations = [
+        teamName, // Original search term
+        teamName.replace(/ swim team/i, '').trim(),
+        teamName.replace(/ club/i, '').trim(),
+        teamName.replace(/ aquatic/i, '').trim(),
+    ].filter(v => v);
+    
+    // Try LSCs in order of likelihood (PN = Pacific Northwest, then try all)
+    const lscsToTry = ['PN', null, 'WA', 'CA', 'OR']; // null = try without LSC filter
+    
+    const [from, to] = [0, 100]; // Age range 0-100 for all ages
+    
+    // Try direct search first
+    for (const nameVariation of nameVariations) {
+        for (const lsc of lscsToTry) {
+            try {
+                const description = lsc ? `LSC ${lsc}` : 'all LSCs';
+                console.log(`[Strategy 1] Trying to find team "${nameVariation}" in ${description}...`);
+                
+                // Use the EXACT same structure as loadClubAgeSwimmerList (proven to work)
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "pkey",
+                            dim: "[Persons.PersonKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            title: "age",
+                            dim: "[Persons.Age]",
+                            datatype: "numeric",
+                            filter: {
+                                from: from,
+                                to: to,
+                            },
+                        },
+                        {
+                            title: "name",
+                            dim: "[Persons.FullName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "clubName",
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "lsc",
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "gender",
+                            dim: "[Persons.Gender]",
+                            datatype: "text",
+                        },
+                        {
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                            filter: {
+                                contains: nameVariation,
+                            },
+                            panel: "scope",
+                        },
+                    ],
+                    count: 5000,
+                };
+                
+                // Add LSC filter only if specified (same as loadClubAgeSwimmerList)
+                if (lsc) {
+                    bodyObj.metadata.push({
+                        dim: "[Persons.LscCode]",
+                        datatype: "text",
+                        filter: {
+                            equals: lsc,
+                        },
+                        panel: "scope",
+                    });
+                }
+                
+                const swimmerList = await fetchSwimValues(bodyObj);
+                
+                if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                    console.log(`✅ Found ${swimmerList.length} swimmers for team "${nameVariation}" in ${description}`);
+                    
+                    // Log sample club names to verify we got the right team
+                    if (swimmerList.length > 0) {
+                        const sampleClubs = new Set();
+                        const sampleLSCs = new Set();
+                        for (let i = 0; i < Math.min(10, swimmerList.length); i++) {
+                            const club = swimmerList[i][swimmerList.idx.clubName];
+                            const lscCode = swimmerList[i][swimmerList.idx.lsc];
+                            if (club) sampleClubs.add(club);
+                            if (lscCode) sampleLSCs.add(lscCode);
+                        }
+                        console.log('Sample club names found:', Array.from(sampleClubs));
+                        console.log('Sample LSC codes found:', Array.from(sampleLSCs));
+                    }
+                    
+                    return swimmerList;
+                }
+            } catch (error) {
+                console.error(`Error searching ${description} with "${nameVariation}":`, error);
+                continue;
+            }
+        }
+    }
+    
+    // Strategy 2: Search through club dictionary to find matching club names
+    console.log(`[Strategy 2] Searching club dictionary for teams matching "${searchTerm}"...`);
+    const lscsForDictionary = ['PN', 'WA', 'CA', 'OR', 'AZ', 'CO', 'UT', 'NV'];
+    const matchingClubNames = [];
+    
+    for (const lsc of lscsForDictionary) {
+        try {
+            // Wait for club dictionary to be available
+            while (!window._clubDictinary) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            const clubMap = await window._clubDictinary.loadClubMap(lsc);
+            if (clubMap && clubMap.size > 0) {
+                for (const [code, name] of clubMap) {
+                    if (name && name.toLowerCase().includes(searchTerm)) {
+                        matchingClubNames.push({ name, code, lsc });
+                        console.log(`Found matching club: "${name}" (${code}) in LSC ${lsc}`);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error(`Error loading club dictionary for LSC ${lsc}:`, error);
+        }
+    }
+    
+    // If we found matching clubs, search for swimmers using those exact club names
+    if (matchingClubNames.length > 0) {
+        console.log(`[Strategy 2] Found ${matchingClubNames.length} matching clubs, searching for swimmers...`);
+        
+        // Group by LSC to search efficiently
+        const clubsByLSC = {};
+        for (const club of matchingClubNames) {
+            if (!clubsByLSC[club.lsc]) {
+                clubsByLSC[club.lsc] = [];
+            }
+            clubsByLSC[club.lsc].push(club.name);
+        }
+        
+        // Search for each LSC
+        for (const [lsc, clubNames] of Object.entries(clubsByLSC)) {
+            try {
+                console.log(`Searching for ${clubNames.length} clubs in LSC ${lsc}...`);
+                
+                const bodyObj = {
+                    metadata: [
+                        {
+                            title: "pkey",
+                            dim: "[Persons.PersonKey]",
+                            datatype: "numeric",
+                        },
+                        {
+                            title: "age",
+                            dim: "[Persons.Age]",
+                            datatype: "numeric",
+                            filter: { from: from, to: to },
+                        },
+                        {
+                            title: "name",
+                            dim: "[Persons.FullName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "clubName",
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "lsc",
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                        },
+                        {
+                            title: "gender",
+                            dim: "[Persons.Gender]",
+                            datatype: "text",
+                        },
+                        {
+                            dim: "[Persons.ClubName]",
+                            datatype: "text",
+                            filter: {
+                                members: clubNames, // Use "members" for exact match
+                            },
+                            panel: "scope",
+                        },
+                        {
+                            dim: "[Persons.LscCode]",
+                            datatype: "text",
+                            filter: {
+                                equals: lsc,
+                            },
+                            panel: "scope",
+                        },
+                    ],
+                    count: 5000,
+                };
+                
+                const swimmerList = await fetchSwimValues(bodyObj);
+                
+                if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
+                    console.log(`✅ Found ${swimmerList.length} swimmers using club dictionary search`);
+                    
+                    // Log sample club names
+                    const sampleClubs = new Set();
+                    for (let i = 0; i < Math.min(10, swimmerList.length); i++) {
+                        const club = swimmerList[i][swimmerList.idx.clubName];
+                        if (club) sampleClubs.add(club);
+                    }
+                    console.log('Sample club names found:', Array.from(sampleClubs));
+                    
+                    return swimmerList;
+                }
+            } catch (error) {
+                console.error(`Error searching LSC ${lsc} with club dictionary:`, error);
+                continue;
+            }
+        }
+    }
+    
+    console.log('❌ All search strategies failed');
+    return null;
+}
+
 console.log("swimmer.js: Exporting functions...");
 window.swimmer = swimmer;
 window.search = search;
@@ -1586,4 +3224,8 @@ window.loadSwimerInfo = loadSwimerInfo;
 window.loadSearch = loadSearch;
 window.loadSwimmerDetails = loadSwimmerDetails;
 window.sortSearchTable = sortSearchTable;
+window.toggleTeamSearchMenu = toggleTeamSearchMenu;
+window.searchByTeam = searchByTeam;
+window.selectTeam = selectTeam;
+window.sortTeamSearchTable = sortTeamSearchTable;
 console.log("swimmer.js: Functions exported - search:", typeof window.search);

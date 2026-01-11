@@ -67,6 +67,7 @@ Last Updated: 2025
         <!-- Core modules (load first) -->
         <script src="common-utils.js"></script>
         <script src="cache.js"></script>
+        <script src="club-dictionary.js"></script>
         <script src="api.js"></script>
         <script src="ui.js"></script>
 
@@ -192,6 +193,29 @@ Last Updated: 2025
 
                         <!-- Search button for all swimmers -->
                         <button onclick="onSearchAll()" class="big search" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">Search</button>
+                        
+                        <!-- Three dots menu for team search -->
+                        <span style="position: relative; display: inline-block; margin-left: 8px; vertical-align: middle;">
+                            <span class="team-search-toggle" onclick="window.toggleTeamSearchMenu(event)" style="cursor: pointer; padding: 4px 10px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 4px; display: inline-block;">
+                                ⋮
+                            </span>
+                            <span class="team-search-menu" style="display: none; position: absolute; top: 100%; right: 0; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; min-width: 200px; margin-top: 5px;">
+                                <div style="margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Search by Team</div>
+                                <input 
+                                    id="team-search-input" 
+                                    type="text" 
+                                    placeholder="Enter team name..."
+                                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; margin-bottom: 8px;"
+                                    onkeypress="if(event.key==='Enter')window.searchByTeam()"
+                                />
+                                <button 
+                                    onclick="window.searchByTeam()" 
+                                    style="width: 100%; padding: 8px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;"
+                                >
+                                    Search Team
+                                </button>
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>
