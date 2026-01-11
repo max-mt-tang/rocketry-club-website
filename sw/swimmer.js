@@ -1162,7 +1162,9 @@ async function search(name, all) {
         return;
     }
 
+    console.log('search() called for swimmer search:', name, 'all:', all);
     let values = await loadSearch(name, all);
+    console.log('search() got', values ? values.length : 0, 'results, calling showSearch()');
     showSearch(values, name);
 }
 
@@ -1307,6 +1309,14 @@ async function fetchGendersForSwimmers(pkeys) {
 }
 
 async function showSearch(values, searchQuery = '') {
+    console.log('showSearch() called with', values ? values.length : 0, 'values, query:', searchQuery);
+    
+    // Ensure this is swimmer data, not team data
+    if (values && values.length > 0 && !values.idx && !Array.isArray(values[0])) {
+        console.error('showSearch() received invalid data structure - this might be team data!');
+        console.error('Data sample:', values[0]);
+    }
+
     if (!values || values.length == 0) {
         window.updateContent("No result found");
         return;
@@ -1344,16 +1354,7 @@ async function showSearch(values, searchQuery = '') {
         return;
     }
     
-    // Calculate age group counts by gender (excluding 19O)
-    const ageGroupCounts = {
-        '10U': { total: 0, M: 0, F: 0 },
-        '11-12': { total: 0, M: 0, F: 0 },
-        '13-14': { total: 0, M: 0, F: 0 },
-        '15-16': { total: 0, M: 0, F: 0 },
-        '17-18': { total: 0, M: 0, F: 0 }
-    };
-    
-    // Collect all pkeys to fetch genders first (only for filtered values)
+    // Collect all pkeys to fetch genders
     const pkeys = [];
     for (const row of filteredValues) {
         const pkey = row[idx.pkey];
@@ -1362,182 +1363,9 @@ async function showSearch(values, searchQuery = '') {
     
     // Fetch genders from events
     const genderMap = await fetchGendersForSwimmers(pkeys);
-    
-    // Calculate counts (only for age groups <= 18)
-    for (const row of filteredValues) {
-        const age = row[idx.age];
-        const pkey = row[idx.pkey];
-        
-        // Get gender from map or row
-        let gender = genderMap.get(pkey) || '';
-        if (!gender && idx.gender !== undefined && idx.gender !== null && row[idx.gender] !== undefined && row[idx.gender] !== null && row[idx.gender] !== '') {
-            const genderCode = row[idx.gender];
-            if (genderCode === 1 || genderCode === '1') {
-                gender = 'F';
-            } else if (genderCode === 2 || genderCode === '2') {
-                gender = 'M';
-            } else if (genderCode === 'F' || genderCode === 'f' || genderCode === 'Female') {
-                gender = 'F';
-            } else if (genderCode === 'M' || genderCode === 'm' || genderCode === 'Male') {
-                gender = 'M';
-            }
-        }
-        
-        if (age !== undefined && age !== null && age <= 18) {
-            let ageGroup = null;
-            if (age <= 10) {
-                ageGroup = '10U';
-            } else if (age >= 11 && age <= 12) {
-                ageGroup = '11-12';
-            } else if (age >= 13 && age <= 14) {
-                ageGroup = '13-14';
-            } else if (age >= 15 && age <= 16) {
-                ageGroup = '15-16';
-            } else if (age >= 17 && age <= 18) {
-                ageGroup = '17-18';
-            }
-            
-            if (ageGroup) {
-                ageGroupCounts[ageGroup].total++;
-                if (gender === 'M' || gender === 'm' || gender === 'Male') {
-                    ageGroupCounts[ageGroup].M++;
-                } else if (gender === 'F' || gender === 'f' || gender === 'Female') {
-                    ageGroupCounts[ageGroup].F++;
-                }
-            }
-        }
-    }
 
     // Always show search results table (don't auto-navigate even for 1 result)
     let html = [];
-    
-    // Add age group counts summary above the table
-    const ageGroupSummary = [];
-    for (const [group, counts] of Object.entries(ageGroupCounts)) {
-        if (counts.total > 0) {
-            const genderBreakdown = [];
-            if (counts.M > 0) genderBreakdown.push(`M: ${counts.M}`);
-            if (counts.F > 0) genderBreakdown.push(`F: ${counts.F}`);
-            const breakdown = genderBreakdown.length > 0 ? ` (${genderBreakdown.join(', ')})` : '';
-            ageGroupSummary.push(`${group}: ${counts.total}${breakdown}`);
-        }
-    }
-    
-    // Calculate total by gender
-    let totalM = 0, totalF = 0;
-    for (const counts of Object.values(ageGroupCounts)) {
-        totalM += counts.M;
-        totalF += counts.F;
-    }
-    
-    if (ageGroupSummary.length > 0) {
-        // Find max count for scaling the chart
-        const maxCount = Math.max(...Object.values(ageGroupCounts).map(c => c.total), filteredValues.length);
-        
-        html.push('<div style="margin-bottom: 15px;">');
-        html.push('<div style="font-weight: 700; color: #333; margin-bottom: 8px; font-size: 15px; padding: 0 2px;">Age Groups Breakdown</div>');
-        
-        // Add bar chart
-        html.push('<div style="margin-bottom: 15px; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); border: 1px solid rgba(0, 0, 0, 0.06);">');
-        html.push('<div style="font-weight: 600; color: #495057; margin-bottom: 15px; font-size: 14px;">Distribution by Age Group</div>');
-        html.push('<div style="display: flex; align-items: flex-end; justify-content: space-around; min-height: 250px; gap: 8px; padding: 0 0 10px 0; border-bottom: 2px solid #e9ecef;">');
-        
-        // Calculate the actual max bar height needed (use 98% of available space for tallest bar)
-        const chartMaxHeight = 250; // Shorter container
-        const barMaxHeight = chartMaxHeight * 0.98; // Use 98% of chart height for tallest bar (taller bars)
-        // Find max of male or female counts for scaling
-        const maxGenderCount = Math.max(
-            ...Object.values(ageGroupCounts).map(c => Math.max(c.M || 0, c.F || 0)),
-            totalM,
-            totalF
-        );
-        
-        for (const [group, counts] of Object.entries(ageGroupCounts)) {
-            if (counts.total > 0) {
-                html.push('<div style="flex: 1; display: flex; flex-direction: column; align-items: center; max-width: 120px;">');
-                html.push(`<div style="width: 100%; height: ${chartMaxHeight}px; display: flex; flex-direction: row; align-items: flex-end; justify-content: center; gap: 4px; position: relative; border-left: 1px solid #e9ecef; padding-left: 4px;">`);
-                
-                // Side-by-side bars: Male (blue) and Female (red)
-                // Calculate heights based on max gender count, not total
-                const maleHeight = counts.M > 0 ? (counts.M / maxGenderCount) * barMaxHeight : 0;
-                const femaleHeight = counts.F > 0 ? (counts.F / maxGenderCount) * barMaxHeight : 0;
-                
-                // Male bar (blue) - left side
-                if (counts.M > 0 && maleHeight > 0) {
-                    html.push(`<div style="flex: 1; position: relative; min-width: 20px;">`);
-                    // Label on top of bar
-                    html.push(`<div style="position: absolute; bottom: ${maleHeight + 4}px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: #007bff; white-space: nowrap; text-shadow: 0 1px 2px rgba(255,255,255,0.9); z-index: 10; pointer-events: none;">${counts.M}</div>`);
-                    html.push(`<div style="height: ${maleHeight}px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 4px 4px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="Male: ${counts.M}"></div>`);
-                    html.push('</div>');
-                } else {
-                    html.push('<div style="flex: 1; min-width: 20px;"></div>');
-                }
-                
-                // Female bar (red) - right side
-                if (counts.F > 0 && femaleHeight > 0) {
-                    html.push(`<div style="flex: 1; position: relative; min-width: 20px;">`);
-                    // Label on top of bar
-                    html.push(`<div style="position: absolute; bottom: ${femaleHeight + 4}px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; color: #dc3545; white-space: nowrap; text-shadow: 0 1px 2px rgba(255,255,255,0.9); z-index: 10; pointer-events: none;">${counts.F}</div>`);
-                    html.push(`<div style="height: ${femaleHeight}px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 4px 4px 0 0; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" title="Female: ${counts.F}"></div>`);
-                    html.push('</div>');
-                } else {
-                    html.push('<div style="flex: 1; min-width: 20px;"></div>');
-                }
-                
-                html.push('</div>');
-                html.push(`<div style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #495057; text-align: center;">${group}</div>`);
-                html.push(`<div style="margin-top: 4px; font-size: 11px; color: #6c757d; text-align: center;">${counts.total}</div>`);
-                html.push('</div>');
-            }
-        }
-        
-        html.push('</div>');
-        html.push('<div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 12px;">');
-        html.push('<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 16px; height: 16px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border-radius: 3px;"></div><span style="color: #495057;">Male</span></div>');
-        html.push('<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 16px; height: 16px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-radius: 3px;"></div><span style="color: #495057;">Female</span></div>');
-        html.push('</div>');
-        html.push('</div>');
-        
-        html.push('<table class="fill top-margin" id="age-groups-table" style="border-collapse: collapse; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">');
-        html.push('<thead><tr class="th">');
-        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: left; font-size: 13px; letter-spacing: 0.3px;">Age Group</th>');
-        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: right; font-size: 13px; letter-spacing: 0.3px;">Total</th>');
-        html.push('<th style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important; color: #ffffff !important; font-weight: 700 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; border: 1px solid rgba(0, 86, 179, 0.3) !important; padding: 12px 10px; text-align: left; font-size: 13px; letter-spacing: 0.3px;">Gender</th>');
-        html.push('</tr></thead><tbody>');
-        
-        // Display each age group in a table row with 3 columns
-        let rowIndex = 0;
-        for (const [group, counts] of Object.entries(ageGroupCounts)) {
-            if (counts.total > 0) {
-                const genderBreakdown = [];
-                if (counts.M > 0) genderBreakdown.push(`<span style="color: #007bff; font-weight: 600;">M: ${counts.M}</span>`);
-                if (counts.F > 0) genderBreakdown.push(`<span style="color: #dc3545; font-weight: 600;">F: ${counts.F}</span>`);
-                const breakdown = genderBreakdown.length > 0 ? genderBreakdown.join(', ') : '-';
-                
-                const bgColor = rowIndex % 2 === 0 ? 'rgba(255, 255, 255, 1)' : 'rgba(248, 249, 250, 0.8)';
-                html.push(`<tr style="transition: all 0.2s ease; background-color: ${bgColor};">`);
-                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: left; font-weight: 600; color: #495057;">${group}</td>`);
-                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: right; font-weight: 600; color: #333;">${counts.total}</td>`);
-                html.push(`<td style="padding: 10px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 14px; text-align: left; color: #333;">${breakdown}</td>`);
-                html.push('</tr>');
-                rowIndex++;
-            }
-        }
-        
-        // Display total row
-        const totalBreakdown = [];
-        if (totalM > 0) totalBreakdown.push(`<span style="color: #007bff; font-weight: 600;">M: ${totalM}</span>`);
-        if (totalF > 0) totalBreakdown.push(`<span style="color: #dc3545; font-weight: 600;">F: ${totalF}</span>`);
-        html.push(`<tr style="background-color: rgba(227, 242, 253, 0.3) !important; border-top: 2px solid rgba(0, 123, 255, 0.2);">`);
-        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">Total</td>`);
-        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333; text-align: right;">${filteredValues.length}</td>`);
-        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">${totalBreakdown.length > 0 ? totalBreakdown.join(', ') : '-'}</td>`);
-        html.push('</tr>');
-        
-        html.push('</tbody>');
-        html.push('</table>');
-        html.push('</div>');
-    }
 
     html.push(
         '<table class="fill top-margin" id="search-table"><thead><tr class="th">',

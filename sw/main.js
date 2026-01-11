@@ -67,19 +67,19 @@ async function onSearch() {
 }
 
 async function onSearchAll() {
-    // Get the search input value from both desktop and mobile inputs
-    const desktopInput = document.getElementById("input");
+    // Get the search input value from swimmer search input only (not team search)
+    const swimmerInput = document.getElementById("input");
     const mobileInput = document.getElementById("mobile-input");
 
     let inputValue = null;
 
-    // Check both desktop and mobile inputs
-    if (desktopInput && desktopInput.value) {
-        inputValue = desktopInput.value.trim();
+    // Prioritize swimmer search input (id="input") - this is the swimmer search, not team search
+    if (swimmerInput && swimmerInput.value) {
+        inputValue = swimmerInput.value.trim();
     } else if (mobileInput && mobileInput.value) {
         inputValue = mobileInput.value.trim();
-    } else if (desktopInput) {
-        inputValue = desktopInput.value.trim();
+    } else if (swimmerInput) {
+        inputValue = swimmerInput.value.trim();
     } else if (mobileInput) {
         inputValue = mobileInput.value.trim();
     }
@@ -98,6 +98,8 @@ async function onSearchAll() {
         swimmerToggleBtn.style.borderRadius = '4px';
     }
 
+    // Ensure we're calling swimmer search, not team search
+    console.log('onSearchAll: Searching for swimmer:', inputValue);
     go("searchAll", inputValue);
 }
 
