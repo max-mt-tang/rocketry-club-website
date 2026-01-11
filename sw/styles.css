@@ -223,8 +223,9 @@ select {
 #bcst-group-select,
 #bcst-gender-select,
 #bcst-swimmer-select {
-  background: #64b5f6 !important;
-  background-color: #64b5f6 !important;
+  background: #2196f3 !important;
+  background-color: #2196f3 !important;
+  color: #ffffff !important;
 }
 
 /* ========================================
@@ -238,7 +239,7 @@ select {
 #bcst-group-select .select-text,
 #bcst-gender-select .select-text,
 #bcst-swimmer-select .select-text {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -246,8 +247,8 @@ select {
   display: inline-block;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.3s ease;
-  color: #0C2340 !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   position: relative;
@@ -264,7 +265,7 @@ select {
 #bcst-gender-select .select-text span,
 #bcst-swimmer-select .select-text span {
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
 }
 
@@ -349,14 +350,14 @@ select {
 }
 
 .select-text:hover {
-  background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%) !important;
+  background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%) !important;
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3) !important;
   transform: translateY(-2px);
 }
 
 /* BCST Dropdown Override - Make taller and align with buttons */
 .bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -364,8 +365,8 @@ select {
   display: inline-block;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.3s ease;
-  color: #0C2340 !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   position: relative;
@@ -378,7 +379,7 @@ select {
 /* BCST Dropdown text styling */
 .bcst-nav-group .select-text span {
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
 }
 
@@ -389,15 +390,15 @@ select {
 div[id="bcst-group-select"] .select-text,
 div[id="bcst-gender-select"] .select-text,
 div[id="bcst-swimmer-select"] .select-text {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
   cursor: pointer !important;
   display: inline-block !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-  color: #0C2340 !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   vertical-align: middle !important;
@@ -413,8 +414,9 @@ div[id="bcst-group-select"] span,
 div[id="bcst-gender-select"] span,
 div[id="bcst-swimmer-select"] span {
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
+  color: #ffffff !important;
 }
 
 /* Final attempt - target all select-text elements within BCST containers */
@@ -426,15 +428,15 @@ div[id="bcst-swimmer-select"] span {
 #bcst-swimmer-container div.select-text,
 div[id^="bcst-"] .select-text,
 .bcst-nav-group div[class*="select"] {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
   cursor: pointer !important;
   display: inline-block !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-  color: #0C2340 !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
   font-size: 14px !important;
   line-height: 1.4 !important;
   vertical-align: middle !important;
@@ -451,10 +453,11 @@ div[id^="bcst-"] .select-text,
 #bcst-gender-container span,
 #bcst-swimmer-container span {
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
   display: inline-block !important;
   vertical-align: middle !important;
+  color: #ffffff !important;
 }
 
 /* Maximum specificity override for BCST dropdowns - Force darker blue background */
@@ -468,8 +471,8 @@ html body #bcst-swimmer-select,
 html body div[id="bcst-group-select"],
 html body div[id="bcst-gender-select"],
 html body div[id="bcst-swimmer-select"] {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
-  background-color: #64b5f6 !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  background-color: #2196f3 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
@@ -480,8 +483,8 @@ div[class*="select"][id*="bcst"],
 *[id*="bcst-group"] .select-text,
 *[id*="bcst-gender"] .select-text,
 *[id*="bcst-swimmer"] .select-text {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
-  background-color: #64b5f6 !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  background-color: #2196f3 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
@@ -1887,8 +1890,8 @@ tbody tr:hover .full>.clickable {
 #bcst-gender-select,
 #bcst-swimmer-select,
 .bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
-  background-color: #64b5f6 !important;
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  background-color: #2196f3 !important;
 }
 
 /* ========================================
