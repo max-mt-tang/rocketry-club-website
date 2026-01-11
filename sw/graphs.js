@@ -1450,10 +1450,10 @@ async function prepareGraphData(config) {
 
     // Keep the graph width constant regardless of time range
     // This creates a zoom effect where the same width shows different time periods
-    config.width = 398 * config.xZoomFactor;
+    config.width = 850 * config.xZoomFactor;
     config.height = 400 * config.yZoomFactor;
     config.marginL = 50;
-    config.marginR = 100;
+    config.marginR = 150;
     config.marginT = 50;
     config.marginB = 30;
 }
