@@ -181,7 +181,7 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
     }).join('');
 
     html.push(
-        '<select id="cuts-age-select" onchange="updateCutsForAge(this.value)" style="margin-right: 15px; margin-top: -8px; display: inline-block; padding: 6px 10px; border: none; border-radius: 6px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #0C2340; font-weight: 600; font-size: 14px; line-height: 1.2; height: 28px; box-sizing: border-box; min-width: 70px; vertical-align: middle;">',
+        '<select id="cuts-age-select" onchange="updateCutsForAge(this.value)" style="margin-right: 15px; margin-top: -8px; display: inline-block; padding: 6px 10px; border: none; border-radius: 6px; background: #009688; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #ffffff; font-weight: 400; font-size: 14px; line-height: 1.2; height: 28px; box-sizing: border-box; min-width: 70px; vertical-align: middle;">',
         selectOptions,
         '</select>',
     );

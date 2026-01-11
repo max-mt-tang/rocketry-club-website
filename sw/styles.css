@@ -219,12 +219,22 @@ select {
   padding: 5px;
 }
 
-/* BCST native select elements - darker blue background */
-#bcst-group-select,
-#bcst-gender-select,
+/* BCST native select elements - different colors for each */
+#bcst-group-select {
+  background: #ff9800 !important;
+  background-color: #ff9800 !important;
+  color: #ffffff !important;
+}
+
+#bcst-gender-select {
+  background: #4caf50 !important;
+  background-color: #4caf50 !important;
+  color: #ffffff !important;
+}
+
 #bcst-swimmer-select {
-  background: #2196f3 !important;
-  background-color: #2196f3 !important;
+  background: #9c27b0 !important;
+  background-color: #9c27b0 !important;
   color: #ffffff !important;
 }
 
@@ -232,14 +242,53 @@ select {
  * 4. FORMS & INPUT CONTROLS
  * ======================================== */
 
-/* BCST Roster Dropdown Styling - Match Ray Tang button appearance */
+/* BCST Roster Dropdown Styling - Different colors for each dropdown */
+/* Group dropdown - Orange */
 #bcst-group-container .select-text,
+#bcst-group-select .select-text {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  position: relative;
+  vertical-align: middle;
+  height: 40px !important;
+  box-sizing: border-box;
+}
+
+/* Gender dropdown - Green */
 #bcst-gender-container .select-text,
+#bcst-gender-select .select-text {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  position: relative;
+  vertical-align: middle;
+  height: 40px !important;
+  box-sizing: border-box;
+}
+
+/* Swimmer dropdown - Purple */
 #bcst-swimmer-container .select-text,
-#bcst-group-select .select-text,
-#bcst-gender-select .select-text,
 #bcst-swimmer-select .select-text {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -282,22 +331,42 @@ select {
   min-width: 180px;
 }
 
-/* Hover effects for BCST dropdowns with blue background */
-#bcst-group-select:hover,
-#bcst-gender-select:hover,
-#bcst-swimmer-select:hover {
-  background-color: #bbdefb !important;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4) !important;
-  border-color: #0056b3 !important;
+/* Hover effects for BCST dropdowns - different colors for each */
+#bcst-group-select:hover {
+  background-color: #f57c00 !important;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4) !important;
+  border-color: #e65100 !important;
 }
 
-/* Selected state for BCST dropdowns - show blue background when value is selected */
-#bcst-group-select[data-selected="true"],
-#bcst-gender-select[data-selected="true"],
+#bcst-gender-select:hover {
+  background-color: #388e3c !important;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4) !important;
+  border-color: #2e7d32 !important;
+}
+
+#bcst-swimmer-select:hover {
+  background-color: #7b1fa2 !important;
+  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.4) !important;
+  border-color: #6a1b9a !important;
+}
+
+/* Selected state for BCST dropdowns - different colors for each */
+#bcst-group-select[data-selected="true"] {
+  background-color: #f57c00 !important;
+  border-color: #e65100 !important;
+  box-shadow: 0 1px 4px rgba(255, 152, 0, 0.3) !important;
+}
+
+#bcst-gender-select[data-selected="true"] {
+  background-color: #388e3c !important;
+  border-color: #2e7d32 !important;
+  box-shadow: 0 1px 4px rgba(76, 175, 80, 0.3) !important;
+}
+
 #bcst-swimmer-select[data-selected="true"] {
-  background-color: #90caf9 !important;
-  border-color: #0056b3 !important;
-  box-shadow: 0 1px 4px rgba(0, 123, 255, 0.3) !important;
+  background-color: #7b1fa2 !important;
+  border-color: #6a1b9a !important;
+  box-shadow: 0 1px 4px rgba(156, 39, 176, 0.3) !important;
 }
 
 /* Arrow styling matching cuts age */
@@ -356,8 +425,8 @@ select {
 }
 
 /* BCST Dropdown Override - Make taller and align with buttons */
+/* Background colors are set individually for each dropdown below */
 .bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -384,13 +453,50 @@ select {
 }
 
 /* Ultra-specific BCST dropdown overrides by ID */
+/* Group dropdown */
 #bcst-group-select.select-text,
+div[id="bcst-group-select"] .select-text {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  min-width: 120px !important;
+}
+
+/* Gender dropdown */
 #bcst-gender-select.select-text,
+div[id="bcst-gender-select"] .select-text {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 10px 12px !important;
+  cursor: pointer !important;
+  display: inline-block !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+  height: 40px !important;
+  box-sizing: border-box !important;
+  min-width: 120px !important;
+}
+
+/* Swimmer dropdown */
 #bcst-swimmer-select.select-text,
-div[id="bcst-group-select"] .select-text,
-div[id="bcst-gender-select"] .select-text,
 div[id="bcst-swimmer-select"] .select-text {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -461,30 +567,54 @@ div[id^="bcst-"] .select-text,
 }
 
 /* Maximum specificity override for BCST dropdowns - Force darker blue background */
+/* Group dropdown */
 body #bcst-group-container .select-text,
-body #bcst-gender-container .select-text,
-body #bcst-swimmer-container .select-text,
-body .bcst-nav-group .select-text,
 html body #bcst-group-select,
+html body div[id="bcst-group-select"] {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  background-color: #ff9800 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Gender dropdown */
+body #bcst-gender-container .select-text,
 html body #bcst-gender-select,
+html body div[id="bcst-gender-select"] {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%) !important;
+  background-color: #4caf50 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Swimmer dropdown */
+body #bcst-swimmer-container .select-text,
 html body #bcst-swimmer-select,
-html body div[id="bcst-group-select"],
-html body div[id="bcst-gender-select"],
 html body div[id="bcst-swimmer-select"] {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
-  background-color: #2196f3 !important;
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+  background-color: #9c27b0 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Force background on all possible BCST dropdown states */
-.select-text[id*="bcst"],
-div[class*="select"][id*="bcst"],
-*[id*="bcst-group"] .select-text,
-*[id*="bcst-gender"] .select-text,
+*[id*="bcst-group"] .select-text {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  background-color: #ff9800 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+*[id*="bcst-gender"] .select-text {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%) !important;
+  background-color: #4caf50 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
 *[id*="bcst-swimmer"] .select-text {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
-  background-color: #2196f3 !important;
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+  background-color: #9c27b0 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
@@ -512,31 +642,32 @@ div[class*="select"][id*="bcst"],
   overflow-y: auto;
 }
 
-/* Style cuts-age-select to match BCST dropdowns */
+/* Style cuts-age-select - Teal color for Personal Best tab */
 #cuts-age-select .select-text,
 div[id="cuts-age-select"] .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background: linear-gradient(135deg, #009688 0%, #00796b 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
   cursor: pointer !important;
   display: inline-block !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-  color: #0C2340 !important;
-  font-weight: 600 !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
   min-width: 100px;
 }
 
 #cuts-age-select .select-text span,
 div[id="cuts-age-select"] .select-text span {
   font-size: 14px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   line-height: 1.4 !important;
+  color: #ffffff !important;
 }
 
 #cuts-age-select:hover .select-text {
-  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%) !important;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4) !important;
+  background: linear-gradient(135deg, #00796b 0%, #00695c 100%) !important;
+  box-shadow: 0 2px 8px rgba(0, 150, 136, 0.4) !important;
 }
 
 /* Ensure cuts age dropdown appears above everything - especially for Chrome mobile */
@@ -791,7 +922,7 @@ th[onclick]:hover {
 .nav-group-label {
   font-size: 14px;
   font-weight: 600;
-  color: #495057;
+  color: #6c757d;
   text-shadow: none;
   text-transform: none;
   letter-spacing: 0.5px;
@@ -1886,12 +2017,22 @@ tbody tr:hover .full>.clickable {
 }
 
 /* Force on any element that might be a BCST dropdown */
-#bcst-group-select,
-#bcst-gender-select,
-#bcst-swimmer-select,
-.bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%) !important;
-  background-color: #2196f3 !important;
+/* Group dropdown */
+#bcst-group-select {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%) !important;
+  background-color: #ff9800 !important;
+}
+
+/* Gender dropdown */
+#bcst-gender-select {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%) !important;
+  background-color: #4caf50 !important;
+}
+
+/* Swimmer dropdown */
+#bcst-swimmer-select {
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%) !important;
+  background-color: #9c27b0 !important;
 }
 
 /* ========================================
