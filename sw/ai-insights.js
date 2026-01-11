@@ -3962,7 +3962,7 @@ function createSpecialtyChart(data) {
     const maxScore = Math.max(...Object.values(scores), 10);
     const dominantStroke = Object.keys(scores).find(key => scores[key] === maxScore) || 'free';
     
-    let chartHtml = '<div style="text-align: center; margin: 0 auto;">';
+    let chartHtml = '<div style="text-align: left; margin: 0;">';
     chartHtml += '<div style="display: inline-block; position: relative;">';
     chartHtml += `<svg width="${size}" height="${size}" style="background: white; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.12);">`;
     
@@ -7801,7 +7801,7 @@ async function refreshAIPromptTextarea() {
         
         // Switch back to AI Insights tab
         if (window.TabView && window.TabView.tab) {
-            TabView.tab('swimmerTabView', 4); // AI Insights is tab 4
+            TabView.tab('swimmerTabView', 1); // AI Insights is now tab 2 (index 1)
         }
     } catch (e) {
         console.error('Error refreshing AI prompt:', e);

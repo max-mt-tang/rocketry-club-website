@@ -656,7 +656,7 @@ th[onclick]:hover {
 #input {
   border-radius: 6px;
   padding: 9px 12px;
-  width: 120px;
+  width: 80px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: #ffffff;
   color: #0C2340;
@@ -1766,7 +1766,9 @@ tbody tr:hover .full>.clickable {
 
 .ai-insights-container {
   padding: 20px;
-  max-width: 100%;
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
 }
 
 .ai-insights-section {
@@ -1861,6 +1863,9 @@ tbody tr:hover .full>.clickable {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   transition: all 0.3s ease;
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
 }
 
 .ai-analysis-main-card:hover {

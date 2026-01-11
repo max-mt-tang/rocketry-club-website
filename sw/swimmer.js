@@ -375,6 +375,32 @@ async function loadSwimerInfo(pkey) {
 // ================================================================================
 
 /**
+ * Minimal fallback progress graph when graphs.js is not available
+ * @param {number} pkey - Swimmer's unique identifier
+ * @param {Array} events - Swimmer's event data
+ * @returns {string} HTML string for minimal progress graph interface
+ */
+function createMinimalProgressGraph(pkey, events) {
+    return `
+        <div class="content">
+            <div style="padding: 40px; text-align: center;">
+                <h2>Progress Graph</h2>
+                <p style="color: #666; margin: 20px 0;">
+                    The progress graph feature requires graphs.js to be loaded.
+                </p>
+                <p style="color: #999; font-size: 14px;">
+                    Please refresh the page or check the browser console for errors.
+                </p>
+                <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                    Swimmer ID: ${pkey}<br>
+                    Events: ${events?.length || 0}
+                </p>
+            </div>
+        </div>
+    `;
+}
+
+/**
  * Displays swimmer details in the UI including personal info, best times, and tables
  * @param {Object} data - Complete swimmer data object
  */
@@ -487,17 +513,38 @@ async function displaySwimmerDetails(data) {
         waitCount++;
     }
 
-    // Wait for graphs.js to load if needed
+    // Create progress graph - wait for graphs.js to load if needed
     let progressGraph;
+    
+    // Check if graphs.js loaded by checking for the function
     if (typeof window.createProgressGraph === 'function') {
-        progressGraph = window.createProgressGraph(data.swimmer.pkey, data.events);
-    } else {
-        // If graphs.js hasn't loaded yet, wait a bit and try again
-        await new Promise(resolve => setTimeout(resolve, 100));
-        if (typeof window.createProgressGraph === 'function') {
+        try {
             progressGraph = window.createProgressGraph(data.swimmer.pkey, data.events);
+        } catch (error) {
+            console.error("Error calling createProgressGraph:", error);
+            progressGraph = '<div class="content"><p>Error loading progress graph: ' + error.message + '</p></div>';
+        }
+    } else {
+        // graphs.js not loaded - wait a bit and retry
+        let attempts = 0;
+        const maxAttempts = 20; // Increased to 1 second total wait
+        
+        while (attempts < maxAttempts && typeof window.createProgressGraph !== 'function') {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+        
+        if (typeof window.createProgressGraph === 'function') {
+            try {
+                progressGraph = window.createProgressGraph(data.swimmer.pkey, data.events);
+            } catch (error) {
+                console.error("Error calling createProgressGraph after wait:", error);
+                progressGraph = '<div class="content"><p>Error loading progress graph: ' + error.message + '</p></div>';
+            }
         } else {
-            progressGraph = '<div class="content"><p>Progress graph not available</p></div>';
+            // Still not available - create a minimal fallback
+            console.warn("graphs.js not loaded, creating minimal progress graph fallback");
+            progressGraph = createMinimalProgressGraph(data.swimmer.pkey, data.events);
         }
     }
 

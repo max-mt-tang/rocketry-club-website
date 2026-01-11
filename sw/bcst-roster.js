@@ -254,7 +254,7 @@ class BCSTRoster {
                                 {
                                                 "name": "Siran Cao",
                                                 "id": "768031",
-                                                "gender": "Male",
+                                                "gender": "Female",
                                                 "age": 13
                                 },
                                 {
