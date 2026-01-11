@@ -480,28 +480,31 @@ async function displaySwimmerDetails(data) {
     let meetTable = await createMeetTable(data);
     console.log("Meet table created, length:", meetTable.length);
 
-    let progressGraph = createProgressGraph(data.swimmer.pkey, data.events);
-    console.log("Progress graph created, length:", progressGraph.length);
-    console.log("Progress graph content preview:", progressGraph.substring(0, 100));
-
-    tabView.addTab("<p>Personal Best</p>", personalBestTable);
-    tabView.addTab(
-        createClickableDiv(
-            "Progress Graph",
-            `showGraph(null,{pkey:${data.swimmer.pkey}})`,
-        ),
-        progressGraph,
-    );
-    tabView.addTab("<p>Age Best</p>", ageBestTable);
-    tabView.addTab("<p>Meets</p>", meetTable);
-    
-    // Add Compare tab
-    if (window.createCompareTab) {
-        const compareTabContent = window.createCompareTab(data);
-        tabView.addTab("<p>Compare</p>", compareTabContent);
+    // Wait for createProgressGraph to be available
+    let waitCount = 0;
+    while (!window.createProgressGraph && waitCount < 50) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+        waitCount++;
     }
-    
-    // Add AI Insights tab
+
+    // Wait for graphs.js to load if needed
+    let progressGraph;
+    if (typeof window.createProgressGraph === 'function') {
+        progressGraph = window.createProgressGraph(data.swimmer.pkey, data.events);
+    } else {
+        // If graphs.js hasn't loaded yet, wait a bit and try again
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (typeof window.createProgressGraph === 'function') {
+            progressGraph = window.createProgressGraph(data.swimmer.pkey, data.events);
+        } else {
+            progressGraph = '<div class="content"><p>Progress graph not available</p></div>';
+        }
+    }
+
+    // Tab 1: Personal Best (stays first)
+    tabView.addTab("<p>Personal Best</p>", personalBestTable);
+
+    // Tab 2: AI Insights (moved from 6th)
     if (window.generateInsights && window.renderInsights) {
         // Show loading indicator immediately
         const loadingHtml = `<div class="ai-insights-loading" style="padding: 40px; text-align: center;">
@@ -700,7 +703,39 @@ async function displaySwimmerDetails(data) {
             }, 1000); // Wait 1 second for rankings to stabilize
         };
     }
-    
+
+    // Tab 3: Compare (moved from 5th)
+    if (window.createCompareTab) {
+        const compareTabContent = window.createCompareTab(data);
+        tabView.addTab("<p>Compare</p>", compareTabContent);
+    }
+
+    // Tab 4: Progress Graph (moved from 2nd)
+    // Wait for createClickableDiv if needed
+    if (!window.createClickableDiv) {
+        let waitCount2 = 0;
+        while (!window.createClickableDiv && waitCount2 < 50) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+            waitCount2++;
+        }
+    }
+
+    tabView.addTab(
+        window.createClickableDiv ?
+            window.createClickableDiv(
+                "Progress Graph",
+                `showGraph(null,{pkey:${data.swimmer.pkey}})`,
+            ) :
+            "<p>Progress Graph</p>",
+        progressGraph,
+    );
+
+    // Tab 5: Age Best
+    tabView.addTab("<p>Age Best</p>", ageBestTable);
+
+    // Tab 6: Meets
+    tabView.addTab("<p>Meets</p>", meetTable);
+
     html.push(tabView.render());
 
     html.push(addHide25Botton());
@@ -1006,19 +1041,25 @@ async function loadSearch(name, all) {
             values = await loadClubSearch(name, all);
         }
 
-        if (!values || values.length <= 1) {
+        if (!values || values.length == 0) {
             return values;
         }
 
+        // Always filter swimmers to only include those with swim times
+        // This ensures consistent results across devices
         values = await filterSwimmers(values);
-        if (values) {
+        if (values && values.length > 0) {
             values.sort((a, b) => a[values.idx.age] - b[values.idx.age]);
         }
-        return values;
+        return values || [];
     }, searchCacheTimeout);
 }
 
 async function filterSwimmers(values) {
+    if (!values || values.length === 0) {
+        return values;
+    }
+    
     let pkeys = new Set(values.map((v) => v[values.idx.pkey]));
 
     let bodyObj = {
@@ -1035,22 +1076,29 @@ async function filterSwimmers(values) {
         count: pkeys.size,
     };
 
-    let list = await fetchSwimValues(bodyObj, "event");
-    if (!list) {
-        return;
-    }
-
-    pkeys = new Set(list.map((v) => v[list.idx.pkey]));
-    let result = [];
-    let idx = values.idx;
-    result.idx = idx;
-    for (let row of values) {
-        if (pkeys.has(row[idx.pkey])) {
-            result.push(row);
+    try {
+        let list = await fetchSwimValues(bodyObj, "event");
+        if (!list || !list.length) {
+            // If filtering fails, return original values to avoid losing results
+            return values;
         }
-    }
 
-    return result;
+        pkeys = new Set(list.map((v) => v[list.idx.pkey]));
+        let result = [];
+        let idx = values.idx;
+        result.idx = idx;
+        for (let row of values) {
+            if (pkeys.has(row[idx.pkey])) {
+                result.push(row);
+            }
+        }
+
+        return result;
+    } catch (error) {
+        console.error("Error filtering swimmers:", error);
+        // If filtering fails, return original values to avoid losing results
+        return values;
+    }
 }
 
 function showSearch(values) {
@@ -1265,4 +1313,6 @@ window.searchAll = searchAll;
 window.toggle25 = toggle25;
 window.loadEvents = loadEvents;
 window.loadSwimerInfo = loadSwimerInfo;
+window.loadSearch = loadSearch;
+window.loadSwimmerDetails = loadSwimmerDetails;
 console.log("swimmer.js: Functions exported - search:", typeof window.search);
