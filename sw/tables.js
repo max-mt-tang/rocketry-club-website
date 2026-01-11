@@ -198,9 +198,20 @@ async function createBestTimeTable(data, fastRowList, rowInfo) {
     // Three dots menu for all other toggles
     html.push(
         '<span style="position: relative; display: inline-block; margin-top: -8px; vertical-align: middle;">',
-        '<span class="more-columns-toggle" onclick="window.toggleMoreColumns(event)" style="cursor: pointer; margin-left: 12px; padding: 4px 10px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 4px;">',
+        '<span class="more-columns-toggle" onclick="window.toggleMoreColumns(event)" title="More Options" style="cursor: pointer; margin-left: 12px; padding: 0; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; position: relative;">',
         '⋯',
         '</span>',
+        '<style>',
+        '.more-columns-toggle:hover::before {',
+        '    content: \'\';',
+        '    position: absolute;',
+        '    width: 32px;',
+        '    height: 32px;',
+        '    border-radius: 50%;',
+        '    background: rgba(0, 0, 0, 0.08);',
+        '    z-index: -1;',
+        '}',
+        '</style>',
         '<span class="more-columns-section" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; min-width: 150px; margin-top: 5px;">',
         '<style>.more-columns-section .checkbox-wrapper { display: block; margin: 8px 0; white-space: nowrap; }</style>',
     );
@@ -1206,10 +1217,19 @@ function toggleMoreColumns(event) {
             toggleBtn.style.background = '#28a745';
             toggleBtn.style.color = 'white';
             toggleBtn.style.borderRadius = '50%';
+            toggleBtn.style.width = '32px';
+            toggleBtn.style.height = '32px';
+            toggleBtn.style.padding = '0';
+            toggleBtn.style.display = 'inline-flex';
+            toggleBtn.style.alignItems = 'center';
+            toggleBtn.style.justifyContent = 'center';
         } else {
             toggleBtn.style.background = 'transparent';
             toggleBtn.style.color = '#555';
-            toggleBtn.style.borderRadius = '4px';
+            toggleBtn.style.borderRadius = '50%';
+            toggleBtn.style.width = '32px';
+            toggleBtn.style.height = '32px';
+            toggleBtn.style.padding = '0';
         }
     }
 }
@@ -1222,7 +1242,10 @@ function closeMoreColumnsPopup() {
         section.style.display = 'none';
         toggleBtn.style.background = 'transparent';
         toggleBtn.style.color = '#555';
-        toggleBtn.style.borderRadius = '4px';
+        toggleBtn.style.borderRadius = '50%';
+        toggleBtn.style.width = '32px';
+        toggleBtn.style.height = '32px';
+        toggleBtn.style.padding = '0';
     }
 }
 

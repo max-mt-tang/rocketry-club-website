@@ -120,34 +120,18 @@ Last Updated: 2025
                         </button>
                     </div>
                 </div>
-
+                
+                <!-- Vertical separator -->
+                <span style="display: inline-block; color: #ddd; font-size: 20px; margin: 0 8px; vertical-align: middle; user-select: none;">|</span>
+                
                 <!-- ========================================
                      BCST TEAM NAVIGATION
                      ======================================== -->
                 <div class="nav-group bcst-nav-group">
                     <div class="nav-group-label">Search BCST</div>
                     <div class="nav-group-buttons">
-                        <!-- Schedule button -->
-                        <button
-                            onclick="showBCSchedule()"
-                            class="big"
-                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
-                        >
-                            📅 Schedule
-                        </button>
-                        
-                        <!-- Member Directory link (GoMotion) -->
-                        <button
-                            onclick="window.open('https://www.gomotionapp.com/team/onsbcst/controller/cms/admin/index?s=tl#/member-search', '_blank')"
-                            class="big"
-                            style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;"
-                            title="Open GoMotion Member Directory (requires login)"
-                        >
-                            📋 Directory
-                        </button>
-                        
                         <!-- BCST Group selection dropdown -->
-                        <select id="bcst-group-select" onchange="onGroupChange(this.value)" style="display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #ffffff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #0C2340; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px;">
+                        <select id="bcst-group-select" onchange="onGroupChange(this.value)" style="display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #64b5f6; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #0C2340; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px;">
                             <option value="">Group</option>
                             <option value="Champs" selected>Champs</option>
                             <option value="Senior 1">Senior 1</option>
@@ -164,56 +148,145 @@ Last Updated: 2025
                         </select>
 
                         <!-- BCST Gender selection dropdown -->
-                        <select id="bcst-gender-select" onchange="onGenderChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 100px; cursor: not-allowed;">
+                        <select id="bcst-gender-select" onchange="onGenderChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #64b5f6; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 100px; cursor: not-allowed;">
                             <option value="">Gender</option>
                             <option value="Male" selected>Male</option>
                             <option value="Female">Female</option>
                         </select>
 
                         <!-- BCST Swimmer selection dropdown -->
-                        <select id="bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #f5f5f5; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px; cursor: not-allowed;">
+                        <select id="bcst-swimmer-select" onchange="onSwimmerChange(this.value)" disabled style="margin-left: 5px; display: inline-block; padding: 10px 12px; border: none; border-radius: 6px; background: #64b5f6; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); color: #999; font-weight: 600; font-size: 16px; line-height: 1.4; height: 40px; box-sizing: border-box; min-width: 120px; cursor: not-allowed;">
                             <option value="">Swimmer</option>
                         </select>
+                        
+                        <!-- Schedule button -->
+                        <button
+                            onclick="showBCSchedule()"
+                            class="schedule-button"
+                            style="background: transparent !important; color: #555; padding: 0; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; border: none; cursor: pointer; transition: all 0.2s ease; position: relative; margin-left: 8px;"
+                            title="Schedule"
+                        >
+                            📅
+                        </button>
+                        <style>
+                            .schedule-button:hover {
+                                background: transparent !important;
+                            }
+                            .schedule-button:hover::before {
+                                content: '';
+                                position: absolute;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background: rgba(0, 0, 0, 0.08);
+                                z-index: -1;
+                            }
+                        </style>
+                        
+                        <!-- Member Directory link (GoMotion) -->
+                        <button
+                            onclick="window.open('https://www.gomotionapp.com/team/onsbcst/controller/cms/admin/index?s=tl#/member-search', '_blank')"
+                            class="directory-button"
+                            style="background: transparent !important; color: #555; padding: 0; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; border: none; cursor: pointer; transition: all 0.2s ease; position: relative; margin-left: 8px;"
+                            title="Open GoMotion Member Directory (requires login)"
+                        >
+                            📋
+                        </button>
+                        <style>
+                            .directory-button:hover {
+                                background: transparent !important;
+                            }
+                            .directory-button:hover::before {
+                                content: '';
+                                position: absolute;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background: rgba(0, 0, 0, 0.08);
+                                z-index: -1;
+                            }
+                        </style>
                     </div>
                 </div>
+                
+                <!-- Vertical separator -->
+                <span style="display: inline-block; color: #ddd; font-size: 20px; margin: 0 8px 0 16px; vertical-align: middle; user-select: none;">|</span>
 
                 <!-- ========================================
                      SEARCH INTERFACE
                      ======================================== -->
-                <div class="nav-group search-nav-group">
-                    <div class="nav-group-label">Search</div>
+                <div class="nav-group search-nav-group" style="margin-left: 8px;">
+                    <div class="nav-group-label">Search USA</div>
                     <div class="nav-group-buttons">
-                        <!-- Text input for searching swimmers by name -->
-                        <input
-                            id="input"
-                            placeholder="Swimmer"
-                            class="big"
-                            onkeypress="if(event.key==='Enter')onSearchAll()"
-                        />
-
-                        <!-- Search button for all swimmers -->
-                        <button onclick="onSearchAll()" class="big search" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">Search</button>
+                        <!-- Magnifying glass menu for swimmer search -->
+                        <span style="position: relative; display: inline-block; margin-right: 8px; vertical-align: middle;">
+                            <span class="swimmer-search-toggle" onclick="window.toggleSwimmerSearchMenu(event)" title="Search Swimmer" style="cursor: pointer; padding: 0; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; position: relative;">
+                                🔍
+                            </span>
+                            <style>
+                                .swimmer-search-toggle:hover::before {
+                                    content: '';
+                                    position: absolute;
+                                    width: 32px;
+                                    height: 32px;
+                                    border-radius: 50%;
+                                    background: rgba(0, 0, 0, 0.08);
+                                    z-index: -1;
+                                }
+                            </style>
+                            <span class="swimmer-search-menu" style="display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; min-width: 200px; margin-top: 5px;">
+                                <div style="margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Search by Swimmer</div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <input 
+                                        id="input" 
+                                        type="text" 
+                                        placeholder="Swimmer"
+                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;"
+                                        onkeypress="if(event.key==='Enter')onSearchAll()"
+                                    />
+                                    <button 
+                                        onclick="onSearchAll()" 
+                                        style="width: 100%; padding: 8px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;"
+                                    >
+                                        Search
+                                    </button>
+                                </div>
+                            </span>
+                        </span>
                         
                         <!-- Three dots menu for team search -->
                         <span style="position: relative; display: inline-block; margin-left: 8px; vertical-align: middle;">
-                            <span class="team-search-toggle" onclick="window.toggleTeamSearchMenu(event)" style="cursor: pointer; padding: 4px 10px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 4px; display: inline-block;">
+                            <span class="team-search-toggle" onclick="window.toggleTeamSearchMenu(event)" title="Search Team" style="cursor: pointer; padding: 0; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s ease; position: relative;">
                                 ⋮
                             </span>
+                            <style>
+                                .team-search-toggle:hover::before {
+                                    content: '';
+                                    position: absolute;
+                                    width: 32px;
+                                    height: 32px;
+                                    border-radius: 50%;
+                                    background: rgba(0, 0, 0, 0.08);
+                                    z-index: -1;
+                                }
+                            </style>
                             <span class="team-search-menu" style="display: none; position: absolute; top: 100%; right: 0; z-index: 1000; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px; min-width: 200px; margin-top: 5px;">
                                 <div style="margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px;">Search by Team</div>
-                                <input 
-                                    id="team-search-input" 
-                                    type="text" 
-                                    placeholder="Enter team name..."
-                                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; margin-bottom: 8px;"
-                                    onkeypress="if(event.key==='Enter')window.searchByTeam()"
-                                />
-                                <button 
-                                    onclick="window.searchByTeam()" 
-                                    style="width: 100%; padding: 8px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;"
-                                >
-                                    Search Team
-                                </button>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <input 
+                                        id="team-search-input" 
+                                        type="text" 
+                                        placeholder="Team"
+                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;"
+                                        onkeypress="if(event.key==='Enter')window.searchByTeam()"
+                                    />
+                                    <button 
+                                        onclick="window.searchByTeam()" 
+                                        style="width: 100%; padding: 8px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer;"
+                                    >
+                                        Search
+                                    </button>
+                                </div>
                             </span>
                         </span>
                     </div>

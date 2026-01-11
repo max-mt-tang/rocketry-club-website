@@ -8,6 +8,98 @@
  */
 
 // ================================================================================
+// LOADING MESSAGE MANAGER WITH HOURGLASS INDICATOR
+// ================================================================================
+
+let loadingMessageTimers = new Map(); // Track timers for loading messages
+let currentLoadingMessageId = null; // Track current loading message
+
+/**
+ * Update content with automatic hourglass indicator for loading messages > 3 seconds
+ * @param {string} html - HTML content to display
+ * @param {boolean} isLoadingMessage - Whether this is a loading message that should get hourglass
+ */
+function updateContentWithLoadingIndicator(html, isLoadingMessage = false) {
+    // Clear previous loading message timer if moving to a new message
+    if (currentLoadingMessageId && isLoadingMessage) {
+        const prevTimer = loadingMessageTimers.get(currentLoadingMessageId);
+        if (prevTimer) {
+            clearTimeout(prevTimer);
+            loadingMessageTimers.delete(currentLoadingMessageId);
+        }
+        // Remove hourglass from previous message if it exists
+        removeHourglassFromPreviousMessage();
+    }
+    
+    if (isLoadingMessage) {
+        // Generate unique ID for this loading message
+        currentLoadingMessageId = 'loading_' + Date.now() + '_' + Math.random();
+        
+        // Set timer to add hourglass after 3 seconds
+        const timer = setTimeout(() => {
+            addHourglassToCurrentMessage();
+        }, 3000);
+        
+        loadingMessageTimers.set(currentLoadingMessageId, timer);
+    } else {
+        // Not a loading message - clear current tracking
+        if (currentLoadingMessageId) {
+            const prevTimer = loadingMessageTimers.get(currentLoadingMessageId);
+            if (prevTimer) {
+                clearTimeout(prevTimer);
+                loadingMessageTimers.delete(currentLoadingMessageId);
+            }
+            removeHourglassFromPreviousMessage();
+        }
+        currentLoadingMessageId = null;
+    }
+    
+    // Update content
+    window.updateContent(html);
+}
+
+/**
+ * Add hourglass to the current loading message
+ */
+function addHourglassToCurrentMessage() {
+    const contentEl = document.getElementById('content');
+    if (!contentEl) return;
+    
+    // Find the last <p> tag that doesn't already have an hourglass
+    const paragraphs = contentEl.querySelectorAll('p');
+    for (let i = paragraphs.length - 1; i >= 0; i--) {
+        const p = paragraphs[i];
+        if (!p.querySelector('.loading-hourglass')) {
+            // Check if this looks like a loading message
+            const text = p.textContent.toLowerCase();
+            if (text.includes('loading') || text.includes('preparing') || text.includes('fetching') || text.includes('searching')) {
+                // Add hourglass at the beginning
+                const hourglass = document.createElement('span');
+                hourglass.className = 'loading-hourglass';
+                hourglass.innerHTML = '<span style="animation: spin 1s linear infinite; font-size: 18px; margin-right: 4px;">⏳</span>';
+                hourglass.style.display = 'inline-flex';
+                hourglass.style.alignItems = 'center';
+                p.insertBefore(hourglass, p.firstChild);
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * Remove hourglass from previous loading message
+ */
+function removeHourglassFromPreviousMessage() {
+    const contentEl = document.getElementById('content');
+    if (!contentEl) return;
+    
+    const hourglasses = contentEl.querySelectorAll('.loading-hourglass');
+    hourglasses.forEach(hg => {
+        hg.remove();
+    });
+}
+
+// ================================================================================
 // SWIMMER DATA LOADING AND DISPLAY
 // ================================================================================
 
@@ -122,11 +214,11 @@ async function loadSwimmerDetails(pkey) {
  */
 async function processSwimmerData(data) {
     try {
-        if (!data.events || !data.events.idx) {
-            return data;
-        }
-        let idx = data.events.idx;
-        let meets = new Set(data.events.map((e) => e[idx.meet]));
+    if (!data.events || !data.events.idx) {
+        return data;
+    }
+    let idx = data.events.idx;
+    let meets = new Set(data.events.map((e) => e[idx.meet]));
 
     // Wait for _meetDictinary to be available
     let waitCount = 0;
@@ -185,7 +277,7 @@ async function processSwimmerData(data) {
     return data;
     } catch (err) {
         console.error("==== processSwimmerData ERROR ====", err);
-        return data;
+    return data;
     }
 }
 
@@ -782,7 +874,7 @@ async function displaySwimmerDetails(data) {
 
     // Tab 6: Meets
     tabView.addTab("<p>Meets</p>", meetTable);
-
+    
     html.push(tabView.render());
 
     html.push(addHide25Botton());
@@ -897,7 +989,7 @@ function getHighestAchievedCut(data) {
 
 async function createDetailsPageTitle(data) {
     let html = [];
-    
+
     /**
      * Handle swimmer name display - simplified approach
      * Take first word from firstName + last word from lastName
@@ -1124,23 +1216,23 @@ async function filterSwimmers(values) {
     };
 
     try {
-        let list = await fetchSwimValues(bodyObj, "event");
+    let list = await fetchSwimValues(bodyObj, "event");
         if (!list || !list.length) {
             // If filtering fails, return original values to avoid losing results
             return values;
-        }
+    }
 
-        pkeys = new Set(list.map((v) => v[list.idx.pkey]));
-        let result = [];
-        let idx = values.idx;
-        result.idx = idx;
-        for (let row of values) {
-            if (pkeys.has(row[idx.pkey])) {
-                result.push(row);
-            }
+    pkeys = new Set(list.map((v) => v[list.idx.pkey]));
+    let result = [];
+    let idx = values.idx;
+    result.idx = idx;
+    for (let row of values) {
+        if (pkeys.has(row[idx.pkey])) {
+            result.push(row);
         }
+    }
 
-        return result;
+    return result;
     } catch (error) {
         console.error("Error filtering swimmers:", error);
         // If filtering fails, return original values to avoid losing results
@@ -1225,8 +1317,9 @@ async function showSearch(values, searchQuery = '') {
     if (searchQuery) {
         const queryLower = searchQuery.toLowerCase().trim();
         values.sort((a, b) => {
-            const nameA = (a[idx.name] || '').toLowerCase();
-            const nameB = (b[idx.name] || '').toLowerCase();
+            // Safely convert to string before calling toLowerCase
+            const nameA = String(a[idx.name] || '').toLowerCase();
+            const nameB = String(b[idx.name] || '').toLowerCase();
             
             // Check for exact match
             const exactA = nameA === queryLower;
@@ -1240,19 +1333,29 @@ async function showSearch(values, searchQuery = '') {
         });
     }
 
-    // Calculate age group counts by gender
+    // Filter out swimmers older than 18 (exclude 19O)
+    const filteredValues = values.filter(row => {
+        const age = row[idx.age];
+        return age !== undefined && age !== null && age <= 18;
+    });
+    
+    if (filteredValues.length === 0) {
+        window.updateContent('<div class="content"><p>No swimmers found (excluding swimmers older than 18).</p></div>');
+        return;
+    }
+    
+    // Calculate age group counts by gender (excluding 19O)
     const ageGroupCounts = {
         '10U': { total: 0, M: 0, F: 0 },
         '11-12': { total: 0, M: 0, F: 0 },
         '13-14': { total: 0, M: 0, F: 0 },
         '15-16': { total: 0, M: 0, F: 0 },
-        '17-18': { total: 0, M: 0, F: 0 },
-        '19O': { total: 0, M: 0, F: 0 }
+        '17-18': { total: 0, M: 0, F: 0 }
     };
     
-    // Collect all pkeys to fetch genders first
+    // Collect all pkeys to fetch genders first (only for filtered values)
     const pkeys = [];
-    for (const row of values) {
+    for (const row of filteredValues) {
         const pkey = row[idx.pkey];
         if (pkey) pkeys.push(pkey);
     }
@@ -1260,8 +1363,8 @@ async function showSearch(values, searchQuery = '') {
     // Fetch genders from events
     const genderMap = await fetchGendersForSwimmers(pkeys);
     
-    // Calculate counts
-    for (const row of values) {
+    // Calculate counts (only for age groups <= 18)
+    for (const row of filteredValues) {
         const age = row[idx.age];
         const pkey = row[idx.pkey];
         
@@ -1280,7 +1383,7 @@ async function showSearch(values, searchQuery = '') {
             }
         }
         
-        if (age !== undefined && age !== null) {
+        if (age !== undefined && age !== null && age <= 18) {
             let ageGroup = null;
             if (age <= 10) {
                 ageGroup = '10U';
@@ -1292,8 +1395,6 @@ async function showSearch(values, searchQuery = '') {
                 ageGroup = '15-16';
             } else if (age >= 17 && age <= 18) {
                 ageGroup = '17-18';
-            } else if (age >= 19) {
-                ageGroup = '19O';
             }
             
             if (ageGroup) {
@@ -1331,7 +1432,7 @@ async function showSearch(values, searchQuery = '') {
     
     if (ageGroupSummary.length > 0) {
         // Find max count for scaling the chart
-        const maxCount = Math.max(...Object.values(ageGroupCounts).map(c => c.total), values.length);
+        const maxCount = Math.max(...Object.values(ageGroupCounts).map(c => c.total), filteredValues.length);
         
         html.push('<div style="margin-bottom: 15px;">');
         html.push('<div style="font-weight: 700; color: #333; margin-bottom: 8px; font-size: 15px; padding: 0 2px;">Age Groups Breakdown</div>');
@@ -1429,7 +1530,7 @@ async function showSearch(values, searchQuery = '') {
         if (totalF > 0) totalBreakdown.push(`<span style="color: #dc3545; font-weight: 600;">F: ${totalF}</span>`);
         html.push(`<tr style="background-color: rgba(227, 242, 253, 0.3) !important; border-top: 2px solid rgba(0, 123, 255, 0.2);">`);
         html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">Total</td>`);
-        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333; text-align: right;">${values.length}</td>`);
+        html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333; text-align: right;">${filteredValues.length}</td>`);
         html.push(`<td style="padding: 12px 8px; border: 1px solid rgba(0, 0, 0, 0.06); font-size: 15px; font-weight: 700; color: #333;">${totalBreakdown.length > 0 ? totalBreakdown.join(', ') : '-'}</td>`);
         html.push('</tr>');
         
@@ -1453,7 +1554,7 @@ async function showSearch(values, searchQuery = '') {
     console.log('Fetched genders for', genderMap.size, 'swimmers');
     
     let index = 0;
-    for (let row of values) {
+    for (let row of filteredValues) {
         const name = row[idx.name] || '';
         const age = row[idx.age] || '';
         const pkey = row[idx.pkey];
@@ -1479,7 +1580,7 @@ async function showSearch(values, searchQuery = '') {
         const lsc = row[idx.lsc] || '';
         
         html.push(
-            `<tr onclick="go('swimmer', ${pkey})" data-index="${index}" data-name="${(name || '').toLowerCase()}" data-age="${age || 0}" data-gender="${(gender || '').toLowerCase()}" data-club="${(club || '').toLowerCase()}" data-lsc="${(lsc || '').toLowerCase()}">`,
+            `<tr onclick="go('swimmer', ${pkey})" data-index="${index}" data-name="${String(name || '').toLowerCase()}" data-age="${age || 0}" data-gender="${String(gender || '').toLowerCase()}" data-club="${String(club || '').toLowerCase()}" data-lsc="${String(lsc || '').toLowerCase()}">`,
             '<td>',
             ++index,
             '</td><td class="left">',
@@ -1606,7 +1707,7 @@ async function searchTeamByClubName(teamName) {
                 
                 // Use the EXACT same structure as loadClubAgeSwimmerList (proven to work)
                 const bodyObj = {
-                    metadata: [
+        metadata: [
                         {
                             title: "pkey",
                             dim: "[Persons.PersonKey]",
@@ -1829,21 +1930,21 @@ async function fetchPersonDetailsForPkeys(pkeys) {
         try {
             const bodyObj = {
                 metadata: [
-                    {
-                        title: "name",
-                        dim: "[Persons.FullName]",
-                        datatype: "text",
-                    },
-                    {
-                        title: "age",
-                        dim: "[Persons.Age]",
-                        datatype: "numeric",
-                        sort: "asc",
-                    },
-                    {
-                        title: "clubName",
-                        dim: "[Persons.ClubName]",
-                        datatype: "text",
+            {
+                title: "name",
+                dim: "[Persons.FullName]",
+                datatype: "text",
+            },
+            {
+                title: "age",
+                dim: "[Persons.Age]",
+                datatype: "numeric",
+                sort: "asc",
+            },
+            {
+                title: "clubName",
+                dim: "[Persons.ClubName]",
+                datatype: "text",
                     },
                     {
                         title: "lsc",
@@ -1863,7 +1964,7 @@ async function fetchPersonDetailsForPkeys(pkeys) {
                     {
                         dim: "[Persons.PersonKey]",
                         datatype: "numeric",
-                        filter: {
+                filter: {
                             members: batch,
                         },
                         panel: "scope",
@@ -2000,16 +2101,16 @@ async function searchTeamByEvents(teamName) {
                         title: "clubName",
                         dim: "[Persons.ClubName]",
                         datatype: "text",
-                    },
-                    {
-                        title: "lsc",
-                        dim: "[Persons.LscCode]",
-                        datatype: "text",
-                    },
-                    {
-                        title: "pkey",
-                        dim: "[Persons.PersonKey]",
-                        datatype: "numeric",
+            },
+            {
+                title: "lsc",
+                dim: "[Persons.LscCode]",
+                datatype: "text",
+            },
+            {
+                title: "pkey",
+                dim: "[Persons.PersonKey]",
+                datatype: "numeric",
                     },
                     {
                         title: "gender",
@@ -2248,11 +2349,60 @@ async function loadSwimmerSearchByFirstAndLastName(firstName, lastName, all) {
 // GLOBAL EXPORTS
 // ================================================================================
 
+// Toggle swimmer search menu
+function toggleSwimmerSearchMenu(event) {
+    if (event) event.stopPropagation();
+    const toggleBtn = document.querySelector('.swimmer-search-toggle');
+    const menu = document.querySelector('.swimmer-search-menu');
+    
+    // Close team search menu if open
+    const teamMenu = document.querySelector('.team-search-menu');
+    const teamToggleBtn = document.querySelector('.team-search-toggle');
+    if (teamMenu && teamToggleBtn && teamMenu.style.display !== 'none') {
+        teamMenu.style.display = 'none';
+        teamToggleBtn.style.background = 'transparent';
+        teamToggleBtn.style.color = '#555';
+        teamToggleBtn.style.borderRadius = '50%';
+        teamToggleBtn.style.width = '32px';
+        teamToggleBtn.style.height = '32px';
+        teamToggleBtn.style.padding = '0';
+    }
+    
+    if (menu && toggleBtn) {
+        const isHidden = menu.style.display === 'none';
+        menu.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+            toggleBtn.style.background = '#28a745';
+            toggleBtn.style.color = 'white';
+            // Don't change dimensions or display - keep them consistent
+            // Focus on input when menu opens
+            setTimeout(() => {
+                const input = document.getElementById('input');
+                if (input) input.focus();
+            }, 100);
+        } else {
+            toggleBtn.style.background = 'transparent';
+            toggleBtn.style.color = '#555';
+            // Don't change dimensions or display - keep them consistent
+        }
+    }
+}
+
 // Toggle team search menu
 function toggleTeamSearchMenu(event) {
     if (event) event.stopPropagation();
     const toggleBtn = document.querySelector('.team-search-toggle');
     const menu = document.querySelector('.team-search-menu');
+    
+    // Close swimmer search menu if open
+    const swimmerMenu = document.querySelector('.swimmer-search-menu');
+    const swimmerToggleBtn = document.querySelector('.swimmer-search-toggle');
+    if (swimmerMenu && swimmerToggleBtn && swimmerMenu.style.display !== 'none') {
+        swimmerMenu.style.display = 'none';
+        swimmerToggleBtn.style.background = 'transparent';
+        swimmerToggleBtn.style.color = '#555';
+    }
+    
     if (menu && toggleBtn) {
         const isHidden = menu.style.display === 'none';
         menu.style.display = isHidden ? 'block' : 'none';
@@ -2260,6 +2410,12 @@ function toggleTeamSearchMenu(event) {
             toggleBtn.style.background = '#28a745';
             toggleBtn.style.color = 'white';
             toggleBtn.style.borderRadius = '50%';
+            toggleBtn.style.width = '32px';
+            toggleBtn.style.height = '32px';
+            toggleBtn.style.padding = '0';
+            toggleBtn.style.display = 'inline-flex';
+            toggleBtn.style.alignItems = 'center';
+            toggleBtn.style.justifyContent = 'center';
             // Focus on input when menu opens
             setTimeout(() => {
                 const input = document.getElementById('team-search-input');
@@ -2268,20 +2424,38 @@ function toggleTeamSearchMenu(event) {
         } else {
             toggleBtn.style.background = 'transparent';
             toggleBtn.style.color = '#555';
-            toggleBtn.style.borderRadius = '4px';
+            toggleBtn.style.borderRadius = '50%';
+            toggleBtn.style.width = '32px';
+            toggleBtn.style.height = '32px';
+            toggleBtn.style.padding = '0';
         }
     }
 }
 
-// Close team search menu when clicking outside
+// Close swimmer search menu when clicking outside
 document.addEventListener('click', function(event) {
-    const menu = document.querySelector('.team-search-menu');
-    const toggleBtn = document.querySelector('.team-search-toggle');
-    if (menu && toggleBtn && !menu.contains(event.target) && !toggleBtn.contains(event.target)) {
-        menu.style.display = 'none';
-        toggleBtn.style.background = 'transparent';
-        toggleBtn.style.color = '#555';
-        toggleBtn.style.borderRadius = '4px';
+    const swimmerMenu = document.querySelector('.swimmer-search-menu');
+    const swimmerToggleBtn = document.querySelector('.swimmer-search-toggle');
+    if (swimmerMenu && swimmerToggleBtn && !swimmerMenu.contains(event.target) && !swimmerToggleBtn.contains(event.target)) {
+        swimmerMenu.style.display = 'none';
+        swimmerToggleBtn.style.background = 'transparent';
+        swimmerToggleBtn.style.color = '#555';
+        swimmerToggleBtn.style.borderRadius = '50%';
+        swimmerToggleBtn.style.width = '32px';
+        swimmerToggleBtn.style.height = '32px';
+        swimmerToggleBtn.style.padding = '0';
+    }
+    
+    const teamMenu = document.querySelector('.team-search-menu');
+    const teamToggleBtn = document.querySelector('.team-search-toggle');
+    if (teamMenu && teamToggleBtn && !teamMenu.contains(event.target) && !teamToggleBtn.contains(event.target)) {
+        teamMenu.style.display = 'none';
+        teamToggleBtn.style.background = 'transparent';
+        teamToggleBtn.style.color = '#555';
+        teamToggleBtn.style.borderRadius = '50%';
+        teamToggleBtn.style.width = '32px';
+        teamToggleBtn.style.height = '32px';
+        teamToggleBtn.style.padding = '0';
     }
 });
 
@@ -2438,14 +2612,15 @@ async function showTeamSearch(teams, searchQuery = '') {
         const lsc = team.lsc || '';
         const code = team.code || '-';
         
-        // Escape single quotes properly for onclick handler
-        const escapedTeamName = teamName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const escapedLsc = (lsc || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const escapedCode = (code || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        // Escape for use in onclick handler (same pattern as swimmer search table)
+        // Double escape single quotes for JavaScript string
+        const escapedTeamName = teamName.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedLsc = (lsc || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const escapedCode = (code === '-' ? '' : code).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        // Store team data in data attributes for use in selectTeam
+        // Use inline onclick exactly like the swimmer search table does
         html.push(
-            `<tr onclick="if(typeof window.selectTeam === 'function') { window.selectTeam('${escapedTeamName}', '${escapedLsc}', '${escapedCode}'); } else { console.error('selectTeam function not available'); }" style="cursor: pointer;" data-index="${index}" data-name="${(teamName || '').toLowerCase()}" data-lsc="${(lsc || '').toLowerCase()}" data-code="${(code || '').toLowerCase()}" data-team-name="${escapedTeamName}">`,
+            `<tr onclick="window.selectTeam('${escapedTeamName}', '${escapedLsc}', '${escapedCode}')" style="cursor: pointer;" data-index="${index}" data-name="${(teamName || '').toLowerCase()}" data-lsc="${(lsc || '').toLowerCase()}" data-code="${(code || '').toLowerCase()}" data-team-name="${escapedTeamName}">`,
             '<td>',
             ++index,
             '</td><td class="left">',
@@ -2464,29 +2639,275 @@ async function showTeamSearch(teams, searchQuery = '') {
     
     window.updateContent(html.join(""));
     
-    // Also attach event listeners programmatically as a backup
+    // Remove any existing debug panel first
+    const existingDebug = document.getElementById('team-table-debug');
+    if (existingDebug) {
+        existingDebug.remove();
+    }
+    
+    // Remove any existing toggle button
+    const existingToggle = document.getElementById('team-table-debug-toggle');
+    if (existingToggle) {
+        existingToggle.remove();
+    }
+    
+    // Find the three dots button and position debug button before it
+    const threeDotsButton = document.querySelector('.team-search-toggle');
+    let toggleButton;
+    
+    if (threeDotsButton && threeDotsButton.parentElement) {
+        // Create round magnifying glass icon button
+        toggleButton = document.createElement('span');
+        toggleButton.id = 'team-table-debug-toggle';
+        toggleButton.innerHTML = '🔍';
+        toggleButton.style.cssText = 'cursor: pointer; margin-right: 2px; padding: 2px 4px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 50%; width: 28px; height: 28px; display: none; align-items: center; justify-content: center; vertical-align: middle; transition: all 0.2s ease;';
+        toggleButton.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(0,0,0,0.1)';
+            this.style.color = '#007bff';
+        });
+        toggleButton.addEventListener('mouseleave', function() {
+            this.style.background = 'transparent';
+            this.style.color = '#555';
+        });
+        toggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const debugArea = document.getElementById('team-table-debug');
+            if (debugArea) {
+                const isVisible = debugArea.style.display !== 'none';
+                debugArea.style.display = isVisible ? 'none' : 'block';
+                toggleButton.style.color = isVisible ? '#555' : '#007bff';
+                toggleButton.style.background = isVisible ? 'transparent' : 'rgba(0,123,255,0.1)';
+            }
+        });
+        // Insert right before the three dots button
+        threeDotsButton.parentElement.insertBefore(toggleButton, threeDotsButton);
+    } else {
+        // Fallback: create button in top-right if three dots button not found
+        toggleButton = document.createElement('button');
+        toggleButton.id = 'team-table-debug-toggle';
+        toggleButton.innerHTML = '🔍';
+        toggleButton.style.cssText = 'position: fixed; top: 10px; right: 50px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid #555; padding: 8px; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; z-index: 10001; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;';
+        toggleButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const debugArea = document.getElementById('team-table-debug');
+            if (debugArea) {
+                const isVisible = debugArea.style.display !== 'none';
+                debugArea.style.display = isVisible ? 'none' : 'block';
+            }
+        });
+        document.body.appendChild(toggleButton);
+    }
+    
+    // Add debug info display area - position it below the toggle button
+    // Use setTimeout to ensure button is in DOM before calculating position
     setTimeout(() => {
-        const tbody = document.getElementById("team-search-table-body");
-        if (tbody) {
-            const rows = tbody.querySelectorAll("tr");
-            rows.forEach(row => {
-                row.addEventListener('click', function(e) {
-                    // Don't trigger if clicking on a sortable header
-                    if (e.target.tagName === 'TH') return;
-                    
-                    const teamName = row.dataset.teamName || '';
-                    const lsc = row.dataset.lsc || '';
-                    const code = row.dataset.code || '';
-                    
-                    if (teamName && typeof window.selectTeam === 'function') {
-                        window.selectTeam(teamName, lsc, code === '-' ? '' : code);
-                    } else {
-                        console.error('selectTeam function not available or teamName missing');
-                    }
-                });
-            });
+        const debugArea = document.getElementById('team-table-debug');
+        if (debugArea && toggleButton) {
+            const toggleRect = toggleButton.getBoundingClientRect();
+            const debugTop = (toggleRect.bottom + 5) + 'px'; // 5px margin below button
+            const debugRight = (window.innerWidth - toggleRect.right) + 'px'; // Align with right edge of button
+            debugArea.style.top = debugTop;
+            debugArea.style.right = debugRight;
         }
-    }, 100);
+    }, 10);
+    
+    const debugArea = document.createElement('div');
+    debugArea.id = 'team-table-debug';
+    debugArea.style.cssText = 'position: fixed; top: 50px; right: 10px; background: rgba(0,0,0,0.9); color: #fff; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; z-index: 10000; max-width: 500px; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;';
+    debugArea.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><div style="font-weight: bold; color: #0f0; font-size: 14px;">🔍 Team Table Debug</div><button id="team-table-debug-close" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Hide</button></div><div id="team-table-debug-content" style="line-height: 1.6;">Waiting for click...</div>';
+    document.body.appendChild(debugArea);
+    
+    // Add close button handler
+    const closeButton = document.getElementById('team-table-debug-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            debugArea.style.display = 'none';
+            if (toggleButton) {
+                toggleButton.style.color = '#555';
+                toggleButton.style.background = 'transparent';
+            }
+        });
+    }
+    
+    // Click outside to hide
+    document.addEventListener('click', function(e) {
+        const debugArea = document.getElementById('team-table-debug');
+        const toggleButton = document.getElementById('team-table-debug-toggle');
+        if (debugArea && toggleButton && debugArea.style.display !== 'none') {
+            // Check if click is outside both debug panel and toggle button
+            if (!debugArea.contains(e.target) && !toggleButton.contains(e.target)) {
+                debugArea.style.display = 'none';
+                if (toggleButton) {
+                    toggleButton.style.color = '#555';
+                    toggleButton.style.background = 'transparent';
+                }
+            }
+        }
+    });
+    
+    function addDebugMessage(message, type = 'info') {
+        const debugContent = document.getElementById('team-table-debug-content');
+        if (!debugContent) return;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        const color = type === 'error' ? '#f44' : type === 'success' ? '#4f4' : '#ff4';
+        const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+        const logEntry = document.createElement('div');
+        logEntry.style.cssText = `margin: 5px 0; padding: 8px; border-left: 3px solid ${color}; background: rgba(255,255,255,0.1); border-radius: 3px;`;
+        logEntry.innerHTML = `<span style="color: #aaa;">[${timestamp}]</span> <span style="color: ${color}; font-weight: ${type === 'error' ? 'bold' : 'normal'};">${icon} ${message}</span>`;
+        debugContent.appendChild(logEntry);
+        debugContent.scrollTop = debugContent.scrollHeight;
+        
+        // Keep only last 30 messages
+        while (debugContent.children.length > 30) {
+            debugContent.removeChild(debugContent.firstChild);
+        }
+        
+        // Also log to console
+        console.log(`[Team Table Debug] ${message}`);
+    }
+    
+    // Use event delegation on the table itself - works even if content gets replaced
+    // This ensures clicks work even during loading or if content is updated
+    setTimeout(() => {
+        const table = document.getElementById("team-search-table");
+        if (table) {
+            addDebugMessage('Table found, attaching click handlers...', 'info');
+            
+            // Remove any existing listeners first
+            const newTable = table.cloneNode(true);
+            table.parentNode.replaceChild(newTable, table);
+            
+            // Attach event delegation listener
+            newTable.addEventListener('click', function(e) {
+                addDebugMessage(`Click detected on: ${e.target.tagName} (${e.target.textContent?.substring(0, 30) || 'no text'})`, 'info');
+                
+                // Find the clicked row
+                const row = e.target.closest('tr');
+                if (!row) {
+                    addDebugMessage('No row found for click target', 'error');
+                    return;
+                }
+                
+                if (row.closest('thead')) {
+                    addDebugMessage('Click was on header row, ignoring', 'info');
+                    return; // Skip header rows
+                }
+                
+                // Get data from the row
+                const teamName = row.dataset.teamName;
+                const lsc = row.dataset.lsc;
+                const code = row.dataset.code;
+                
+                addDebugMessage(`Row data extracted: teamName="${teamName}", lsc="${lsc}", code="${code}"`, 'info');
+                addDebugMessage(`Full row dataset: ${JSON.stringify(row.dataset)}`, 'info');
+                
+                if (!teamName) {
+                    addDebugMessage('ERROR: No teamName in row dataset', 'error');
+                    console.error('[Team table click delegation] Missing teamName:', row.dataset);
+                    return;
+                }
+                
+                if (typeof window.selectTeam !== 'function') {
+                    addDebugMessage(`ERROR: window.selectTeam is ${typeof window.selectTeam}, not a function`, 'error');
+                    console.error('[Team table click delegation] selectTeam not available');
+                    return;
+                }
+                
+                const clubCode = code === '-' || code === '' ? '' : code;
+                addDebugMessage(`Calling selectTeam('${teamName}', '${lsc}', '${clubCode}')`, 'success');
+                console.log('[Team table click delegation] Calling selectTeam:', { teamName, lsc, clubCode });
+                
+                try {
+                    addDebugMessage(`About to call window.selectTeam...`, 'info');
+                    const result = window.selectTeam(teamName, lsc, clubCode);
+                    addDebugMessage(`selectTeam called successfully. Result: ${result}`, 'success');
+                    if (result && typeof result.then === 'function') {
+                        addDebugMessage('selectTeam returned a Promise, waiting for resolution...', 'info');
+                        result.then((resolvedValue) => {
+                            addDebugMessage(`✅ selectTeam Promise resolved successfully. Value: ${resolvedValue}`, 'success');
+                            // Check if content was updated
+                            setTimeout(() => {
+                                const content = document.getElementById('content');
+                                if (content) {
+                                    const hasTeamTable = content.querySelector('#team-search-table');
+                                    const hasSwimmerTable = content.querySelector('#search-table');
+                                    addDebugMessage(`Content check: team table=${!!hasTeamTable}, swimmer table=${!!hasSwimmerTable}`, 'info');
+                                }
+                            }, 1000);
+                        }).catch((err) => {
+                            addDebugMessage(`❌ selectTeam Promise rejected: ${err.message}`, 'error');
+                            addDebugMessage(`Error stack: ${err.stack?.substring(0, 300)}`, 'error');
+                            console.error('[Team table click delegation] selectTeam Promise rejected:', err);
+                        });
+                    } else {
+                        addDebugMessage(`selectTeam did not return a Promise (returned: ${typeof result})`, 'info');
+                    }
+                } catch (error) {
+                    addDebugMessage(`❌ ERROR calling selectTeam: ${error.message}`, 'error');
+                    addDebugMessage(`Error stack: ${error.stack?.substring(0, 300)}`, 'error');
+                    console.error('[Team table click delegation] Error calling selectTeam:', error);
+                }
+            }, true); // Use capture phase
+            
+            addDebugMessage('Click handlers attached successfully', 'success');
+        } else {
+            addDebugMessage('ERROR: Table not found!', 'error');
+        }
+    }, 50);
+}
+
+/**
+ * Attach click handlers to team table rows
+ */
+function attachTeamTableClickHandlers() {
+    const tbody = document.getElementById("team-search-table-body");
+    if (!tbody) return;
+    
+    const rows = tbody.querySelectorAll("tr");
+    rows.forEach(row => {
+        // Remove any existing click listeners by cloning the row
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+        
+        newRow.addEventListener('click', function(e) {
+            // Don't trigger if clicking on a sortable header (shouldn't happen in tbody, but just in case)
+            if (e.target.tagName === 'TH') return;
+            
+            // Don't prevent default - let the inline onclick handler work
+            // This is just a backup in case onclick doesn't work
+            // Get data from the row
+            const teamName = newRow.dataset.teamName || '';
+            const lsc = newRow.dataset.lsc || '';
+            const code = newRow.dataset.code || '';
+            
+            console.log('[attachTeamTableClickHandlers] Backup click handler triggered:', { teamName, lsc, code, hasSelectTeam: typeof window.selectTeam });
+            
+            if (!teamName) {
+                console.error('No team name found in row dataset');
+                return;
+            }
+            
+            if (typeof window.selectTeam !== 'function') {
+                console.error('selectTeam function not available');
+                return;
+            }
+            
+            // Call selectTeam with the team data
+            const clubCode = code === '-' || code === '' ? '' : code;
+            window.selectTeam(teamName, lsc, clubCode);
+        });
+        
+        // Add hover effect
+        newRow.style.transition = 'background-color 0.2s';
+        newRow.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f0f7ff';
+        });
+        newRow.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+    });
 }
 
 // Sort function for team search table
@@ -2543,7 +2964,10 @@ function sortTeamSearchTable(columnIndex) {
     
     // Clear and re-append sorted rows
     tbody.innerHTML = '';
-    rows.forEach(row => tbody.appendChild(row));
+    rows.forEach(row => {
+        // Preserve onclick handler when re-adding rows
+        tbody.appendChild(row);
+    });
     
     // Update header arrows
     const headers = table.querySelectorAll('th');
@@ -2556,23 +2980,150 @@ function sortTeamSearchTable(columnIndex) {
     });
 }
 
+// Helper function to add debug messages to the debug panel
+function addDebugMessageToPanel(message, type = 'info') {
+    // Ensure debug panel exists - create it if it doesn't
+    let debugArea = document.getElementById('team-table-debug');
+    let debugContent = document.getElementById('team-table-debug-content');
+    
+    if (!debugArea || !debugContent) {
+        // Create debug panel if it doesn't exist
+        const existingDebug = document.getElementById('team-table-debug');
+        if (existingDebug) {
+            existingDebug.remove();
+        }
+        
+        const existingToggle = document.getElementById('team-table-debug-toggle');
+        if (existingToggle) {
+            existingToggle.remove();
+        }
+        
+        // Find three dots button for positioning
+        const threeDotsButton = document.querySelector('.team-search-toggle');
+        let toggleButton;
+        
+        if (threeDotsButton && threeDotsButton.parentElement) {
+            toggleButton = document.createElement('span');
+            toggleButton.id = 'team-table-debug-toggle';
+            toggleButton.innerHTML = '🔍';
+            toggleButton.style.cssText = 'cursor: pointer; margin-right: 2px; padding: 2px 4px; color: #555; font-size: 18px; font-weight: bold; user-select: none; background: transparent; border-radius: 50%; width: 28px; height: 28px; display: none; align-items: center; justify-content: center; vertical-align: middle; transition: all 0.2s ease;';
+            toggleButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const da = document.getElementById('team-table-debug');
+                if (da) {
+                    const isVisible = da.style.display !== 'none';
+                    da.style.display = isVisible ? 'none' : 'block';
+                    toggleButton.style.color = isVisible ? '#555' : '#007bff';
+                    toggleButton.style.background = isVisible ? 'transparent' : 'rgba(0,123,255,0.1)';
+                }
+            });
+            // Insert right before the three dots button
+            threeDotsButton.parentElement.insertBefore(toggleButton, threeDotsButton);
+        }
+        
+        debugArea = document.createElement('div');
+        debugArea.id = 'team-table-debug';
+        debugArea.style.cssText = 'position: fixed; top: 50px; right: 10px; background: rgba(0,0,0,0.9); color: #fff; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; z-index: 10000; max-width: 500px; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;';
+        debugArea.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><div style="font-weight: bold; color: #0f0; font-size: 14px;">🔍 Team Table Debug</div><button id="team-table-debug-close" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">Hide</button></div><div id="team-table-debug-content" style="line-height: 1.6;">Waiting for messages...</div>';
+        document.body.appendChild(debugArea);
+        
+        const closeButton = document.getElementById('team-table-debug-close');
+        if (closeButton) {
+            closeButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                debugArea.style.display = 'none';
+                if (toggleButton) {
+                    toggleButton.style.color = '#555';
+                    toggleButton.style.background = 'transparent';
+                }
+            });
+        }
+        
+        debugContent = document.getElementById('team-table-debug-content');
+    }
+    
+    if (!debugContent) {
+        console.error('[addDebugMessageToPanel] Debug content element not found');
+        return;
+    }
+    
+    // Don't automatically show the panel - let user click the debug button to see it
+    // The panel will remain hidden by default
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const color = type === 'error' ? '#f44' : type === 'success' ? '#4f4' : '#ff4';
+    const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+    const logEntry = document.createElement('div');
+    logEntry.style.cssText = `margin: 5px 0; padding: 8px; border-left: 3px solid ${color}; background: rgba(255,255,255,0.1); border-radius: 3px;`;
+    logEntry.innerHTML = `<span style="color: #aaa;">[${timestamp}]</span> <span style="color: ${color}; font-weight: ${type === 'error' ? 'bold' : 'normal'};">${icon} ${message}</span>`;
+    debugContent.appendChild(logEntry);
+    debugContent.scrollTop = debugContent.scrollHeight;
+    
+    // Also log to console
+    console.log(`[Team Debug] ${message}`);
+}
+
 // Select a team and show its swimmers
 async function selectTeam(teamName, lsc, clubCode) {
+    // Show loading message immediately in main content area
+    window.updateContent(`<div style="padding: 40px; text-align: center; font-size: 24px; font-weight: 600; color: #333;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <span style="animation: spin 1s linear infinite; font-size: 32px;">⏳</span>
+            <span>Loading swimmers for "${teamName}"...</span>
+        </div>
+    </div>`);
+    
+    // Add debug message immediately when team is clicked
+    addDebugMessageToPanel(`🚀 selectTeam STARTED for "${teamName}" (LSC: ${lsc}, Code: ${clubCode || 'none'})`, 'info');
+    
     // Normalize LSC code to uppercase (e.g., "pn" -> "PN") early
     if (lsc) {
         lsc = lsc.toUpperCase();
     }
     
     // Check cache first (1 hour timeout)
+    addDebugMessageToPanel('Checking cache for team results...', 'info');
+    window.updateContent(`<div style="padding: 40px; text-align: center; font-size: 24px; font-weight: 600; color: #333;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <span style="animation: spin 1s linear infinite; font-size: 32px;">⏳</span>
+            <span>Checking cache for "${teamName}"...</span>
+        </div>
+    </div>`);
+    
     const cacheKey = `team/${lsc}/${clubCode || 'none'}/${teamName}`;
     const cacheTimeout = 60 * 60; // 1 hour in seconds
     const cachedResult = await LocalCache.get(cacheKey, cacheTimeout);
     
     if (cachedResult) {
         console.log(`[selectTeam] Using cached results for "${teamName}"`);
+        addDebugMessageToPanel(`✅ Found cached results (${cachedResult.length} swimmers), displaying...`, 'success');
+        // Show detailed loading message even for cached results
+        let cachedDebugInfo = [];
+        cachedDebugInfo.push(`<div style="padding: 20px; font-family: monospace; background: #f5f5f5; border-radius: 8px; margin: 10px 0;">`);
+        cachedDebugInfo.push(`<h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 20px;">✅</span> Loading swimmers for: ${teamName}</h3>`);
+        cachedDebugInfo.push(`<p><strong>LSC:</strong> ${lsc || 'none'}</p>`);
+        cachedDebugInfo.push(`<p><strong>Club Code:</strong> ${clubCode || 'none'}</p>`);
+        cachedDebugInfo.push(`<hr>`);
+        cachedDebugInfo.push(`<p style="color: green;">✅ Found ${cachedResult.length} swimmers in cache</p>`);
+        cachedDebugInfo.push(`<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Displaying results...</p>`);
+        cachedDebugInfo.push(`</div>`);
+        updateContentWithLoadingIndicator(cachedDebugInfo.join(''), true);
         await showSearch(cachedResult, teamName);
+        addDebugMessageToPanel('✅ Results displayed from cache', 'success');
         return;
     }
+    
+    addDebugMessageToPanel('No cache found, starting fresh search...', 'info');
+    window.updateContent(`<div style="padding: 40px; text-align: center; font-size: 24px; font-weight: 600; color: #333;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <span style="animation: spin 1s linear infinite; font-size: 32px;">⏳</span>
+            <span>Loading swimmers for "${teamName}"...</span>
+        </div>
+        <div style="margin-top: 20px; font-size: 16px; color: #666;">
+            <div>LSC: ${lsc || 'none'}</div>
+            <div>Club Code: ${clubCode || 'none'}</div>
+        </div>
+    </div>`);
     
     let debugInfo = [];
     debugInfo.push(`<div style="padding: 20px; font-family: monospace; background: #f5f5f5; border-radius: 8px; margin: 10px 0;">`);
@@ -2581,7 +3132,7 @@ async function selectTeam(teamName, lsc, clubCode) {
     debugInfo.push(`<p><strong>Club Code:</strong> ${clubCode || 'none'}</p>`);
     debugInfo.push(`<hr>`);
     
-    window.updateContent(debugInfo.join('') + '<p>Starting search...</p></div>');
+    updateContentWithLoadingIndicator(debugInfo.join('') + '<p>Starting search...</p></div>', true);
     
     try {
         if (!lsc) {
@@ -2590,6 +3141,7 @@ async function selectTeam(teamName, lsc, clubCode) {
         }
         
         console.log(`[selectTeam] Starting search for team: "${teamName}", LSC: ${lsc}, Code: ${clubCode || 'none'}`);
+        addDebugMessageToPanel(`LSC code found: ${lsc}`, 'success');
         debugInfo.push(`<p>✓ LSC code found: ${lsc}</p>`);
         
         let actualClubName = null;
@@ -2599,12 +3151,27 @@ async function selectTeam(teamName, lsc, clubCode) {
         // Strategy: If we have a club code, use it directly (same as rankings do)
         if (clubCode && clubCode !== '-') {
             try {
+                addDebugMessageToPanel(`Looking up club name for code "${clubCode}"...`, 'info');
+                window.updateContent(`<div style="padding: 40px; text-align: center; font-size: 24px; font-weight: 600; color: #333;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                        <span style="animation: spin 1s linear infinite; font-size: 32px;">⏳</span>
+                        <span>Looking up club name for "${teamName}"...</span>
+                    </div>
+                </div>`);
                 debugInfo.push(`<p>Looking up club name for code "${clubCode}"...</p>`);
-                window.updateContent(debugInfo.join('') + '<p>Loading club dictionary...</p></div>');
+                updateContentWithLoadingIndicator(debugInfo.join('') + '<p>Loading club dictionary...</p></div>', true);
                 
+                addDebugMessageToPanel('Waiting for club dictionary to load...', 'info');
+                window.updateContent(`<div style="padding: 40px; text-align: center; font-size: 24px; font-weight: 600; color: #333;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                        <span style="animation: spin 1s linear infinite; font-size: 32px;">⏳</span>
+                        <span>Loading club dictionary...</span>
+                    </div>
+                </div>`);
                 while (!window._clubDictinary) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
+                addDebugMessageToPanel('✅ Club dictionary loaded', 'success');
                 
                 // Try both uppercase and lowercase versions of club code
                 const codeVariations = [clubCode.toUpperCase(), clubCode];
@@ -2612,10 +3179,12 @@ async function selectTeam(teamName, lsc, clubCode) {
                     codeVariations.push(clubCode.toLowerCase());
                 }
                 
+                addDebugMessageToPanel(`Trying code variations: ${codeVariations.join(', ')}`, 'info');
                 for (const codeVar of codeVariations) {
                     actualClubName = await window._clubDictinary.loadClubName(lsc, codeVar);
                     if (actualClubName) {
                         console.log(`[selectTeam] ✅ Found club name from code "${codeVar}": "${actualClubName}"`);
+                        addDebugMessageToPanel(`✅ Found club name: "${actualClubName}" (from code "${codeVar}")`, 'success');
                         debugInfo.push(`<p style="color: green;">✓ Found club name from code "${codeVar}": <strong>${actualClubName}</strong></p>`);
                         break;
                     }
@@ -2645,7 +3214,7 @@ async function selectTeam(teamName, lsc, clubCode) {
             debugInfo.push(`<hr><h4>Using loadClubAgeSwimmerList (same as rankings)</h4>`);
             debugInfo.push(`<p>Club name: <strong>"${actualClubName}"</strong></p>`);
             debugInfo.push(`<p>Loading swimmers for all age groups...</p>`);
-            window.updateContent(debugInfo.join('') + '<p>Loading swimmers...</p></div>');
+            updateContentWithLoadingIndicator(debugInfo.join('') + '<p>Loading swimmers...</p></div>', true);
             
             // Age groups to check (same as rankings)
             const ageGroups = ['10U', '11-12', '13-14', '15-16', '17-18', '19O'];
@@ -2661,16 +3230,20 @@ async function selectTeam(teamName, lsc, clubCode) {
             
             // Check if loadClubAgeSwimmerList is available (from rankings.js)
             if (typeof loadClubAgeSwimmerList === 'function') {
+                addDebugMessageToPanel('✓ loadClubAgeSwimmerList function found', 'success');
                 debugInfo.push(`<p>✓ loadClubAgeSwimmerList function found</p>`);
                 
                 for (const ageKey of ageGroups) {
                     let swimmerList = null;
+                    addDebugMessageToPanel(`Loading age group: ${ageKey}...`, 'info');
+                    debugInfo.push(`<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Loading age group: <strong>${ageKey}</strong>...</p>`);
+                    updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
                     
                     // Try each club name variation
                     for (const clubNameVar of uniqueVariations) {
                         try {
                             debugInfo.push(`<p>Loading age group: <strong>${ageKey}</strong> with club name: <strong>"${clubNameVar}"</strong>...</p>`);
-                            window.updateContent(debugInfo.join('') + `<p>Loading ${ageKey}...</p></div>`);
+                            updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
                             
                             // Try with forceRefresh=false first (use cache)
                             swimmerList = await loadClubAgeSwimmerList(lsc, clubNameVar, ageKey, false);
@@ -2713,10 +3286,14 @@ async function selectTeam(teamName, lsc, clubCode) {
                             }
                         
                             if (swimmerList && swimmerList.length > 0 && swimmerList.idx) {
-                                debugInfo.push(`<p style="color: green;">✓ Found ${swimmerList.length} swimmers in ${ageKey} with "${clubNameVar}"</p>`);
+                                addDebugMessageToPanel(`✅ Found ${swimmerList.length} swimmers in ${ageKey}`, 'success');
+                                debugInfo.push(`<p style="color: green; display: flex; align-items: center; gap: 10px;"><span style="font-size: 18px;">✅</span> Found <strong>${swimmerList.length}</strong> swimmers in ${ageKey} with "${clubNameVar}"</p>`);
+                                updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
                                 break; // Found swimmers, stop trying variations
                             } else {
+                                addDebugMessageToPanel(`No swimmers found in ${ageKey}`, 'info');
                                 debugInfo.push(`<p style="color: gray;">No swimmers in ${ageKey} with "${clubNameVar}"</p>`);
+                                updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
                             }
                         } catch (error) {
                             console.error(`[selectTeam] Error loading age ${ageKey} with "${clubNameVar}":`, error);
@@ -2779,7 +3356,7 @@ async function selectTeam(teamName, lsc, clubCode) {
         // If we didn't get swimmers from club code approach, fall back to name search
         if (allSwimmers.length === 0) {
             debugInfo.push(`<hr><h4>Fallback: Searching by team name</h4>`);
-            window.updateContent(debugInfo.join('') + '<p>Trying fallback approach...</p></div>');
+            updateContentWithLoadingIndicator(debugInfo.join('') + '<p>Trying fallback approach...</p></div>', true);
             
             // Try team name variations
             const nameVariations = [];
@@ -2799,7 +3376,7 @@ async function selectTeam(teamName, lsc, clubCode) {
             
             for (const nameVariation of uniqueVariations) {
                 debugInfo.push(`<p>Trying: <strong>"${nameVariation}"</strong>...</p>`);
-                window.updateContent(debugInfo.join('') + '<p>Searching...</p></div>');
+                updateContentWithLoadingIndicator(debugInfo.join('') + '<p>Searching...</p></div>', true);
                 
                 try {
                     const swimmers = await loadClubSearch(nameVariation, true);
@@ -2841,9 +3418,35 @@ async function selectTeam(teamName, lsc, clubCode) {
         }
         
         console.log(`[selectTeam] ✅ Successfully found ${allSwimmers.length} swimmers for "${teamName}"`);
-        debugInfo.push(`<hr><h3 style="color: green;">✅ Successfully Found ${allSwimmers.length} Swimmers!</h3>`);
+        addDebugMessageToPanel(`✅ Successfully found ${allSwimmers.length} swimmers!`, 'success');
+        
+        // Calculate age group breakdown for summary
+        if (idx && allSwimmers.length > 0) {
+            const ageGroupCounts = {};
+            for (const row of allSwimmers) {
+                const age = row[idx.age] || 'Unknown';
+                ageGroupCounts[age] = (ageGroupCounts[age] || 0) + 1;
+            }
+            
+            debugInfo.push(`<hr><h3 style="color: green;">✅ Successfully Found ${allSwimmers.length} Swimmers!</h3>`);
+            debugInfo.push(`<p><strong>Age Group Breakdown:</strong></p><ul>`);
+            const ageGroups = ['10U', '11-12', '13-14', '15-16', '17-18', '19O'];
+            for (const ageKey of ageGroups) {
+                const count = ageGroupCounts[ageKey] || 0;
+                if (count > 0) {
+                    debugInfo.push(`<li><strong>${ageKey}:</strong> ${count} swimmers</li>`);
+                } else {
+                    debugInfo.push(`<li style="color: gray;"><strong>${ageKey}:</strong> 0 swimmers</li>`);
+                }
+            }
+            debugInfo.push(`</ul>`);
+        } else {
+            debugInfo.push(`<hr><h3 style="color: green;">✅ Successfully Found ${allSwimmers.length} Swimmers!</h3>`);
+        }
+        
         debugInfo.push(`<p>Fetching swimmer names and gender information...</p>`);
-        window.updateContent(debugInfo.join('') + '<p>Loading swimmer details...</p></div>');
+        debugInfo.push(`<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Loading swimmer details...</p>`);
+        updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
         
         // Set idx if not already set
         if (!idx) {
@@ -2853,9 +3456,10 @@ async function selectTeam(teamName, lsc, clubCode) {
         
         // Fetch names and genders for all found swimmers (in parallel for better performance)
         const pkeys = allSwimmers.map(row => row[idx.pkey]);
-        
+        addDebugMessageToPanel(`Fetching names and genders for ${pkeys.length} swimmers...`, 'info');
         debugInfo.push(`<p>Fetching details for ${pkeys.length} swimmers...</p>`);
-        window.updateContent(debugInfo.join('') + '<p>Fetching swimmer details...</p></div>');
+        debugInfo.push(`<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Fetching swimmer details...</p>`);
+        updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
         
         // Fetch names and genders in parallel
         const [nameMap, genderMap] = await Promise.all([
@@ -2863,8 +3467,10 @@ async function selectTeam(teamName, lsc, clubCode) {
             fetchGendersForSwimmers(pkeys)
         ]);
         
+        addDebugMessageToPanel(`✅ Fetched names and genders (${nameMap.size} names, ${genderMap.size} genders)`, 'success');
         debugInfo.push(`<p style="color: green;">✓ Fetched names and genders</p>`);
-        window.updateContent(debugInfo.join('') + '<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Preparing results...</p></div>');
+        debugInfo.push(`<p style="display: flex; align-items: center; gap: 10px;"><span style="animation: spin 1s linear infinite; font-size: 18px;">⏳</span> Preparing results...</p>`);
+        updateContentWithLoadingIndicator(debugInfo.join('') + '</div>', true);
         
         // Update swimmers with names and genders
         const updatedSwimmers = allSwimmers.map(row => {
@@ -2876,12 +3482,18 @@ async function selectTeam(teamName, lsc, clubCode) {
         });
         updatedSwimmers.idx = idx;
         
+        addDebugMessageToPanel('Caching results and preparing to display...', 'info');
+        
         // Cache the results for 1 hour
         await LocalCache.set(cacheKey, updatedSwimmers);
         console.log(`[selectTeam] Cached results for "${teamName}" (${updatedSwimmers.length} swimmers)`);
         
+        addDebugMessageToPanel(`Calling showSearch with ${updatedSwimmers.length} swimmers...`, 'info');
+        
         // Display results using showSearch
         await showSearch(updatedSwimmers, teamName);
+        
+        addDebugMessageToPanel('✅ showSearch completed, results displayed!', 'success');
         
     } catch (error) {
         console.error('Error loading swimmers for team:', error);
@@ -2966,8 +3578,13 @@ async function searchByTeam() {
         toggleBtn.style.borderRadius = '4px';
     }
     
-    // Show loading message
-    window.updateContent('Searching for teams matching "' + teamKeyword + '"...');
+    // Show loading message with hourglass
+    window.updateContent(`<div style="padding: 40px; text-align: center; font-weight: 600; color: #333;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+            <span style="animation: spin 1s linear infinite; font-size: 24px;">⏳</span>
+            <span style="font-size: 16px !important;">Searching for teams matching "${teamKeyword}"...</span>
+        </div>
+    </div>`);
     
     try {
         const teams = await searchTeams(teamKeyword);
@@ -3224,6 +3841,7 @@ window.loadSwimerInfo = loadSwimerInfo;
 window.loadSearch = loadSearch;
 window.loadSwimmerDetails = loadSwimmerDetails;
 window.sortSearchTable = sortSearchTable;
+window.toggleSwimmerSearchMenu = toggleSwimmerSearchMenu;
 window.toggleTeamSearchMenu = toggleTeamSearchMenu;
 window.searchByTeam = searchByTeam;
 window.selectTeam = selectTeam;

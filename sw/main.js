@@ -88,6 +88,16 @@ async function onSearchAll() {
         return;
     }
 
+    // Close swimmer search menu
+    const swimmerMenu = document.querySelector('.swimmer-search-menu');
+    const swimmerToggleBtn = document.querySelector('.swimmer-search-toggle');
+    if (swimmerMenu && swimmerToggleBtn) {
+        swimmerMenu.style.display = 'none';
+        swimmerToggleBtn.style.background = 'transparent';
+        swimmerToggleBtn.style.color = '#555';
+        swimmerToggleBtn.style.borderRadius = '4px';
+    }
+
     go("searchAll", inputValue);
 }
 

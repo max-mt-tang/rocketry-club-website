@@ -219,6 +219,14 @@ select {
   padding: 5px;
 }
 
+/* BCST native select elements - darker blue background */
+#bcst-group-select,
+#bcst-gender-select,
+#bcst-swimmer-select {
+  background: #64b5f6 !important;
+  background-color: #64b5f6 !important;
+}
+
 /* ========================================
  * 4. FORMS & INPUT CONTROLS
  * ======================================== */
@@ -230,7 +238,7 @@ select {
 #bcst-group-select .select-text,
 #bcst-gender-select .select-text,
 #bcst-swimmer-select .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -348,7 +356,7 @@ select {
 
 /* BCST Dropdown Override - Make taller and align with buttons */
 .bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -381,7 +389,7 @@ select {
 div[id="bcst-group-select"] .select-text,
 div[id="bcst-gender-select"] .select-text,
 div[id="bcst-swimmer-select"] .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -418,7 +426,7 @@ div[id="bcst-swimmer-select"] span {
 #bcst-swimmer-container div.select-text,
 div[id^="bcst-"] .select-text,
 .bcst-nav-group div[class*="select"] {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 6px !important;
   padding: 10px 12px !important;
@@ -449,7 +457,7 @@ div[id^="bcst-"] .select-text,
   vertical-align: middle !important;
 }
 
-/* Maximum specificity override for BCST dropdowns - Force light blue background like Ray Tang button */
+/* Maximum specificity override for BCST dropdowns - Force darker blue background */
 body #bcst-group-container .select-text,
 body #bcst-gender-container .select-text,
 body #bcst-swimmer-container .select-text,
@@ -460,8 +468,8 @@ html body #bcst-swimmer-select,
 html body div[id="bcst-group-select"],
 html body div[id="bcst-gender-select"],
 html body div[id="bcst-swimmer-select"] {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-  background-color: #e3f2fd !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background-color: #64b5f6 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
@@ -472,8 +480,8 @@ div[class*="select"][id*="bcst"],
 *[id*="bcst-group"] .select-text,
 *[id*="bcst-gender"] .select-text,
 *[id*="bcst-swimmer"] .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-  background-color: #e3f2fd !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background-color: #64b5f6 !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
@@ -1364,6 +1372,14 @@ td {
 
 canvas {
   display: block;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Progress graph canvas width constraint */
+.content canvas#canvas {
+  max-width: 1200px;
+  width: 100%;
 } 
 
 /* ========================================
@@ -1871,8 +1887,8 @@ tbody tr:hover .full>.clickable {
 #bcst-gender-select,
 #bcst-swimmer-select,
 .bcst-nav-group .select-text {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-  background-color: #e3f2fd !important;
+  background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%) !important;
+  background-color: #64b5f6 !important;
 }
 
 /* ========================================
