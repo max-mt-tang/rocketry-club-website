@@ -1353,7 +1353,7 @@ async function showSearch(values, searchQuery = '') {
         window.updateContent('<div class="content"><p>No swimmers found (excluding swimmers older than 18).</p></div>');
         return;
     }
-    
+
     // Collect all pkeys to fetch genders
     const pkeys = [];
     for (const row of filteredValues) {
@@ -2401,21 +2401,67 @@ async function showTeamSearch(teams, searchQuery = '') {
         return;
     }
     
-    // Sort results: exact name matches first, then by LSC, then by name
+    // Sort results: prioritize teams that start with search term, then exact matches, then contains, then by LSC and name
     if (searchQuery) {
         const queryLower = searchQuery.toLowerCase().trim();
+        const queryOriginal = searchQuery.trim();
         teams.sort((a, b) => {
             const nameA = (a.name || '').toLowerCase();
             const nameB = (b.name || '').toLowerCase();
+            const nameAOriginal = (a.name || '').trim();
+            const nameBOriginal = (b.name || '').trim();
             
-            // Check for exact match
+            // Check for case-sensitive exact match first
+            const exactCaseA = nameAOriginal === queryOriginal;
+            const exactCaseB = nameBOriginal === queryOriginal;
+            
+            // Check for case-insensitive exact match
             const exactA = nameA === queryLower;
             const exactB = nameB === queryLower;
             
+            // Check if name starts with search term (case-sensitive)
+            const startsWithCaseA = nameAOriginal.startsWith(queryOriginal);
+            const startsWithCaseB = nameBOriginal.startsWith(queryOriginal);
+            
+            // Check if name starts with search term (case-insensitive)
+            const startsWithA = nameA.startsWith(queryLower);
+            const startsWithB = nameB.startsWith(queryLower);
+            
+            // Check if name contains search term as whole word (case-insensitive)
+            const wordRegex = new RegExp(`\\b${queryLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+            const containsWordA = wordRegex.test(nameA);
+            const containsWordB = wordRegex.test(nameB);
+            
+            // Check if name contains search term anywhere (case-insensitive)
+            const containsA = nameA.includes(queryLower);
+            const containsB = nameB.includes(queryLower);
+            
+            // Priority order:
+            // 1. Case-sensitive exact match
+            if (exactCaseA && !exactCaseB) return -1;
+            if (!exactCaseA && exactCaseB) return 1;
+            
+            // 2. Case-insensitive exact match
             if (exactA && !exactB) return -1;
             if (!exactA && exactB) return 1;
             
-            // Then sort by LSC, then by name
+            // 3. Starts with search term (case-sensitive)
+            if (startsWithCaseA && !startsWithCaseB) return -1;
+            if (!startsWithCaseA && startsWithCaseB) return 1;
+            
+            // 4. Starts with search term (case-insensitive)
+            if (startsWithA && !startsWithB) return -1;
+            if (!startsWithA && startsWithB) return 1;
+            
+            // 5. Contains search term as whole word
+            if (containsWordA && !containsWordB) return -1;
+            if (!containsWordA && containsWordB) return 1;
+            
+            // 6. Contains search term anywhere
+            if (containsA && !containsB) return -1;
+            if (!containsA && containsB) return 1;
+            
+            // 7. Within same priority level, sort by LSC, then by name
             if (a.lsc !== b.lsc) {
                 return (a.lsc || '').localeCompare(b.lsc || '');
             }
