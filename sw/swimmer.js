@@ -1308,6 +1308,312 @@ async function fetchGendersForSwimmers(pkeys) {
     return genderMap;
 }
 
+/**
+ * Create a BCST training group distribution chart with separate bars for girls and boys
+ * This uses the BCST roster data directly, not the search results
+ * @returns {string} HTML string for the group chart
+ */
+function createBCSTGroupChart() {
+    console.log('[createBCSTGroupChart] Creating chart from BCST roster data');
+    
+    if (!window.bcstRoster || !window.bcstRoster.isLoaded) {
+        console.log('[createBCSTGroupChart] BCST roster not loaded');
+        return '';
+    }
+    
+    // Get all groups from BCST roster
+    const groups = window.bcstRoster.getGroupHierarchy();
+    console.log('[createBCSTGroupChart] Groups:', groups);
+    
+    // Calculate group distribution by gender directly from roster
+    const groupCounts = {};
+    
+    // Initialize all groups
+    for (const group of groups) {
+        groupCounts[group] = { 'M': 0, 'F': 0 };
+    }
+    
+    // Count swimmers in each group directly from roster
+    for (const group of groups) {
+        const swimmers = window.bcstRoster.getSwimmers(group);
+        if (swimmers && swimmers.length > 0) {
+            for (const swimmer of swimmers) {
+                if (swimmer.gender) {
+                    const gender = swimmer.gender.toLowerCase();
+                    if (gender === 'male' || gender === 'm') {
+                        groupCounts[group]['M']++;
+                    } else if (gender === 'female' || gender === 'f') {
+                        groupCounts[group]['F']++;
+                    }
+                }
+            }
+        }
+    }
+    
+    console.log('[createBCSTGroupChart] Group counts:', groupCounts);
+    
+    // Filter out groups with no swimmers
+    const groupsWithSwimmers = groups.filter(group => {
+        const counts = groupCounts[group];
+        return counts && (counts['M'] > 0 || counts['F'] > 0);
+    });
+    
+    console.log('[createBCSTGroupChart] Groups with swimmers:', groupsWithSwimmers);
+    
+    if (groupsWithSwimmers.length === 0) {
+        console.log('[createBCSTGroupChart] No groups with swimmers');
+        return '';
+    }
+    
+    // Find max count for scaling
+    let maxCount = 1;
+    for (const group of groupsWithSwimmers) {
+        maxCount = Math.max(maxCount, groupCounts[group]['M'] + groupCounts[group]['F']);
+    }
+    
+    const chartHeight = 250;
+    const chartWidth = Math.max(800, groupsWithSwimmers.length * 120);
+    const groupWidth = 100; // Width for each group (contains 2 bars)
+    const barWidth = 35; // Width of each individual bar
+    const barGap = 5; // Gap between M and F bars within same group
+    const groupSpacing = 20; // Space between groups
+    const chartPadding = 60;
+    
+    let html = [];
+    html.push('<div class="content" style="margin-bottom: 30px;">');
+    html.push('<h3 style="margin-bottom: 15px; color: #333;">BCST Training Group Distribution</h3>');
+    html.push(`<div style="position: relative; width: ${chartWidth}px; height: ${chartHeight + chartPadding + 30}px; margin: 0 auto; background: #f8f9fa; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`);
+    
+    // Legend
+    html.push('<div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">');
+    html.push('<div style="display: flex; align-items: center; gap: 5px;"><div style="width: 20px; height: 20px; background: #3498db; border-radius: 3px;"></div><span style="font-size: 12px; color: #555;">Boys</span></div>');
+    html.push('<div style="display: flex; align-items: center; gap: 5px;"><div style="width: 20px; height: 20px; background: #e91e63; border-radius: 3px;"></div><span style="font-size: 12px; color: #555;">Girls</span></div>');
+    html.push('</div>');
+    
+    // Chart area
+    html.push(`<svg width="${chartWidth}" height="${chartHeight + chartPadding}" style="overflow: visible;">`);
+    
+    // Draw bars
+    const boyColor = '#3498db';
+    const girlColor = '#e91e63';
+    
+    groupsWithSwimmers.forEach((group, index) => {
+        const boyCount = groupCounts[group]['M'];
+        const girlCount = groupCounts[group]['F'];
+        
+        // Calculate bar heights
+        const boyHeight = maxCount > 0 ? (boyCount / maxCount) * chartHeight : 0;
+        const girlHeight = maxCount > 0 ? (girlCount / maxCount) * chartHeight : 0;
+        
+        // Position for this group
+        const groupX = chartPadding + index * (groupWidth + groupSpacing);
+        const boyX = groupX + (groupWidth - barWidth * 2 - barGap) / 2;
+        const girlX = boyX + barWidth + barGap;
+        
+        // Draw boys bar
+        html.push(`<rect x="${boyX}" y="${chartHeight - boyHeight}" width="${barWidth}" height="${boyHeight}" fill="${boyColor}" stroke="#fff" stroke-width="1.5" rx="3" style="cursor: pointer;" title="${group} Boys: ${boyCount}">`);
+        html.push(`</rect>`);
+        
+        // Draw count label on top of boys bar
+        if (boyCount > 0) {
+            html.push(`<text x="${boyX + barWidth / 2}" y="${chartHeight - boyHeight - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">${boyCount}</text>`);
+        }
+        
+        // Draw girls bar
+        html.push(`<rect x="${girlX}" y="${chartHeight - girlHeight}" width="${barWidth}" height="${girlHeight}" fill="${girlColor}" stroke="#fff" stroke-width="1.5" rx="3" style="cursor: pointer;" title="${group} Girls: ${girlCount}">`);
+        html.push(`</rect>`);
+        
+        // Draw count label on top of girls bar
+        if (girlCount > 0) {
+            html.push(`<text x="${girlX + barWidth / 2}" y="${chartHeight - girlHeight - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">${girlCount}</text>`);
+        }
+        
+        // Draw group label below bars (rotate if long)
+        const labelY = chartHeight + 25;
+        if (group.length > 10) {
+            // Rotate long labels
+            html.push(`<text x="${groupX + groupWidth / 2}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="500" fill="#555" transform="rotate(-45 ${groupX + groupWidth / 2} ${labelY})">${group}</text>`);
+        } else {
+            html.push(`<text x="${groupX + groupWidth / 2}" y="${labelY}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="500" fill="#555">${group}</text>`);
+        }
+    });
+    
+    // Draw Y-axis
+    html.push(`<line x1="${chartPadding}" y1="0" x2="${chartPadding}" y2="${chartHeight}" stroke="#333" stroke-width="2"></line>`);
+    
+    // Draw X-axis
+    html.push(`<line x1="${chartPadding}" y1="${chartHeight}" x2="${chartWidth - chartPadding}" y2="${chartHeight}" stroke="#333" stroke-width="2"></line>`);
+    
+    // Y-axis labels
+    const yAxisSteps = 5;
+    for (let i = 0; i <= yAxisSteps; i++) {
+        const value = Math.round((maxCount / yAxisSteps) * i);
+        const y = chartHeight - (i / yAxisSteps) * chartHeight;
+        html.push(`<text x="${chartPadding - 10}" y="${y + 4}" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">${value}</text>`);
+    }
+    
+    html.push('</svg>');
+    html.push('</div>');
+    html.push('</div>');
+    
+    return html.join('');
+}
+
+/**
+ * Create an age group distribution chart with separate bars for girls and boys
+ * @param {Array} values - Array of swimmer data rows
+ * @param {Object} idx - Index mapping object
+ * @param {Map} genderMap - Map of pkey to gender ('M' or 'F')
+ * @returns {string} HTML string for the age group chart
+ */
+function createAgeGroupChart(values, idx, genderMap) {
+    if (!values || values.length === 0) {
+        return '';
+    }
+    
+    // Calculate age group distribution by gender
+    const ageGroupCounts = {
+        '10U': { 'M': 0, 'F': 0 },
+        '11-12': { 'M': 0, 'F': 0 },
+        '13-14': { 'M': 0, 'F': 0 },
+        '15-16': { 'M': 0, 'F': 0 },
+        '17-18': { 'M': 0, 'F': 0 }
+    };
+    
+    for (const row of values) {
+        const age = row[idx.age];
+        if (age === undefined || age === null) continue;
+        
+        // Get gender from map or row
+        let gender = genderMap ? genderMap.get(row[idx.pkey]) : '';
+        if (!gender && idx.gender !== undefined && idx.gender !== null && row[idx.gender] !== undefined && row[idx.gender] !== null && row[idx.gender] !== '') {
+            const genderCode = row[idx.gender];
+            if (genderCode === 1 || genderCode === '1' || genderCode === 'F' || genderCode === 'f' || genderCode === 'Female') {
+                gender = 'F';
+            } else if (genderCode === 2 || genderCode === '2' || genderCode === 'M' || genderCode === 'm' || genderCode === 'Male') {
+                gender = 'M';
+            }
+        }
+        
+        // Normalize gender to M or F
+        if (gender && gender.toUpperCase() === 'MALE') gender = 'M';
+        if (gender && gender.toUpperCase() === 'FEMALE') gender = 'F';
+        if (gender && gender.toUpperCase() !== 'M' && gender.toUpperCase() !== 'F') {
+            gender = ''; // Unknown gender
+        }
+        gender = gender ? gender.toUpperCase() : '';
+        
+        let ageGroup = null;
+        if (age <= 10) {
+            ageGroup = '10U';
+        } else if (age >= 11 && age <= 12) {
+            ageGroup = '11-12';
+        } else if (age >= 13 && age <= 14) {
+            ageGroup = '13-14';
+        } else if (age >= 15 && age <= 16) {
+            ageGroup = '15-16';
+        } else if (age >= 17 && age <= 18) {
+            ageGroup = '17-18';
+        }
+        
+        if (ageGroup && gender && (gender === 'M' || gender === 'F')) {
+            ageGroupCounts[ageGroup][gender]++;
+        }
+    }
+    
+    // Find max count for scaling (across all age groups and genders)
+    let maxCount = 1;
+    for (const ageGroup in ageGroupCounts) {
+        maxCount = Math.max(maxCount, ageGroupCounts[ageGroup]['M'] + ageGroupCounts[ageGroup]['F']);
+    }
+    
+    const chartHeight = 200;
+    const chartWidth = 700;
+    const groupWidth = 100; // Width for each age group (contains 2 bars)
+    const barWidth = 35; // Width of each individual bar
+    const barGap = 5; // Gap between M and F bars within same age group
+    const groupSpacing = 20; // Space between age groups
+    const chartPadding = 50;
+    
+    let html = [];
+    html.push('<div class="content" style="margin-bottom: 20px;">');
+    html.push('<h3 style="margin-bottom: 15px; color: #333;">Age Group Distribution</h3>');
+    html.push(`<div style="position: relative; width: ${chartWidth}px; height: ${chartHeight + chartPadding + 30}px; margin: 0 auto; background: #f8f9fa; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`);
+    
+    // Legend
+    html.push('<div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 10px;">');
+    html.push('<div style="display: flex; align-items: center; gap: 5px;"><div style="width: 20px; height: 20px; background: #3498db; border-radius: 3px;"></div><span style="font-size: 12px; color: #555;">Boys</span></div>');
+    html.push('<div style="display: flex; align-items: center; gap: 5px;"><div style="width: 20px; height: 20px; background: #e91e63; border-radius: 3px;"></div><span style="font-size: 12px; color: #555;">Girls</span></div>');
+    html.push('</div>');
+    
+    // Chart area
+    html.push(`<svg width="${chartWidth}" height="${chartHeight + chartPadding}" style="overflow: visible;">`);
+    
+    // Draw bars
+    const ageGroups = ['10U', '11-12', '13-14', '15-16', '17-18'];
+    const boyColor = '#3498db';
+    const girlColor = '#e91e63';
+    
+    ageGroups.forEach((ageGroup, index) => {
+        const boyCount = ageGroupCounts[ageGroup]['M'];
+        const girlCount = ageGroupCounts[ageGroup]['F'];
+        
+        // Calculate bar heights
+        const boyHeight = maxCount > 0 ? (boyCount / maxCount) * chartHeight : 0;
+        const girlHeight = maxCount > 0 ? (girlCount / maxCount) * chartHeight : 0;
+        
+        // Position for this age group
+        const groupX = chartPadding + index * (groupWidth + groupSpacing);
+        const boyX = groupX + (groupWidth - barWidth * 2 - barGap) / 2;
+        const girlX = boyX + barWidth + barGap;
+        
+        // Draw boys bar
+        if (boyCount > 0 || girlCount > 0) {
+            html.push(`<rect x="${boyX}" y="${chartHeight - boyHeight}" width="${barWidth}" height="${boyHeight}" fill="${boyColor}" stroke="#fff" stroke-width="1.5" rx="3" style="cursor: pointer;" title="${ageGroup} Boys: ${boyCount}">`);
+            html.push(`</rect>`);
+            
+            // Draw count label on top of boys bar
+            if (boyCount > 0) {
+                html.push(`<text x="${boyX + barWidth / 2}" y="${chartHeight - boyHeight - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">${boyCount}</text>`);
+            }
+        }
+        
+        // Draw girls bar
+        if (boyCount > 0 || girlCount > 0) {
+            html.push(`<rect x="${girlX}" y="${chartHeight - girlHeight}" width="${barWidth}" height="${girlHeight}" fill="${girlColor}" stroke="#fff" stroke-width="1.5" rx="3" style="cursor: pointer;" title="${ageGroup} Girls: ${girlCount}">`);
+            html.push(`</rect>`);
+            
+            // Draw count label on top of girls bar
+            if (girlCount > 0) {
+                html.push(`<text x="${girlX + barWidth / 2}" y="${chartHeight - girlHeight - 5}" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">${girlCount}</text>`);
+            }
+        }
+        
+        // Draw age group label below bars
+        html.push(`<text x="${groupX + groupWidth / 2}" y="${chartHeight + 20}" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#555">${ageGroup}</text>`);
+    });
+    
+    // Draw Y-axis
+    html.push(`<line x1="${chartPadding}" y1="0" x2="${chartPadding}" y2="${chartHeight}" stroke="#333" stroke-width="2"></line>`);
+    
+    // Draw X-axis
+    html.push(`<line x1="${chartPadding}" y1="${chartHeight}" x2="${chartWidth - chartPadding}" y2="${chartHeight}" stroke="#333" stroke-width="2"></line>`);
+    
+    // Y-axis labels
+    const yAxisSteps = 5;
+    for (let i = 0; i <= yAxisSteps; i++) {
+        const value = Math.round((maxCount / yAxisSteps) * i);
+        const y = chartHeight - (i / yAxisSteps) * chartHeight;
+        html.push(`<text x="${chartPadding - 10}" y="${y + 4}" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#666">${value}</text>`);
+    }
+    
+    html.push('</svg>');
+    html.push('</div>');
+    html.push('</div>');
+    
+    return html.join('');
+}
+
 async function showSearch(values, searchQuery = '') {
     console.log('showSearch() called with', values ? values.length : 0, 'values, query:', searchQuery);
     
@@ -1366,6 +1672,73 @@ async function showSearch(values, searchQuery = '') {
 
     // Always show search results table (don't auto-navigate even for 1 result)
     let html = [];
+    
+    // Check if this is Bellevue Club Swim Team and add special group chart
+    // Check both search query and club names in the data
+    let isBCST = false;
+    const searchLower = (searchQuery || '').toLowerCase();
+    
+    if (searchQuery) {
+        isBCST = searchLower.includes('bellevue') ||
+                 searchLower.includes('bcst') ||
+                 searchLower.includes('bc swim') ||
+                 searchLower === 'bc';
+        console.log('[showSearch] Checking BCST detection - searchQuery:', searchQuery, 'isBCST:', isBCST);
+    }
+    
+    // Also check club names in the data
+    if (!isBCST && filteredValues.length > 0) {
+        const clubName = filteredValues[0][idx.clubName] || '';
+        const clubLower = clubName.toLowerCase();
+        isBCST = clubLower.includes('bellevue') ||
+                 clubLower.includes('bcst') ||
+                 clubLower.includes('bc swim');
+        console.log('[showSearch] Checking BCST detection - clubName:', clubName, 'isBCST:', isBCST);
+    }
+    
+    console.log('[showSearch] Final isBCST:', isBCST, 'window.bcstRoster exists:', !!window.bcstRoster);
+    
+    if (isBCST) {
+        // Wait for bcstRoster to be available if it doesn't exist yet
+        if (!window.bcstRoster) {
+            console.log('[showSearch] Waiting for bcstRoster to be available...');
+            let attempts = 0;
+            while (!window.bcstRoster && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+        }
+        
+        if (window.bcstRoster) {
+            // Ensure BCST roster is loaded
+            if (!window.bcstRoster.isLoaded) {
+                console.log('[showSearch] Loading BCST roster...');
+                await window.bcstRoster.loadRoster();
+            }
+            
+            if (window.bcstRoster.isLoaded) {
+                console.log('[showSearch] Creating BCST group chart from roster data...');
+                try {
+                    // Create chart directly from BCST roster (no matching needed)
+                    const groupChartHtml = createBCSTGroupChart();
+                    console.log('[showSearch] Group chart HTML length:', groupChartHtml ? groupChartHtml.length : 0);
+                    if (groupChartHtml) {
+                        html.push(groupChartHtml);
+                    }
+                } catch (error) {
+                    console.error('[showSearch] Error creating BCST group chart:', error);
+                    // Don't block if chart creation fails
+                }
+            } else {
+                console.log('[showSearch] BCST roster failed to load');
+            }
+        } else {
+            console.log('[showSearch] bcstRoster not available after waiting');
+        }
+    }
+    
+    // Create age group chart with gender breakdown
+    html.push(createAgeGroupChart(filteredValues, idx, genderMap));
 
     html.push(
         '<table class="fill top-margin" id="search-table"><thead><tr class="th">',
@@ -3377,6 +3750,41 @@ async function selectTeam(teamName, lsc, clubCode) {
         window.updateContent(debugInfo.join('') + '</div>');
     }
 }
+
+/**
+ * Quick search function for BCST team - shows all BCST swimmers
+ * This is a shortcut button for frequently searching Bellevue Club Swim Team
+ */
+async function quickSearchBCSTTeam() {
+    console.log('[quickSearchBCSTTeam] Quick search BCST team triggered');
+    
+    // Try common variations of BCST team name
+    const teamName = 'Bellevue Club Swim Team';
+    const lsc = 'PN'; // Pacific Northwest
+    const clubCode = 'BC'; // Bellevue Club code
+    
+    // Call selectTeam with BCST information
+    if (typeof window.selectTeam === 'function') {
+        await window.selectTeam(teamName, lsc, clubCode);
+    } else {
+        console.error('[quickSearchBCSTTeam] selectTeam function not available');
+        // Fallback: try using searchByTeam
+        const input = document.getElementById('team-search-input');
+        if (input) {
+            input.value = 'Bellevue Club';
+            if (typeof window.searchByTeam === 'function') {
+                await window.searchByTeam();
+            } else {
+                alert('Search function not available. Please use the team search menu.');
+            }
+        } else {
+            alert('Please use the team search menu to search for Bellevue Club Swim Team.');
+        }
+    }
+}
+
+// Export the function globally
+window.quickSearchBCSTTeam = quickSearchBCSTTeam;
 
 // Helper function to fetch names for swimmers
 async function fetchNamesForSwimmers(pkeys) {

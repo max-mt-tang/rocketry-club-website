@@ -159,6 +159,31 @@ Last Updated: 2025
                             <option value="">Swimmer</option>
                         </select>
                         
+                        <!-- Quick search BCST team button -->
+                        <button
+                            onclick="quickSearchBCSTTeam()"
+                            class="bcst-team-button"
+                            style="background: transparent !important; color: #555; padding: 0; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; border: none; cursor: pointer; transition: all 0.2s ease; position: relative; margin-left: 8px;"
+                            title="Search BCST Team"
+                        >
+                            🏊
+                        </button>
+                        <style>
+                            .bcst-team-button:hover {
+                                background: rgba(255, 152, 0, 0.1) !important;
+                                color: #ff9800 !important;
+                            }
+                            .bcst-team-button:hover::before {
+                                content: '';
+                                position: absolute;
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background: rgba(255, 152, 0, 0.1);
+                                z-index: -1;
+                            }
+                        </style>
+                        
                         <!-- Schedule button -->
                         <button
                             onclick="showBCSchedule()"
