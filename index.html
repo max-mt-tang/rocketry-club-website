@@ -9,115 +9,13 @@
     <link rel="canonical" href="https://interlakerocketry.org/">
     <meta property="og:url" content="https://interlakerocketry.org/">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="refresh.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="refresh">
     <header class="hero">
-        <div class="hero-carousel">
-
-            <div class="carousel-slide active">
-                <img src="images/hero/KQ1A1243-2.jpg" alt="Rocket preparation at 60 Acres North Field" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Pre-Launch Preparation</h3>
-                    <p>Conducting safety checks before initiating launch</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1255-2.jpg" alt="Successful rocket descent" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Rocket Descent</h3>
-                    <p>Blackberry Pi's rocket descends after a successful launch</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1264-2.jpg" alt="Rocket return" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Rocket Retrieval</h3>
-                    <p>Cleaning and retrieving the rocket from the wet grass</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1266.jpg" alt="Rocket preparation" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Launch Preparation</h3>
-                    <p>Rushing back to the rest of the team to quickly prepare for the next launch</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1275-2.jpg" alt="Countdown" loading="lazy">
-                <div class="slide-caption">
-                    <h3>3, 2, 1, 0</h3>
-                    <p>Ms. Dossett counting down to launch</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1277-2.jpg" alt="Students observing launch" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Tracking the Rocket</h3>
-                    <p>A student observes the rocket's flight path and records the time of flight</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1281-2.jpg" alt="Chasing the rocket" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Chasing the Rocket</h3>
-                    <p>Smoke wafts across the field as studnets begin to chase the rocket</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1296-2.jpg" alt="Reaching the rocket" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Reaching the Rocket</h3>
-                    <p>Getting ready to clean the rocket and record flight data</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1304-2.jpg" alt="Ms. Dossett" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Ms. Dossett</h3>
-                    <p>Ms. Dosset stares into the distance with a cup of coffee in hand</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1309-2.jpg" alt="Rocket data collection" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Data Collection</h3>
-                    <p>Listening to the altimeter's beeps and recording data</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1313-2.jpg" alt="Qualification Flight" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Qualification Flight</h3>
-                    <p>Jim Pommert, a NAR Observer, checks Blackberry Pi's rocket after its second qualification flight</p>
-                </div>
-            </div>
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1336.JPG" alt="Team Photo" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Team Photo</h3>
-                    <p>Blackberry Pi celebrates successfully qualifying for nationals with a team photo</p>
-                </div>
-            </div>
-
-            <div class="carousel-slide">
-                <img src="images/hero/KQ1A1483-2.jpg" alt="Setting up the rocket" loading="lazy">
-                <div class="slide-caption">
-                    <h3>Launch Pad</h3>
-                    <p>Setting up the rocket on the launch pad</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Carousel Navigation -->
-        <div class="carousel-nav">
-            <button class="carousel-btn prev" onclick="changeSlide(-1)">❮</button>
-            <button class="carousel-btn next" onclick="changeSlide(1)">❯</button>
-        </div>
-        
-
-        
+        <div class="hero-photo"><img src="images/hero/KQ1A1483-2.jpg" alt="Preparing a rocket on the launch pad" fetchpriority="high"></div>
         <nav class="navbar">
             <div class="nav-brand">
                 <a href="https://interlakehigh.bsd405.org/" target="_blank" class="school-link">
@@ -126,12 +24,12 @@
                 </a>
                 <h1 class="mobile-title">Interlake Rocketry</h1>
             </div>
-            <button class="menu-toggle" aria-label="Toggle navigation">
+            <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-menu">
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
                 <span class="hamburger-line"></span>
             </button>
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="main-menu">
                 <li><a href="#about">About</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#announcements">Announcements</a></li>
@@ -142,36 +40,25 @@
             </ul>
         </nav>
         <div class="hero-content">
-            <h1 class="hero-title"><span class="hero-title-small">Interlake High School</span><br>Rocketry Club</h1>
-            <p class="hero-subtitle">Reaching for the stars at Interlake High School</p>
-            <a href="#about" class="cta-button">Explore Our Mission</a>
+            <p class="eyebrow">INTERLAKE HIGH SCHOOL · ROCKETRY CLUB</p>
+            <h1 class="hero-title">Built by students.<br><span>Bound for the sky.</span></h1>
+            <p class="hero-subtitle">From our first sketches to the final countdown. We design, build, and launch rockets—together.</p>
+            <div class="hero-actions"><a href="#contact" class="cta-button">Join the club ↗</a><a href="#projects" class="secondary-button">Explore our projects →</a></div>
         </div>
+        <div class="hero-foot"><span>DESIGN. BUILD. TEST. LAUNCH.</span><a href="#about">Discover Interlake Rocketry ↓</a></div>
     </header>
 
     <main>
         <section id="about" class="section">
-            <div class="container">
-                <h2>About Interlake Rocketry Club</h2>
-                <div class="about-grid">
-                    <div class="about-card">
-                        <h3>Mission</h3>
-                        <p>To inspire Interlake students to become the next generation of aerospace engineers through hands-on rocketry projects and STEM education.</p>
-                    </div>
-                    <div class="about-card">
-                        <h3>Vision</h3>
-                        <p>Building rockets that reach new heights while building skills that last a lifetime at Interlake High School.</p>
-                    </div>
-                    <div class="about-card">
-                        <h3>Values</h3>
-                        <p>Innovation, teamwork, safety, and a passion for exploration drive everything we do as Interlake Saints.</p>
-                    </div>
-                </div>
+            <div class="container intro-layout">
+                <div><p class="eyebrow">01 / WHO WE ARE</p><h2>A shared curiosity.<br>A higher ambition.</h2><p class="intro-copy">We're a team of Interlake students turning a fascination with flight into something we can build with our own hands.</p><p>Through design sessions, field tests, and competition launches, we learn by doing—and by helping each other get better. Whether you're a first-time builder or already love engineering, there's a place for you here.</p><a class="text-link" href="#team">Meet the people behind the rockets ↗</a></div>
+                <figure class="team-feature"><img src="images/hero/KQ1A1336.JPG" alt="Blackberry Pi team celebrating qualification for nationals" loading="lazy"><figcaption>OUR TEAM / A moment worth celebrating</figcaption></figure>
             </div>
         </section>
 
         <section id="projects" class="section">
             <div class="container">
-                <h2>Our Projects</h2>
+                <p class="eyebrow">02 / FROM IDEA TO FLIGHT</p><h2>Made to leave the ground.</h2>
                 <div class="projects-grid">
                     <div class="project-card">
                         <div class="project-logo">
@@ -232,67 +119,66 @@
 
         <section id="gallery" class="section">
             <div class="container">
-                <h2>Photo Gallery</h2>
-                <p class="gallery-intro">Explore our rocketry adventures through organized photo collections!</p>
+                <p class="eyebrow">03 / LIFE AT INTERLAKE ROCKETRY</p><h2>More than the launch.</h2><p class="gallery-intro">The preparation, the people, and the moments in between. Select a photo to take a closer look.</p><div class="photo-grid"><button class="photo-tile" data-photo="images/hero/KQ1A1243-2.jpg" aria-label="Enlarge: Pre-launch preparation"><img src="images/hero/KQ1A1243-2.jpg" alt="Pre-launch preparation" loading="lazy"><span>The details before liftoff ↗</span></button><button class="photo-tile" data-photo="images/hero/KQ1A1277-2.jpg" aria-label="Enlarge: Student tracking a rocket in flight"><img src="images/hero/KQ1A1277-2.jpg" alt="Student tracking a rocket in flight" loading="lazy"><span>Eyes on the sky ↗</span></button><button class="photo-tile" data-photo="images/hero/KQ1A1309-2.jpg" aria-label="Enlarge: Team collecting rocket flight data"><img src="images/hero/KQ1A1309-2.jpg" alt="Team collecting rocket flight data" loading="lazy"><span>Every flight teaches us something ↗</span></button></div><h3 class="album-title">Explore the albums</h3>
                 <div class="gallery-categories">
                     <a href="launches.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400&h=300&fit=crop&crop=center" alt="Rocket launches" loading="lazy">
+                            <img src="images/hero/KQ1A1483-2.jpg" alt="Rocket launches" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Launches</h3>
                             <p>All our rocket launches, from first attempts to record-breaking missions</p>
-                            <span class="category-count">12+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                     <a href="competitions.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1541185933-ef5d8cb6e496?w=400&h=300&fit=crop&crop=center" alt="Competitions" loading="lazy">
+                            <img src="images/hero/KQ1A1313-2.jpg" alt="Competitions" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Competitions</h3>
                             <p>Regional and national competitions where we represent Interlake</p>
-                            <span class="category-count">8+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                     <a href="workshops.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1516849672393-9c3d0a4f2e8d?w=400&h=300&fit=crop&crop=center" alt="Workshops" loading="lazy">
+                            <img src="images/hero/KQ1A1243-2.jpg" alt="Workshops" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Workshops</h3>
                             <p>Design sessions, building workshops, and testing phases</p>
-                            <span class="category-count">15+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                     <a href="team.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center" alt="Team activities" loading="lazy">
+                            <img src="images/hero/KQ1A1336.JPG" alt="Team activities" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Team Activities</h3>
                             <p>Behind-the-scenes moments and team celebrations</p>
-                            <span class="category-count">20+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                     <a href="testing.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop&crop=center" alt="Testing and safety" loading="lazy">
+                            <img src="images/hero/KQ1A1309-2.jpg" alt="Testing and safety" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Testing & Safety</h3>
                             <p>Rigorous testing procedures and safety protocols</p>
-                            <span class="category-count">10+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                     <a href="achievements.html" class="category-card">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center" alt="Achievements and awards" loading="lazy">
+                            <img src="images/hero/KQ1A1336.JPG" alt="Achievements and awards" loading="lazy">
                         </div>
                         <div class="category-content">
                             <h3>Achievements</h3>
                             <p>Awards, records, and milestones we've accomplished</p>
-                            <span class="category-count">6+ photos</span>
+                            <span class="category-count">View album →</span>
                         </div>
                     </a>
                 </div>
@@ -441,125 +327,7 @@
         </div>
     </footer>
 
-    <script>
-        // Photo Carousel Functionality
-        let currentSlideIndex = 0;
-        const slides = document.querySelectorAll('.carousel-slide');
-        
-        function showSlide(index) {
-            // Hide all slides
-            slides.forEach(slide => slide.classList.remove('active'));
-            
-            // Show current slide
-            slides[index].classList.add('active');
-        }
-        
-        function changeSlide(direction) {
-            currentSlideIndex += direction;
-            
-            if (currentSlideIndex >= slides.length) {
-                currentSlideIndex = 0;
-            } else if (currentSlideIndex < 0) {
-                currentSlideIndex = slides.length - 1;
-            }
-            
-            showSlide(currentSlideIndex);
-        }
-        
-        // Auto-advance slides every 5 seconds
-        let autoAdvanceInterval;
-        
-        function startAutoAdvance() {
-            autoAdvanceInterval = setInterval(() => {
-                changeSlide(1);
-            }, 5000);
-        }
-        
-        function stopAutoAdvance() {
-            clearInterval(autoAdvanceInterval);
-        }
-        
-        // Pause auto-advance on hover
-        const heroCarousel = document.querySelector('.hero-carousel');
-        if (heroCarousel) {
-            heroCarousel.addEventListener('mouseenter', stopAutoAdvance);
-            heroCarousel.addEventListener('mouseleave', startAutoAdvance);
-        }
-        
-        // Mobile Menu Toggle Functionality
-        function initMobileMenu() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const navMenu = document.querySelector('.nav-menu');
-            const navLinks = document.querySelectorAll('.nav-menu a');
-            
-            if (menuToggle && navMenu) {
-                menuToggle.addEventListener('click', function() {
-                    menuToggle.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-                
-                // Close menu when a link is clicked
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        menuToggle.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    });
-                });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    if (!menuToggle.contains(event.target) && !navMenu.contains(event.target)) {
-                        menuToggle.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    }
-                });
-            }
-        }
-        
-        // Navbar scroll transparency effect
-        function initNavbarScroll() {
-            const navbar = document.querySelector('.navbar');
-            
-            if (navbar) {
-                // Use smaller threshold for mobile devices
-                const isMobile = window.innerWidth <= 768;
-                const scrollThreshold = isMobile ? 50 : 100;
-                
-                function handleScroll() {
-                    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-                    
-                    if (scrollY > scrollThreshold) {
-                        navbar.classList.add('scrolled');
-                    } else {
-                        navbar.classList.remove('scrolled');
-                    }
-                }
-                
-                // Add scroll listener with throttling for better performance
-                let ticking = false;
-                function requestTick() {
-                    if (!ticking) {
-                        requestAnimationFrame(handleScroll);
-                        ticking = true;
-                        setTimeout(() => { ticking = false; }, 16);
-                    }
-                }
-                
-                window.addEventListener('scroll', requestTick, { passive: true });
-                
-                // Also listen for touch events on mobile
-                if (isMobile) {
-                    window.addEventListener('touchmove', requestTick, { passive: true });
-                }
-            }
-        }
-        
-        // Start auto-advance on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            startAutoAdvance();
-            initMobileMenu();
-            initNavbarScroll();
-        });
-    </script>
+    <dialog class="photo-dialog" aria-label="Enlarged club photo"><button class="close-photo" aria-label="Close photo">Close ✕</button><img alt=""><p></p></dialog>
+    <script src="refresh.js"></script>
 </body>
 </html>
