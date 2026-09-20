@@ -15,12 +15,16 @@
 </head>
 <body class="refresh">
     <header class="hero">
-        <div class="hero-photo"><img src="images/hero/KQ1A1483-2.jpg" alt="Preparing a rocket on the launch pad" fetchpriority="high"></div>
+        <div class="hero-photo" role="region" aria-roledescription="carousel" aria-label="Club photos">
+            <div class="hero-frame is-current" role="group" aria-roledescription="slide" aria-label="1 of 3"><img src="images/hero/KQ1A1483-2.jpg" alt="Preparing a rocket on the launch pad" fetchpriority="high"></div>
+            <div class="hero-frame" role="group" aria-roledescription="slide" aria-label="2 of 3" aria-hidden="true"><img src="images/hero/KQ1A1336.JPG" alt="Blackberry Pi team celebrating qualification for nationals" decoding="async"></div>
+            <div class="hero-frame" role="group" aria-roledescription="slide" aria-label="3 of 3" aria-hidden="true"><img src="images/hero/KQ1A1309-2.jpg" alt="Team collecting rocket flight data" decoding="async"></div>
+        </div>
         <nav class="navbar">
             <div class="nav-brand">
                 <a href="https://interlakehigh.bsd405.org/" target="_blank" class="school-link">
-                    <img src="images/InterlakeHighDogHorizontalwText-White.svg" alt="Interlake High School Logo" class="school-logo desktop-logo" onerror="this.style.display='none'">
-                    <img src="images/InterlakeHighDog-Mobile-White.svg" alt="Interlake High School Logo" class="school-logo mobile-logo" onerror="this.style.display='none'">
+                    <img src="images/InterlakeHighDogHorizontalwText-White.svg" data-light-src="images/InterlakeHighDogHorizontalwText-White.svg" data-dark-src="images/InterlakeHighDogHorizontalwText-Blue.svg" alt="Interlake High School Logo" class="school-logo desktop-logo" onerror="this.style.display='none'">
+                    <img src="images/InterlakeHighDog-Mobile-White.svg" data-light-src="images/InterlakeHighDog-Mobile-White.svg" data-dark-src="images/InterlakeHighDog-Mobile-Blue.svg" alt="Interlake High School Logo" class="school-logo mobile-logo" onerror="this.style.display='none'">
                 </a>
                 <h1 class="mobile-title">Interlake Rocketry</h1>
             </div>
@@ -44,6 +48,12 @@
             <h1 class="hero-title">Built by students.<br><span>Bound for the sky.</span></h1>
             <p class="hero-subtitle">From our first sketches to the final countdown. We design, build, and launch rockets—together.</p>
             <div class="hero-actions"><a href="#contact" class="cta-button">Join the club ↗</a><a href="#projects" class="secondary-button">Explore our projects →</a></div>
+        </div>
+        <div class="hero-slideshow-controls" role="group" aria-label="Photo slideshow controls" hidden>
+            <span class="slide-position" aria-live="off">01 / 03</span>
+            <button type="button" class="slideshow-toggle" aria-label="Pause slideshow"><span aria-hidden="true">Ⅱ</span></button>
+            <button type="button" class="slideshow-previous" aria-label="Previous photo"><span aria-hidden="true">←</span></button>
+            <button type="button" class="slideshow-next" aria-label="Next photo"><span aria-hidden="true">→</span></button>
         </div>
         <div class="hero-foot"><span>DESIGN. BUILD. TEST. LAUNCH.</span><a href="#about">Discover Interlake Rocketry ↓</a></div>
     </header>

@@ -72,3 +72,56 @@
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
 .refresh #contact p,.refresh #contact .contact-info,.refresh #contact .contact-item,.refresh #contact a { color:#e0e8f0; }
+
+/* School-style header: white branding over photography, blue on white after scroll. */
+.refresh header.hero nav.navbar {
+    background:transparent!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    border-bottom:1px solid transparent!important;
+    box-shadow:none!important;
+    padding:24px 32px!important;
+    transition:background-color .25s ease, padding .25s ease, box-shadow .25s ease!important;
+}
+.refresh header.hero nav.navbar.scrolled {
+    background:#fff!important;
+    border-bottom-color:#e3e8ec!important;
+    box-shadow:0 3px 16px #0c23400d!important;
+    padding:14px 32px!important;
+}
+.refresh .navbar .school-logo { filter:none!important; height:52px; margin-top:0; }
+.refresh .navbar .nav-menu a,.refresh .navbar .mobile-title { color:#fff!important; }
+.refresh .navbar.scrolled .nav-menu a,.refresh .navbar.scrolled .mobile-title { color:#172b40!important; }
+.refresh .navbar .nav-menu a:hover { color:#b8d9ff!important; }
+.refresh .navbar.scrolled .nav-menu a:hover { color:#176ba1!important; }
+.refresh .navbar .hamburger-line { background:#fff!important; }
+.refresh .navbar.scrolled .hamburger-line { background:#172b40!important; }
+@media(max-width:768px) {
+    .refresh header.hero nav.navbar { padding:18px 22px!important; }
+    .refresh header.hero nav.navbar.scrolled { padding:12px 22px!important; }
+    .refresh .navbar .mobile-logo { width:32px; height:32px; margin:0; }
+    .refresh .navbar .desktop-logo { display:none; }
+    .refresh .navbar .nav-menu { background:#fff; }
+    .refresh .navbar .nav-menu a { color:#172b40!important; }
+    .refresh .navbar .mobile-title { font-size:clamp(16px,4.7vw,24px); }
+}
+@media(prefers-reduced-motion:reduce) {
+    .refresh header.hero nav.navbar { transition:none!important; }
+}
+
+/* Hero photo slideshow, independent of the floating navigation. */
+.hero-frame { position:absolute; inset:0; opacity:0; transition:opacity .8s ease; }
+.hero-frame.is-current { opacity:1; }
+.hero-photo:after { pointer-events:none; }
+.hero-slideshow-controls { position:absolute; bottom:92px; right:32px; z-index:4; display:flex; align-items:center; gap:14px; color:#fff; }
+.hero-slideshow-controls[hidden] { display:none; }
+.hero-slideshow-controls button { width:54px; height:54px; border:1px solid #ffffffc0; border-radius:50%; background:#081b2d33; color:#fff; cursor:pointer; font:26px/1 Arial,sans-serif; display:grid; place-items:center; transition:background .2s,color .2s; }
+.hero-slideshow-controls button:hover { background:white; color:#172b40; }
+.slide-position { font-size:11px; letter-spacing:.12em; margin-right:8px; font-variant-numeric:tabular-nums; }
+@media(max-width:768px) {
+ .hero-slideshow-controls { bottom:77px; right:22px; gap:10px; }
+ .hero-slideshow-controls button { width:44px; height:44px; font-size:23px; }
+ .refresh .hero { min-height:740px; }
+ .refresh .hero-content { top:43%; }
+}
+@media(prefers-reduced-motion:reduce) { .hero-frame { transition:none; } }
