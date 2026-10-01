@@ -139,3 +139,34 @@
  .refresh .hero-content { top:43%; }
 }
 @media(prefers-reduced-motion:reduce) { .hero-frame { transition:none; } }
+
+/* Year-by-year leadership, arranged from student leaders to adult support. */
+.leadership-year { border-top:1px solid #cbd6df; margin-top:20px; }
+.leadership-year summary { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:24px 0; cursor:pointer; list-style:none; color:#0c2340; }
+.leadership-year summary::-webkit-details-marker { display:none; }
+.leadership-year summary::after { content:'+'; font-size:28px; line-height:1; }
+.leadership-year[open] summary::after { content:'−'; }
+.leadership-year summary h3 { margin:0; font-size:clamp(1.2rem,2.5vw,1.6rem); }
+.leadership-hierarchy { display:grid; gap:24px; padding:8px 0 24px; }
+.leadership-row { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:24px; }
+.leadership-row-2 .team-member { grid-column:span 2; }
+.leadership-row-2 .team-member:first-child { grid-column:2 / span 2; }
+.leadership-row-3 .team-member { grid-column:span 2; }
+.leadership-row-1 .team-member { grid-column:3 / span 2; }
+.refresh .leadership-row .team-member { min-width:0; padding:28px 20px; }
+.refresh .leadership-row[data-level="presidents"] .team-member { border-top:3px solid #225ee8; }
+.refresh .leadership-row .team-member h4 { color:#0c2340; font-size:1.2rem; margin:0 0 16px; }
+.refresh .leadership-row .team-member p { color:#23374a; font-weight:400; }
+.refresh .leadership-row .leadership-name { font-weight:600; margin-bottom:12px; }
+.refresh .leadership-row .member-photo { width:96px; height:120px; }
+.refresh .leadership-row .member-email { overflow-wrap:anywhere; }
+@media(max-width:768px) {
+ .leadership-row { grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+ .leadership-row-2 .team-member,.leadership-row-2 .team-member:first-child,.leadership-row-3 .team-member,.leadership-row-1 .team-member { grid-column:auto; }
+ .leadership-row-3 .team-member:last-child,.leadership-row-1 .team-member { grid-column:1 / -1; width:calc((100% - 14px)/2); justify-self:center; }
+ .refresh .leadership-row .team-member { padding:22px 14px; }
+}
+@media(max-width:480px) {
+ .leadership-row { grid-template-columns:minmax(0,1fr); }
+ .leadership-row-3 .team-member:last-child,.leadership-row-1 .team-member { grid-column:auto; width:100%; }
+}
