@@ -56,7 +56,7 @@
 .refresh .category-content { padding:20px; }
 .refresh .category-content h3 { font-size:18px; }
 .refresh .category-content p { font-size:13px; }
-.refresh #contact { background:#0c2340; color:#e0e8f0; }
+.refresh #contact { background:#0c2340; color:#fff; }
 .refresh #contact h2 { color:white; text-align:center; }
 .photo-dialog { margin:auto; width:min(960px,94vw); max-height:92svh; padding:20px; border:0; border-radius:8px; background:#0c2340; color:white; }
 .photo-dialog::backdrop { background:#061320db; }
@@ -85,7 +85,7 @@
  .refresh .nav-menu { background:#fafbf9; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
-.refresh #contact p,.refresh #contact .contact-info,.refresh #contact .contact-item,.refresh #contact a { color:#e0e8f0; }
+.refresh #contact p,.refresh #contact .contact-info,.refresh #contact .contact-item,.refresh #contact .contact-icon,.refresh #contact .contact-item span,.refresh #contact a { color:#fff; }
 
 /* School-style header: white branding over photography, blue on white after scroll. */
 .refresh header.hero nav.navbar {
