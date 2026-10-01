@@ -27,7 +27,21 @@
 .team-feature { margin:0; }
 .team-feature img { width:100%; height:400px; object-fit:cover; border-radius:6px; }
 .team-feature figcaption { font-size:10px; letter-spacing:.12em; margin-top:12px; color:#526778; }
-.refresh #projects { background:#edf1f4; }
+/* Full-width ARC feature; the photograph sits behind a readable light overlay. */
+.refresh #projects {
+    background:#fafbf9;
+    background-image:linear-gradient(90deg,rgba(250,251,249,.94),rgba(250,251,249,.78)),url('arc-finals.jpg');
+    background-size:cover;
+    background-position:center;
+}
+.arc-feature { width:100%; }
+.arc-feature-logo { display:block; max-width:100%; width:auto; height:150px; object-fit:contain; margin:0 0 28px; filter:brightness(0) saturate(100%) invert(12%) sepia(27%) saturate(1800%) hue-rotate(175deg) brightness(90%) contrast(95%); }
+.arc-feature p { max-width:760px; font-size:clamp(1.05rem,2vw,1.3rem); line-height:1.75; margin:0 0 28px; color:#23374a; }
+.arc-photo-credit { display:block; width:fit-content; margin-top:32px; color:#23374a; font-size:11px; text-underline-offset:3px; }
+@media(max-width:768px) {
+    .refresh #projects { background-position:55% center; }
+    .arc-feature-logo { height:120px; }
+}
 .refresh .project-card,.refresh .announcement-card,.refresh .team-member { box-shadow:none; border:1px solid #dde4ea; border-radius:8px; }
 .refresh .gallery-intro { text-align:left; max-width:600px; margin:0 0 32px; }
 .photo-grid { display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:18px; }
