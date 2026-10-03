@@ -2,7 +2,6 @@
 .sponsor-belt { padding:28px 0 32px; background:#fff; border-bottom:1px solid #dde4ea; }
 .sponsor-belt-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:20px; }
 .sponsor-belt-heading p { margin:0; color:#526778; font-size:10px; font-weight:600; letter-spacing:.16em; }
-.sponsor-motion-toggle { flex-shrink:0; border:1px solid #cbd6df; border-radius:4px; padding:8px 12px; background:#fff; color:#23374a; font:12px Inter,Arial,sans-serif; cursor:pointer; }
 .sponsor-carousel { overflow:hidden; }
 .sponsor-track { display:flex; width:max-content; animation:sponsor-belt-scroll 40s linear infinite; }
 .sponsor-belt-group { display:flex; align-items:center; gap:40px; width:max(1280px,100vw); padding:0 40px; flex:0 0 auto; }
@@ -11,7 +10,7 @@
 .sponsor-belt-group .belt-invitation { flex-direction:column; align-items:flex-start; border-left:1px solid #dde4ea; padding-left:28px; color:#23374a; }
 .belt-invitation strong { font-size:16px; font-weight:500; }
 .belt-invitation span { font-size:11px; color:#194bc2; margin-top:8px; }
-.sponsor-belt.is-paused .sponsor-track,.sponsor-carousel:hover .sponsor-track,.sponsor-carousel:focus-within .sponsor-track { animation-play-state:paused; }
+.sponsor-carousel:hover .sponsor-track,.sponsor-carousel:focus-within .sponsor-track { animation-play-state:paused; }
 @keyframes sponsor-belt-scroll { to { transform:translateX(-50%); } }
 
 /* Annual support ranges, with consistent neutral styling. */
@@ -43,7 +42,7 @@
 @media(prefers-reduced-motion:reduce) {
  .sponsor-track { animation:none; }
  .sponsor-carousel { overflow-x:auto; }
- .sponsor-belt-group[aria-hidden="true"],.sponsor-motion-toggle { display:none; }
+ .sponsor-belt-group[aria-hidden="true"] { display:none; }
 }
 
 .sponsorship-page .cta-button { display:inline-block; color:#fff; text-decoration:none; font-weight:600; }
