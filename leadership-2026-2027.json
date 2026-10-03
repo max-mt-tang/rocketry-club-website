@@ -1,83 +1,29 @@
 {
   "president1": {
-    "name": "",
-    "description": "Leads our mission and coordinates club activities at Interlake.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Leads our mission and coordinates club activities at Interlake.\n"
   },
   "president2": {
-    "name": "",
-    "description": "Leads our mission and coordinates club activities at Interlake.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Leads our mission and coordinates club activities at Interlake."
   },
   "treasurer": {
-    "name": "",
-    "description": "Manages club finances and fundraising initiatives.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Manages club finances and fundraising initiatives."
   },
   "secretary": {
-    "name": "",
-    "description": "Maintains club records, communications, and meeting schedules.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Maintains club records, communications, and meeting schedules."
   },
   "outreachDirector": {
-    "name": "",
-    "description": "Connects with our community and promotes STEM education.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Connects with our community and promotes STEM education."
   },
   "teachingLead1": {
-    "name": "",
-    "description": "Teaches rocketry principles and leads technical workshops.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Teaches rocketry principles and leads technical workshops."
   },
   "teachingLead2": {
-    "name": "",
-    "description": "Teaches rocketry principles and leads technical workshops.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Teaches rocketry principles and leads technical workshops."
   },
   "advisor": {
-    "name": "",
-    "description": "Provides guidance, organizes launches, and supports competition teams.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Provides guidance, organizes launches, and supports competition teams."
   },
   "mentor": {
-    "name": "",
-    "description": "Supports students as they work toward their rocketry goals.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Supports students as they work toward their rocketry goals."
   }
 }
