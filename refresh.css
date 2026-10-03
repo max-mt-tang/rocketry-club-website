@@ -14,7 +14,7 @@
 .refresh .hero-content { left:max(32px,calc((100% - 1136px)/2)); right:32px; top:50%; bottom:auto; transform:translateY(-40%); max-width:820px; padding:0; background:none; backdrop-filter:none; box-shadow:none; text-align:left; }
 .refresh .hero-content .eyebrow { color:#b8d9ff; }
 .refresh h1.hero-title { display:block; font-size:clamp(3rem,6.5vw,5.7rem); font-weight:700!important; line-height:1.04; letter-spacing:-.055em; color:white!important; margin:0 0 26px; }
-.refresh .hero-title span { color:#a9ccff; }
+.refresh .hero-title span { color:white; }
 .refresh .hero-subtitle { font-family:Inter,Arial,sans-serif; color:#e1e9f1; font-size:17px; max-width:480px; line-height:1.75; }
 .hero-actions { display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
 .refresh .cta-button { background:#225ee8; border-radius:5px; font-size:13px; letter-spacing:0; padding:15px 24px; text-transform:none; box-shadow:none; }
