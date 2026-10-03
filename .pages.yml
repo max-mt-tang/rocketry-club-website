@@ -185,7 +185,7 @@
         },
         {
           "name": "launches",
-          "label": "Launches \u2014 additional photos",
+          "label": "Launches — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -205,7 +205,7 @@
         },
         {
           "name": "competitions",
-          "label": "Competitions \u2014 additional photos",
+          "label": "Competitions — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -225,7 +225,7 @@
         },
         {
           "name": "workshops",
-          "label": "Workshops \u2014 additional photos",
+          "label": "Workshops — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -245,7 +245,7 @@
         },
         {
           "name": "team",
-          "label": "Team activities \u2014 additional photos",
+          "label": "Team activities — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -265,7 +265,7 @@
         },
         {
           "name": "testing",
-          "label": "Testing and safety \u2014 additional photos",
+          "label": "Testing and safety — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -285,7 +285,7 @@
         },
         {
           "name": "achievements",
-          "label": "Achievements \u2014 additional photos",
+          "label": "Achievements — additional photos",
           "type": "object",
           "list": true,
           "fields": [
@@ -300,6 +300,779 @@
               "label": "Caption",
               "type": "text",
               "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leadership",
+      "label": "Leadership",
+      "type": "group",
+      "items": [
+        {
+          "name": "leadership2026",
+          "label": "2026–2027",
+          "type": "file",
+          "path": "leadership-2026-2027.json",
+          "format": "json",
+          "fields": [
+            {
+              "name": "president1",
+              "label": "President 1",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "president2",
+              "label": "President 2",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "treasurer",
+              "label": "Treasurer",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "secretary",
+              "label": "Secretary",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "outreachDirector",
+              "label": "Outreach Director",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "teachingLead1",
+              "label": "Teaching Lead 1",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "teachingLead2",
+              "label": "Teaching Lead 2",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "advisor",
+              "label": "Club Advisor",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "mentor",
+              "label": "Club Mentor",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "leadership2025",
+          "label": "2025–2026",
+          "type": "file",
+          "path": "leadership-2025-2026.json",
+          "format": "json",
+          "fields": [
+            {
+              "name": "president",
+              "label": "President",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "coPresident",
+              "label": "Co-President",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "treasurer",
+              "label": "Treasurer",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "secretary",
+              "label": "Secretary",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "outreachDirector",
+              "label": "Outreach Director",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "teachingLead",
+              "label": "Teaching Lead",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "advisor",
+              "label": "Club Advisor",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
+            },
+            {
+              "name": "mentor",
+              "label": "Club Mentor",
+              "type": "object",
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Person’s name",
+                  "type": "string"
+                },
+                {
+                  "name": "description",
+                  "label": "Position description",
+                  "type": "text",
+                  "required": true
+                },
+                {
+                  "name": "photo",
+                  "label": "Photo",
+                  "type": "image"
+                },
+                {
+                  "name": "photoAlt",
+                  "label": "Photo description",
+                  "type": "string"
+                },
+                {
+                  "name": "email",
+                  "label": "Contact email",
+                  "type": "string"
+                },
+                {
+                  "name": "schoolEmail",
+                  "label": "School email",
+                  "type": "string"
+                },
+                {
+                  "name": "contactInfo",
+                  "label": "Other contact information",
+                  "type": "text",
+                  "description": "Optional public contact details, such as a phone number or availability."
+                }
+              ]
             }
           ]
         }

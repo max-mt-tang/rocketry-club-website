@@ -1,0 +1,74 @@
+{
+  "president": {
+    "name": "",
+    "description": "Leads our mission and coordinates club activities at Interlake.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  },
+  "coPresident": {
+    "name": "",
+    "description": "Shares club leadership and coordinates activities at Interlake.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  },
+  "treasurer": {
+    "name": "Max Tang",
+    "description": "Manages club finances and fundraising initiatives.",
+    "photo": "images/team/Max.png",
+    "photoAlt": "Max Tang",
+    "email": "maxmttang@gmail.com",
+    "schoolEmail": "s-tangm@bsd405.org",
+    "contactInfo": ""
+  },
+  "secretary": {
+    "name": "",
+    "description": "Maintains club records, communications, and meeting schedules.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  },
+  "outreachDirector": {
+    "name": "",
+    "description": "Connects with our community and promotes STEM education.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  },
+  "teachingLead": {
+    "name": "",
+    "description": "Teaches rocketry principles and leads technical workshops.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  },
+  "advisor": {
+    "name": "Lisa Dossett",
+    "description": "Provides guidance, organizes launches, and supports competition teams.",
+    "photo": "images/team/Lisa.png",
+    "photoAlt": "Lisa Dossett",
+    "email": "",
+    "schoolEmail": "dossettl@bsd405.org",
+    "contactInfo": ""
+  },
+  "mentor": {
+    "name": "",
+    "description": "Supports students as they work toward their rocketry goals.",
+    "photo": "",
+    "photoAlt": "",
+    "email": "",
+    "schoolEmail": "",
+    "contactInfo": ""
+  }
+}

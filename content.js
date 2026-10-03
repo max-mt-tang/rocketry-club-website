@@ -54,6 +54,54 @@
         // Keep the original announcements readable if the content request fails.
         grid.insertAdjacentElement('beforebegin', text('p', 'Latest updates could not be loaded. Please try refreshing.', 'content-status'));
     });
+    document.querySelectorAll('[data-leadership-file]').forEach(hierarchy => {
+        load(hierarchy.dataset.leadershipFile).then(data => {
+            const replacements = [...hierarchy.querySelectorAll('[data-leadership-role]')].map(original => {
+                const key = original.dataset.leadershipRole;
+                const person = data && data[key];
+                if (!person || Array.isArray(person) || typeof person.description !== 'string') throw new Error('Invalid leadership');
+                const role = original.querySelector('h4').textContent;
+                const card = document.createElement('div');
+                card.className = 'team-member';
+                card.dataset.leadershipRole = key;
+                card.append(text('h4', role));
+                const photoUrl = safeUrl(person.photo);
+                if (photoUrl) {
+                    const photo = document.createElement('img');
+                    photo.src = photoUrl;
+                    photo.alt = person.photoAlt || person.name || role;
+                    photo.className = 'member-photo';
+                    photo.loading = 'lazy';
+                    card.append(photo);
+                }
+                if (person.name) card.append(text('p', person.name, 'leadership-name'));
+                card.append(text('p', person.description, 'leadership-description'));
+                const contacts = document.createElement('p');
+                contacts.className = 'member-email';
+                for (const [value, label] of [[person.email, ''], [person.schoolEmail, ' (School)']]) {
+                    if (typeof value !== 'string' || !value.trim()) continue;
+                    const email = value.trim();
+                    if (contacts.childNodes.length) contacts.append(document.createElement('br'));
+                    if (/^[^\s@<>?&#]+@[^\s@<>?&#]+\.[^\s@<>?&#]+$/.test(email)) {
+                        const link = text('a', email);
+                        link.href = `mailto:${encodeURIComponent(email)}`;
+                        contacts.append(link, document.createTextNode(label));
+                    } else {
+                        contacts.append(document.createTextNode(email + label));
+                    }
+                }
+                if (contacts.childNodes.length) card.append(contacts);
+                if (person.contactInfo) card.append(text('p', person.contactInfo, 'leadership-contact-info'));
+                return [original, card];
+            });
+            // Validate the complete year before changing any of its cards.
+            replacements.forEach(([original, card]) => original.replaceWith(card));
+        }).catch(() => {
+            const status = text('p', 'Latest leadership details could not be loaded. Please try refreshing.', 'content-status');
+            status.setAttribute('role', 'status');
+            hierarchy.before(status);
+        });
+    });
     load('photos.json').then(data => {
         if (!Array.isArray(data.featured)) throw new Error('Invalid gallery');
         const photos = data.featured.flatMap(photo => {

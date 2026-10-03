@@ -2,6 +2,7 @@
 .announcement-image { display:block; width:100%; max-height:320px; object-fit:cover; border-radius:4px; margin-top:20px; }
 .announcement-link { display:inline-block; margin-top:16px; color:#194bc2; font-weight:600; }
 .content-status { color:#526778; font-size:14px; margin-bottom:20px; }
+.leadership-description,.leadership-contact-info { white-space:pre-line; overflow-wrap:anywhere; }
 .managed-album { margin-top:48px; }
 .managed-album[hidden] { display:none; }
 .admin-main { max-width:840px!important; }
