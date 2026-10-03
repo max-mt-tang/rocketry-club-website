@@ -68,7 +68,8 @@
             {
               "name": "image",
               "label": "Optional photo",
-              "type": "image"
+              "type": "image",
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "imageAlt",
@@ -113,7 +114,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -133,7 +135,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -153,7 +156,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -173,7 +177,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -193,7 +198,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -213,7 +219,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -233,7 +240,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -253,7 +261,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -273,7 +282,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -293,7 +303,8 @@
               "name": "image",
               "label": "Photo",
               "type": "image",
-              "required": true
+              "required": true,
+              "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
             },
             {
               "name": "caption",
@@ -336,7 +347,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -380,7 +392,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -424,7 +437,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -468,7 +482,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -512,7 +527,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -556,7 +572,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -600,7 +617,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -644,7 +662,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -688,7 +707,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -741,7 +761,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -785,7 +806,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -829,7 +851,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -873,7 +896,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -917,7 +941,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -961,7 +986,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -1005,7 +1031,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",
@@ -1049,7 +1076,8 @@
                 {
                   "name": "photo",
                   "label": "Photo",
-                  "type": "image"
+                  "type": "image",
+                  "description": "Use a photo under 2 MB. For large photos or upload error 413, prepare a copy at https://interlakerocketry.org/prepare-photos.html before uploading."
                 },
                 {
                   "name": "photoAlt",

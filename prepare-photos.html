@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Prepare photos | Interlake Rocketry</title>
+    <link rel="stylesheet" href="outreach.css">
+    <link rel="stylesheet" href="content.css">
+    <link rel="stylesheet" href="prepare-photos.css">
+    <script src="prepare-photos.js" defer></script>
+</head>
+<body class="outreach-album-page">
+    <header class="album-header"><div class="container"><a class="album-brand" href="index.html">Interlake Rocketry</a><a href="admin.html">← Club editor</a></div></header>
+    <main class="container album-main admin-main">
+        <p class="album-eyebrow">PHOTO UPLOAD HELP</p>
+        <h1>Make photos ready for Pages CMS</h1>
+        <p>If an upload shows error 413, the photo is too large. This tool makes a copy under 2 MB so you can upload it to your chosen folder in Pages CMS.</p>
+        <p>Your photos are processed on this device. Your originals stay unchanged.</p>
+        <ol>
+            <li>Choose your photos below. JPEG, PNG, WebP, and small GIF files are supported.</li>
+            <li>Download each prepared copy.</li>
+            <li>Open Pages CMS, choose your media folder, and upload the downloaded copies.</li>
+        </ol>
+        <div class="photo-actions">
+            <label class="photo-choose" for="photo-files">Choose photos</label>
+            <input id="photo-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" multiple>
+            <a class="photo-cms" href="https://app.pagescms.org/max-mt-tang/rocketry-club-website/main/media/default" target="_blank" rel="noopener">Open Pages CMS →</a>
+        </div>
+        <p id="photo-status" role="status" aria-live="polite">Choose one or more photos to start.</p>
+        <div id="photo-results" class="photo-results" aria-label="Prepared photos"></div>
+        <noscript><p>Enable JavaScript to prepare photos on this device.</p></noscript>
+    </main>
+</body>
+</html>
