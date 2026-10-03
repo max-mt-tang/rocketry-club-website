@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="refresh.css">
     <link rel="stylesheet" href="outreach.css">
+    <link rel="stylesheet" href="sponsors.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -61,6 +62,14 @@
     </header>
 
     <main>
+        <section class="sponsor-belt" aria-label="Club sponsors">
+            <div class="container sponsor-belt-heading"><p>SUPPORTED BY OUR COMMUNITY</p><button type="button" class="sponsor-motion-toggle" aria-pressed="false">Pause logos</button></div>
+            <div class="sponsor-carousel"><div class="sponsor-track">
+                <div class="sponsor-belt-group"><a class="belt-sponsor" href="https://www.applebees.com/" target="_blank" rel="noopener noreferrer"><img src="applebees-logo.svg" alt="Applebee’s" width="321" height="160" loading="lazy"></a><a class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a><a class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a><a class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a></div>
+                <div class="sponsor-belt-group" aria-hidden="true"><a tabindex="-1" class="belt-sponsor" href="https://www.applebees.com/" target="_blank" rel="noopener noreferrer"><img src="applebees-logo.svg" alt="" width="321" height="160" loading="lazy"></a><a tabindex="-1" class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a><a tabindex="-1" class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a><a tabindex="-1" class="belt-invitation" href="#contact"><strong>Your name here</strong><span>Contact us to become a sponsor →</span></a></div>
+            </div></div>
+        </section>
+
         <section id="about" class="section">
             <div class="container intro-layout">
                 <div><p class="eyebrow">01 / WHO WE ARE</p><h2>A shared curiosity.<br>A higher ambition.</h2><p class="intro-copy">We're a team of Interlake students turning a fascination with flight into something we can build with our own hands.</p><p>Through design sessions, field tests, and competition launches, we learn by doing—and by helping each other get better. Whether you're a first-time builder or already love engineering, there's a place for you here.</p><a class="text-link" href="#team">Meet the people behind the rockets ↗</a></div>
@@ -274,67 +283,26 @@
                 <h2>Our Sponsors</h2>
                 <p class="sponsors-intro">We're grateful for the support of local businesses and organizations that help make our rocketry program possible.</p>
                 
-                <div class="sponsor-tiers">
-                    <div class="tier platinum">
-                        <h3>Platinum Sponsors</h3>
-                        <p class="tier-description">$5,000+ annual support</p>
-                        <div class="sponsor-benefits">
-                            <span>• Logo on all rockets</span>
-                            <span>• Featured on website</span>
-                            <span>• VIP event access</span>
-                            <span>• Team photo recognition</span>
-                        </div>
-                        <div class="sponsor-grid">
-                            <div class="sponsor-placeholder">
-                                <h4>Your Company Here</h4>
-                                <p>Join our platinum tier and help launch the next generation of aerospace engineers!</p>
-                                <a href="#contact" class="sponsor-cta">Become a Sponsor</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tier gold">
-                        <h3>🥇 Gold Sponsors</h3>
-                        <p class="tier-description">$2,500+ annual support</p>
-                        <div class="sponsor-benefits">
-                            <span>• Logo on competition rockets</span>
-                            <span>• Website recognition</span>
-                            <span>• Event invitations</span>
-                        </div>
-                        <div class="sponsor-grid">
-                            <div class="sponsor-placeholder">
-                                <h4>Your Company Here</h4>
-                                <p>Support STEM education and get recognized for your commitment to our community!</p>
-                                <a href="#contact" class="sponsor-cta">Become a Sponsor</a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tier silver">
-                        <h3>🥈 Silver Sponsors</h3>
-                        <p class="tier-description">$1,000+ annual support</p>
-                        <div class="sponsor-benefits">
-                            <span>• Website recognition</span>
-                            <span>• Event acknowledgments</span>
-                        </div>
-                        <div class="sponsor-grid">
-                            <div class="sponsor-placeholder">
-                                <h4>Your Company Here</h4>
-                                <p>Every contribution helps us reach new heights in aerospace education!</p>
-                                <a href="#contact" class="sponsor-cta">Become a Sponsor</a>
-                            </div>
-                        </div>
-                    </div>
+                <div class="support-tiers">
+                    <article class="support-tier support-tier-diamond">
+                        <h3>Diamond</h3><p class="support-amount">$2,000+</p><p class="support-period">in annual support</p>
+                        <div class="tier-opening"><p>Your name here</p><a href="#contact">Become a sponsor →</a></div>
+                    </article>
+                    <article class="support-tier support-tier-platinum">
+                        <h3>Platinum</h3><p class="support-amount">$1,000–1,999</p><p class="support-period">in annual support</p>
+                        <div class="tier-opening"><p>Your name here</p><a href="#contact">Become a sponsor →</a></div>
+                    </article>
+                    <article class="support-tier support-tier-gold">
+                        <h3>Gold</h3><p class="support-amount">$500–999</p><p class="support-period">in annual support</p>
+                        <div class="tier-opening"><p>Your name here</p><a href="#contact">Become a sponsor →</a></div>
+                    </article>
+                    <article class="support-tier support-tier-silver">
+                        <h3>Silver</h3><p class="support-amount">$100–499</p><p class="support-period">in annual support</p>
+                        <div class="tier-supporter"><a href="https://www.applebees.com/" target="_blank" rel="noopener noreferrer"><img src="applebees-logo.svg" alt="Applebee’s" width="321" height="160" loading="lazy"></a><h4>Applebee’s</h4><p>Thank you for your $100 contribution.</p></div>
+                        <a class="tier-join" href="#contact">Join our Silver sponsors →</a>
+                    </article>
                 </div>
-                
-                <div class="sponsor-cta-section">
-                    <h3>Ready to Support STEM Education?</h3>
-                    <p>Your sponsorship helps us purchase materials, attend competitions, and provide hands-on learning experiences for Interlake students.</p>
-                    <div class="sponsor-cta-buttons">
-                        <a href="#contact" class="cta-button">Contact Us</a>
-                        <a href="sponsorship-package.pdf" class="cta-button secondary" target="_blank">Download Sponsorship Package</a>
-                    </div>
-                </div>
+                <div class="support-invitation"><h3>Help the next generation take flight.</h3><p>Your sponsorship helps us purchase materials, attend competitions, and share hands-on STEM experiences with our community.</p><a href="#contact" class="cta-button">Contact us about sponsorship</a></div>
             </div>
         </section>
 
@@ -364,5 +332,6 @@
 
     <dialog class="photo-dialog" aria-label="Enlarged club photo"><button class="close-photo" aria-label="Close photo">Close ✕</button><img alt=""><p></p></dialog>
     <script src="refresh.js"></script>
+    <script src="sponsors.js"></script>
 </body>
 </html>
