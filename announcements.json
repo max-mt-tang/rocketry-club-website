@@ -7,20 +7,13 @@
       "body": "Testing rockets for nationals at 60 Acres North Field. Dress for weather and muddy conditions. Bring: hard-boiled eggs and flight recording materials.",
       "link": "https://forms.office.com/r/0BeGQVVCxB",
       "linkText": "RSVP by 9pm Friday 5/9",
-      "published": true
+      "published": false
     },
     {
       "title": "Weekly Club Meeting",
       "category": "meeting",
-      "when": "Wednesday 3:00 PM",
-      "body": "Regular club meeting in Science Building 201. We'll discuss upcoming competitions and work on current projects. All members welcome!",
-      "published": true
-    },
-    {
-      "title": "New Members Welcome",
-      "category": "info",
-      "when": "Ongoing",
-      "body": "Interested in rocketry? Join our club! No experience needed - we'll teach you everything from rocket design to launch procedures.",
+      "when": "Tuesday (3:30PM - 4:00PM)",
+      "body": "Regular club meeting in Room 1710. We'll be running a basic rocketry test, forming teams, and starting our rocket design process this month!",
       "published": true
     }
   ]
