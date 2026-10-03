@@ -1,0 +1,55 @@
+/* Outreach feature and its event albums. */
+.refresh #outreach { background:#fff; }
+.outreach-intro { display:grid; grid-template-columns:minmax(0,2fr) minmax(220px,1fr); gap:48px; align-items:center; margin-bottom:44px; }
+.outreach-intro h2 { max-width:720px; }
+.outreach-intro p { line-height:1.7; }
+.outreach-impact { margin:0; padding-left:40px; border-left:1px solid #dce4eb; color:#0c2340; }
+.outreach-impact strong { display:block; font-size:clamp(4.5rem,8vw,7rem); font-weight:700; line-height:1; letter-spacing:-.06em; color:#225ee8; }
+.outreach-impact span { display:block; font-size:16px; margin-top:14px; }
+.outreach-events { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+.outreach-event { display:flex; flex-direction:column; align-items:flex-start; padding:28px; border:1px solid #dde4ea; border-radius:8px; background:#fafbf9; min-width:0; }
+.outreach-status { display:inline-block; padding:6px 10px; border-radius:4px; background:#e8edf2; color:#23374a; font-size:11px; font-weight:600; }
+.outreach-status-upcoming { background:#dfebff; color:#194bc2; }
+.refresh .outreach-event h3 { margin:20px 0 12px; color:#0c2340; font-size:22px; line-height:1.25; letter-spacing:-.02em; }
+.outreach-date { color:#376184; font-size:12px; font-weight:600; margin-bottom:16px; line-height:1.6; }
+.outreach-event p:not(.outreach-date) { font-size:14px; line-height:1.75; margin:0 0 20px; color:#23374a; }
+.outreach-partner { color:#194bc2; font-size:13px; font-weight:600; text-underline-offset:3px; margin-bottom:22px; }
+.outreach-album-link { display:block; margin-top:auto; padding-top:18px; width:100%; border-top:1px solid #dde4ea; color:#194bc2; font-size:13px; font-weight:600; text-decoration:none; }
+.outreach-album-link:hover { text-decoration:underline; }
+@media(max-width:900px) {
+ .outreach-intro { grid-template-columns:minmax(0,1fr); gap:24px; }
+ .outreach-impact { padding:0; border:0; }
+ .outreach-events { grid-template-columns:minmax(0,1fr); }
+}
+
+/* Albums are separate pages with the same typography and colors. */
+.outreach-album-page { margin:0; background:#fafbf9; color:#23374a; font:16px/1.7 Inter,Arial,sans-serif; }
+.outreach-album-page * { box-sizing:border-box; }
+.outreach-album-page .container { max-width:1200px; margin:0 auto; padding:0 32px; }
+.album-header { background:#fff; border-bottom:1px solid #dde4ea; padding:22px 0; }
+.album-header .container { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+.album-header a { color:#0c2340; text-decoration:none; font-size:13px; font-weight:600; }
+.album-header .album-brand { font-size:20px; }
+.album-main { padding-top:64px!important; padding-bottom:64px!important; min-height:60vh; }
+.album-eyebrow { color:#376184; font-size:11px; font-weight:700; letter-spacing:.16em; margin-bottom:24px; }
+.album-main h1 { color:#0c2340; font-size:clamp(2.3rem,5vw,4rem); letter-spacing:-.045em; line-height:1.12; margin:24px 0; }
+.album-main h2 { color:#0c2340; font-size:26px; }
+.album-description { max-width:800px; margin-bottom:24px; }
+.album-photos { margin-top:48px; }
+.album-empty { padding:32px; border:1px dashed #b9cbd9; border-radius:8px; background:#fff; }
+.outreach-photo-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.outreach-photo { padding:0; border:0; background:#fff; color:#23374a; border-radius:6px; overflow:hidden; cursor:pointer; font:inherit; text-align:left; }
+.outreach-photo img { display:block; width:100%; height:240px; object-fit:cover; }
+.outreach-photo span { display:block; padding:16px; }
+.album-dialog { margin:auto; width:min(960px,94vw); max-height:92svh; border:0; border-radius:8px; padding:20px; background:#0c2340; color:#fff; }
+.album-dialog::backdrop { background:#061320db; }
+.album-dialog img { display:block; width:100%; max-height:70svh; object-fit:contain; }
+.album-close { display:block; margin:0 0 16px auto; padding:10px 16px; border:0; border-radius:4px; cursor:pointer; font:inherit; background:#fff; color:#0c2340; }
+.outreach-album-page .footer { background:#edf1f4; padding:28px 0; text-align:center; font-size:13px; }
+.outreach-album-page .footer a { color:#194bc2; }
+.outreach-album-page :focus-visible { outline:3px solid #4d92ff; outline-offset:5px; }
+@media(max-width:768px) {
+ .outreach-album-page .container { padding-left:22px; padding-right:22px; }
+ .outreach-photo-grid { grid-template-columns:minmax(0,1fr); }
+ .album-main { padding-top:40px!important; padding-bottom:40px!important; }
+}
