@@ -6,7 +6,7 @@ menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeM
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
 document.addEventListener('click', event => { if (!menu.contains(event.target) && !toggle.contains(event.target)) closeMenu(); });
 const dialog = document.querySelector('.photo-dialog');
-document.querySelectorAll('[data-photo]').forEach(button => button.addEventListener('click', () => { const img = button.querySelector('img'); dialog.querySelector('img').src = button.dataset.photo; dialog.querySelector('img').alt = img.alt; dialog.querySelector('p').textContent = img.alt; dialog.showModal(); }));
+document.querySelector('.photo-grid').addEventListener('click', event => { const button = event.target.closest('button[data-photo]'); if (!button) return; const img = button.querySelector('img'); dialog.querySelector('img').src = button.dataset.photo; dialog.querySelector('img').alt = img.alt; dialog.querySelector('p').textContent = img.alt; dialog.showModal(); });
 dialog.querySelector('button').addEventListener('click', () => dialog.close());
 dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
 

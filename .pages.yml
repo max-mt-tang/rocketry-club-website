@@ -1,0 +1,309 @@
+{
+  "media": {
+    "input": "images",
+    "output": "/images",
+    "extensions": [
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+      "gif"
+    ],
+    "rename": true
+  },
+  "content": [
+    {
+      "name": "announcements",
+      "label": "Announcements",
+      "type": "file",
+      "path": "announcements.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "announcements",
+          "label": "Announcements",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "title",
+              "label": "Title",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "category",
+              "label": "Category",
+              "type": "select",
+              "default": "info",
+              "options": {
+                "values": [
+                  {
+                    "name": "urgent",
+                    "label": "Launch event"
+                  },
+                  {
+                    "name": "meeting",
+                    "label": "Meeting"
+                  },
+                  {
+                    "name": "info",
+                    "label": "Info"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "when",
+              "label": "Date or time",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "body",
+              "label": "Message",
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": "image",
+              "label": "Optional photo",
+              "type": "image"
+            },
+            {
+              "name": "imageAlt",
+              "label": "Photo description",
+              "type": "string"
+            },
+            {
+              "name": "link",
+              "label": "Optional link",
+              "type": "string"
+            },
+            {
+              "name": "linkText",
+              "label": "Link button text",
+              "type": "string"
+            },
+            {
+              "name": "published",
+              "label": "Show on website",
+              "type": "boolean",
+              "default": true,
+              "description": "Hide from the page by turning this off. Saved content is still stored in the public repository."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "photos",
+      "label": "Photo albums",
+      "type": "file",
+      "path": "photos.json",
+      "format": "json",
+      "fields": [
+        {
+          "name": "featured",
+          "label": "Homepage gallery",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "clubFair",
+          "label": "2026 Club Fair",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "campLiftoff",
+          "label": "Camp Liftoff Partnership",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "worldSpaceWeek",
+          "label": "World Space Week Outreach",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "launches",
+          "label": "Launches \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "competitions",
+          "label": "Competitions \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "workshops",
+          "label": "Workshops \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "team",
+          "label": "Team activities \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "testing",
+          "label": "Testing and safety \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "achievements",
+          "label": "Achievements \u2014 additional photos",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "image",
+              "label": "Photo",
+              "type": "image",
+              "required": true
+            },
+            {
+              "name": "caption",
+              "label": "Caption",
+              "type": "text",
+              "required": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

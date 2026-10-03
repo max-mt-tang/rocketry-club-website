@@ -1,0 +1,25 @@
+{
+  "featured": [
+    {
+      "image": "images/hero/KQ1A1243-2.jpg",
+      "caption": "The details before liftoff"
+    },
+    {
+      "image": "images/hero/KQ1A1277-2.jpg",
+      "caption": "Eyes on the sky"
+    },
+    {
+      "image": "images/hero/KQ1A1309-2.jpg",
+      "caption": "Every flight teaches us something"
+    }
+  ],
+  "clubFair": [],
+  "campLiftoff": [],
+  "worldSpaceWeek": [],
+  "launches": [],
+  "competitions": [],
+  "workshops": [],
+  "team": [],
+  "testing": [],
+  "achievements": []
+}
