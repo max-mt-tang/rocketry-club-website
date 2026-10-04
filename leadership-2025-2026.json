@@ -6,7 +6,10 @@
     "schoolEmail": "s-vikramadityan@bsd405.org"
   },
   "coPresident": {
-    "description": "Shares club leadership and coordinates activities at Interlake."
+    "name": "Anjana Vaidyaramanan",
+    "description": "Shares club leadership and coordinates activities at Interlake.",
+    "email": "s-vaidyaramanan@bsd405.org",
+    "schoolEmail": "s-vaidyaramanan@bsd405.org"
   },
   "treasurer": {
     "name": "Max Tang",
@@ -17,13 +20,22 @@
     "schoolEmail": "s-tangm@bsd405.org"
   },
   "secretary": {
-    "description": "Maintains club records, communications, and meeting schedules."
+    "name": "Adithya Gogini",
+    "description": "Maintains club records, communications, and meeting schedules.",
+    "email": "adithyagogini@gmail.com",
+    "schoolEmail": "s-goginia@bsd405.org"
   },
   "outreachDirector": {
-    "description": "Connects with our community and promotes STEM education."
+    "name": "Arnav Koganti",
+    "description": "Connects with our community and promotes STEM education.",
+    "email": "s-kogantia@bsd405.org",
+    "schoolEmail": "s-kogantia@bsd405.org"
   },
   "teachingLead": {
-    "description": "Teaches rocketry principles and leads technical workshops."
+    "name": "Vedika Hemani",
+    "description": "Teaches rocketry principles and leads technical workshops.",
+    "email": "s-hemaniv@bsd405.org",
+    "schoolEmail": "s-hemaniv@bsd405.org"
   },
   "advisor": {
     "name": "Lisa Dossett",
@@ -33,6 +45,9 @@
     "schoolEmail": "dossettl@bsd405.org"
   },
   "mentor": {
-    "description": "Supports students as they work toward their rocketry goals."
+    "name": "Brendan Williams",
+    "description": "Supports students as they work toward their rocketry goals.",
+    "email": "williamsb@bsd405.org",
+    "schoolEmail": "williamsb@bsd405.org"
   }
 }
