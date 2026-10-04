@@ -13,7 +13,11 @@
     "schoolEmail": "s-hemaniv@bsd405.org"
   },
   "treasurer": {
-    "description": "Manages club finances and fundraising initiatives."
+    "name": "Pari Prabhakar",
+    "description": "Manages club finances and fundraising initiatives.",
+    "photo": "/images/team/pari.png",
+    "email": "pariprab@gmail.com",
+    "schoolEmail": "s-prabhakarp@bsd405.org"
   },
   "secretary": {
     "description": "Maintains club records, communications, and meeting schedules."
