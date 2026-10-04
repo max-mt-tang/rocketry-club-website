@@ -1,74 +1,38 @@
 {
   "president": {
-    "name": "",
+    "name": "Nishant Vikramaditya",
     "description": "Leads our mission and coordinates club activities at Interlake.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "email": "s-vikramadityan@bsd405.org",
+    "schoolEmail": "s-vikramadityan@bsd405.org"
   },
   "coPresident": {
-    "name": "",
-    "description": "Shares club leadership and coordinates activities at Interlake.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Shares club leadership and coordinates activities at Interlake."
   },
   "treasurer": {
     "name": "Max Tang",
     "description": "Manages club finances and fundraising initiatives.",
-    "photo": "images/team/Max.png",
+    "photo": "/images/team/Max.png",
     "photoAlt": "Max Tang",
     "email": "maxmttang@gmail.com",
-    "schoolEmail": "s-tangm@bsd405.org",
-    "contactInfo": ""
+    "schoolEmail": "s-tangm@bsd405.org"
   },
   "secretary": {
-    "name": "",
-    "description": "Maintains club records, communications, and meeting schedules.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Maintains club records, communications, and meeting schedules."
   },
   "outreachDirector": {
-    "name": "",
-    "description": "Connects with our community and promotes STEM education.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Connects with our community and promotes STEM education."
   },
   "teachingLead": {
-    "name": "",
-    "description": "Teaches rocketry principles and leads technical workshops.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Teaches rocketry principles and leads technical workshops."
   },
   "advisor": {
     "name": "Lisa Dossett",
     "description": "Provides guidance, organizes launches, and supports competition teams.",
-    "photo": "images/team/Lisa.png",
+    "photo": "/images/team/Lisa.png",
     "photoAlt": "Lisa Dossett",
-    "email": "",
-    "schoolEmail": "dossettl@bsd405.org",
-    "contactInfo": ""
+    "schoolEmail": "dossettl@bsd405.org"
   },
   "mentor": {
-    "name": "",
-    "description": "Supports students as they work toward their rocketry goals.",
-    "photo": "",
-    "photoAlt": "",
-    "email": "",
-    "schoolEmail": "",
-    "contactInfo": ""
+    "description": "Supports students as they work toward their rocketry goals."
   }
 }
