@@ -20,7 +20,11 @@
     "schoolEmail": "s-prabhakarp@bsd405.org"
   },
   "secretary": {
-    "description": "Maintains club records, communications, and meeting schedules."
+    "name": "Ted Yun",
+    "description": "Maintains club records, communications, and meeting schedules.",
+    "photo": "/images/team/ted.png",
+    "email": "ted.yun.chats@gmail.com",
+    "schoolEmail": "s-yunte@bsd405.org"
   },
   "outreachDirector": {
     "description": "Connects with our community and promotes STEM education."
