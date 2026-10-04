@@ -1,25 +1,42 @@
 {
   "featured": [
     {
-      "image": "images/hero/KQ1A1243-2.jpg",
-      "caption": "The details before liftoff"
+      "image": "/images/hero/KQ1A1243-2.jpg",
+      "caption": "On the launch rail"
     },
     {
-      "image": "images/hero/KQ1A1277-2.jpg",
-      "caption": "Eyes on the sky"
+      "image": "/images/hero/KQ1A1277-2.jpg",
+      "caption": "Eyes on the rocket's descent"
     },
     {
-      "image": "images/hero/KQ1A1309-2.jpg",
-      "caption": "Every flight teaches us something"
+      "image": "/images/hero/KQ1A1309-2.jpg",
+      "caption": "Recording altimeter data"
     }
   ],
-  "clubFair": [],
-  "campLiftoff": [],
-  "worldSpaceWeek": [],
-  "launches": [],
-  "competitions": [],
-  "workshops": [],
-  "team": [],
-  "testing": [],
-  "achievements": []
+  "campLiftoff": [
+    {
+      "image": "/images/Camp Liftoff/image-1-cms.webp",
+      "caption": "Arriving at 60 Acres"
+    },
+    {
+      "image": "/images/Camp Liftoff/image-2-cms.webp",
+      "caption": "Explanation of a coupler (sorry for the poorly drawn diagrams ;-; - Max)"
+    },
+    {
+      "image": "/images/Camp Liftoff/image-5-cms.webp",
+      "caption": "Teaching OpenRocket"
+    },
+    {
+      "image": "/images/Camp Liftoff/image-7-cms.webp",
+      "caption": "Breaktime!"
+    },
+    {
+      "image": "/images/Camp Liftoff/image-8-cms.webp",
+      "caption": "SSBU tournament!"
+    },
+    {
+      "image": "/images/Camp Liftoff/image-cms.webp",
+      "caption": "Getting ready for launches at 60 Acres"
+    }
+  ]
 }
