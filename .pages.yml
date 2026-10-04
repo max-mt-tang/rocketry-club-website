@@ -789,7 +789,7 @@
             },
             {
               "name": "coPresident",
-              "label": "Co-President",
+              "label": "Vice President",
               "type": "object",
               "fields": [
                 {
