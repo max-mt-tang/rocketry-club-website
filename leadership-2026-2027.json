@@ -46,9 +46,14 @@
     "schoolEmail": "s-goginia@bsd405.org"
   },
   "advisor": {
-    "description": "Provides guidance, organizes launches, and supports competition teams."
+    "description": "Provides guidance, organizes launches, and supports competition teams.",
+    "email": "dossettl@bsd405.org",
+    "schoolEmail": "dossettl@bsd405.org"
   },
   "mentor": {
-    "description": "Supports students as they work toward their rocketry goals."
+    "name": "Brendan Williams",
+    "description": "Supports students as they work toward their rocketry goals.",
+    "email": "williamsb@bsd405.org",
+    "schoolEmail": "williamsb@bsd405.org"
   }
 }
