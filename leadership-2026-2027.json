@@ -1,10 +1,16 @@
 {
   "president1": {
     "name": "Max Tang",
-    "description": "Leads our mission and coordinates club activities at Interlake."
+    "description": "Leads our mission and coordinates club activities at Interlake.",
+    "photo": "/images/team/Max.png",
+    "email": "maxmttang@gmail.com",
+    "schoolEmail": "s-tangm@bsd405.org"
   },
   "president2": {
-    "description": "Leads our mission and coordinates club activities at Interlake."
+    "name": "Vedika Hemani",
+    "description": "Leads our mission and coordinates club activities at Interlake.",
+    "email": "s-hemaniv@bsd405.org",
+    "schoolEmail": "s-hemaniv@bsd405.org"
   },
   "treasurer": {
     "description": "Manages club finances and fundraising initiatives."
