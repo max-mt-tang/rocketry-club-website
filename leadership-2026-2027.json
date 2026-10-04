@@ -46,7 +46,9 @@
     "schoolEmail": "s-goginia@bsd405.org"
   },
   "advisor": {
+    "name": "Lisa Dossett",
     "description": "Provides guidance, organizes launches, and supports competition teams.",
+    "photo": "/images/team/Lisa.png",
     "email": "dossettl@bsd405.org",
     "schoolEmail": "dossettl@bsd405.org"
   },
