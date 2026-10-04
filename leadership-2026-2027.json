@@ -27,13 +27,23 @@
     "schoolEmail": "s-yunte@bsd405.org"
   },
   "outreachDirector": {
-    "description": "Connects with our community and promotes STEM education."
+    "name": "Daniel Pegushin",
+    "description": "Connects with our community and promotes STEM education.",
+    "email": "daniel.pegushin@gmail.com",
+    "schoolEmail": "s-pegushind@bsd405.org"
   },
   "teachingLead1": {
-    "description": "Teaches rocketry principles and leads technical workshops."
+    "name": "Stanley Song",
+    "description": "Teaches rocketry principles and leads technical workshops.",
+    "email": "Stanley_Song@outlook.com",
+    "schoolEmail": "s-songs@bsd405.org"
   },
   "teachingLead2": {
-    "description": "Teaches rocketry principles and leads technical workshops."
+    "name": "Adithya Gogini",
+    "description": "Teaches rocketry principles and leads technical workshops.",
+    "photo": "/images/team/adithya.png",
+    "email": "adithyagogini@gmail.com",
+    "schoolEmail": "s-goginia@bsd405.org"
   },
   "advisor": {
     "description": "Provides guidance, organizes launches, and supports competition teams."
